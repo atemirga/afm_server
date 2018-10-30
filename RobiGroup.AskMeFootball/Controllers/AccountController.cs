@@ -81,7 +81,7 @@ namespace RobiGroup.AskMeFootball.Controllers
             {
                 if (!Regex.IsMatch(model.Phone, ValidationPatternConstants.PhoneNumber))
                 {
-                    ModelState.AddModelError(nameof(model.Phone).ToLower(), _localizer["Register_PhoneNumber_Invalid"]);
+                    ModelState.AddModelError(nameof(model.Phone).FirstCharToLower(), _localizer["Register_PhoneNumber_Invalid"]);
                     return BadRequest(ModelState);
                 }
 
@@ -133,7 +133,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                             foreach (var error in result.Errors)
                             {
-                                ModelState.AddModelError(nameof(model.Phone).ToLower(), error.Description);
+                                ModelState.AddModelError(nameof(model.Phone).FirstCharToLower(), error.Description);
                             }
                         }
                     }
@@ -142,7 +142,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                         transaction.Rollback();
                         foreach (var error in result.Errors)
                         {
-                            ModelState.AddModelError(nameof(model.Phone).ToLower(), error.Description);
+                            ModelState.AddModelError(nameof(model.Phone).FirstCharToLower(), error.Description);
                         }
                     }
                 }
@@ -194,12 +194,12 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                     foreach (var error in result.Errors)
                     {
-                        ModelState.AddModelError(nameof(model.Code), error.Description);
+                        ModelState.AddModelError(nameof(model.Code).FirstCharToLower(), error.Description);
                     }
                 }
                 else
                 {
-                    ModelState.AddModelError(nameof(model.Phone).ToLower(), _localizer["Register_User_With_Phone_Not_Exists", normalizedPhone]);
+                    ModelState.AddModelError(nameof(model.Phone).FirstCharToLower(), _localizer["Register_User_With_Phone_Not_Exists", normalizedPhone]);
                 }
             }
 
@@ -232,7 +232,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                     foreach (var error in result.Errors)
                     {
-                        ModelState.AddModelError(nameof(model.Password), error.Description);
+                        ModelState.AddModelError(nameof(model.Password).FirstCharToLower(), error.Description);
                     }
                 }
             }

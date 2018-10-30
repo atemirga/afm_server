@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Register_Phone_Confirmation_Code_Sms" xml:space="preserve">
-    <value>mastera24.kz Код: {0}</value>
+    <value>AskMeFootball. Ваш код: {0}</value>
   </data>
   <data name="Register_User_With_Phone_Not_Exists" xml:space="preserve">
     <value>Пользователь с номером телефона {0} не существует.</value>

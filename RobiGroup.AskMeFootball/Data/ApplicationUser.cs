@@ -4,6 +4,8 @@ namespace RobiGroup.AskMeFootball.Data
 {
     public class ApplicationUser : IdentityUser
     {
-        
+        public decimal Points { get; set; }
+
+
     }
 }
