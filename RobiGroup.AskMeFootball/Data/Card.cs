@@ -23,6 +23,8 @@ namespace RobiGroup.AskMeFootball.Data
         public List<Question> Questions { get; set; }
 
         public CardType Type { get; set; }
+
+        public List<Game> Games { get; set; }
     }
 
     public class Game
@@ -34,5 +36,22 @@ namespace RobiGroup.AskMeFootball.Data
         public int CardId { get; set; }
 
         public Card Card { get; set; }
+
+        public List<GameParticipant> Participants { get; set; }
+    }
+
+    public class GameParticipant
+    {
+        public int Id { get; set; }
+
+        public int GameId { get; set; }
+
+        public int GamerId { get; set; }
+
+        public int Score { get; set; }
+
+        public ApplicationUser Gamer { get; set; }
+
+        public Game Game { get; set; }
     }
 }

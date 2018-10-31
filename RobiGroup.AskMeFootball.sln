@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobiGroup.AskMeFootball", "RobiGroup.AskMeFootball\RobiGroup.AskMeFootball.csproj", "{74919FBA-B472-469E-BB06-A0F5FDFFDEEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobiGroup.AskMeFootball", "RobiGroup.AskMeFootball\RobiGroup.AskMeFootball.csproj", "{74919FBA-B472-469E-BB06-A0F5FDFFDEEA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobiGroup.Web.Common", "..\mastera24\RobiGroup.Mastera24\RobiGroup.Web.Common\RobiGroup.Web.Common.csproj", "{866FE13F-BD1C-489C-B771-9701D2D6EA80}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketManager", "..\ututor\backend\WebSocketManager\WebSocketManager.csproj", "{6560A0C8-776A-4270-A14C-41CBFB0C5740}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketManager.Common", "..\ututor\backend\WebSocketManager.Common\WebSocketManager.Common.csproj", "{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{866FE13F-BD1C-489C-B771-9701D2D6EA80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{866FE13F-BD1C-489C-B771-9701D2D6EA80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{866FE13F-BD1C-489C-B771-9701D2D6EA80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6560A0C8-776A-4270-A14C-41CBFB0C5740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6560A0C8-776A-4270-A14C-41CBFB0C5740}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6560A0C8-776A-4270-A14C-41CBFB0C5740}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6560A0C8-776A-4270-A14C-41CBFB0C5740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

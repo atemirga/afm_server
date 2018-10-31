@@ -22,6 +22,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 using RobiGroup.AskMeFootball.Common.Localization;
+using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.Web.Common;
 using RobiGroup.Web.Common.Binders;
@@ -29,6 +30,7 @@ using RobiGroup.Web.Common.Configuration;
 using RobiGroup.Web.Common.Localizer;
 using RobiGroup.Web.Common.Services;
 using Swashbuckle.AspNetCore.Swagger;
+using WebSocketManager;
 
 namespace RobiGroup.AskMeFootball
 {
@@ -128,6 +130,8 @@ namespace RobiGroup.AskMeFootball
                 options.SupportedUICultures = supportedCultures;
             });
 
+            services.AddWebSocketManager();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "AskMeFootball API", Version = "v1" });
@@ -187,6 +191,9 @@ namespace RobiGroup.AskMeFootball
                 .Value);
 
             app.UseAuthentication();
+
+            app.UseWebSockets();
+            app.MapWebSocketManager("/game", serviceProvider.GetService<GamersHandler>(), "");
 
             app.UseMvc(routes =>
             {

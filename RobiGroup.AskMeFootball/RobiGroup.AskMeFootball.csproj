@@ -37,9 +37,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\mastera24\RobiGroup.Mastera24\RobiGroup.Web.Common\RobiGroup.Web.Common.csproj" />
+    <ProjectReference Include="..\..\ututor\backend\WebSocketManager\WebSocketManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Common\Handlers\" />
     <Folder Include="Services\" />
   </ItemGroup>
 

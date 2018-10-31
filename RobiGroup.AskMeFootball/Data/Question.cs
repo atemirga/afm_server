@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RobiGroup.AskMeFootball.Data
 {
@@ -8,8 +9,6 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string Text { get; set; }
 
-        public int Point { get; set; }
-
         public int Duration { get; set; }
 
         public int Order { get; set; }
@@ -17,8 +16,6 @@ namespace RobiGroup.AskMeFootball.Data
         public int CardId { get; set; }
 
         public int CorrectAnswerId { get; set; }
-
-        public QuestionAnswer CorrectAnswer { get; set; }
 
         public Card Card { get; set; }
 
