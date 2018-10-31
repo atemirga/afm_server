@@ -93,7 +93,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 {
                     if (!await _userManager.HasPasswordAsync(user))
                     {
-                        await _userManager.DeleteAsync(user);
+                        await _userManager.DeleteAsync(user); 
                     }
                     else
                     {

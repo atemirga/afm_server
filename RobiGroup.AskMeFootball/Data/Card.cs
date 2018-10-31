@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RobiGroup.AskMeFootball.Data
@@ -9,42 +10,29 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string Name { get; set; }
 
-        public int PrizeAmount { get; set; }
-
-        public int PrizeCurrency { get; set; }
+        public string Prize { get; set; }
 
         public string ImageUrl { get; set; }
 
         public int TypeId { get; set; }
 
-        [ForeignKey("TypeId")]
+        public DateTime ResetTime { get; set; }
+
+        public int ResetPeriod { get; set; }
+
+        public List<Question> Questions { get; set; }
+
         public CardType Type { get; set; }
     }
 
-    public class CardType
+    public class Game
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }
+        public DateTime StartTime { get; set; }
 
-        public string Code { get; set; }
-    }
+        public int CardId { get; set; }
 
-    public class Question
-    {
-        public int Id { get; set; }
-
-        public string Text { get; set; }
-
-        public int Point { get; set; }
-
-        public int Duration { get; set; }
-
-        public int Order { get; set; }
-    }
-
-    public class QuestionAnswer
-    {
-        
+        public Card Card { get; set; }
     }
 }
