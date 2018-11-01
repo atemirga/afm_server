@@ -14,6 +14,8 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string ImageUrl { get; set; }
 
+        public int GameQuestions { get; set; }
+
         public int TypeId { get; set; }
 
         public DateTime ResetTime { get; set; }
@@ -50,8 +52,35 @@ namespace RobiGroup.AskMeFootball.Data
 
         public int Score { get; set; }
 
+        public bool IsPlay { get; set; }
+
         public ApplicationUser Gamer { get; set; }
 
         public Game Game { get; set; }
+
+        public List<GamerAnswer> GamerAnswers { get; set; }
+    }
+
+    public class GamerAnswer
+    {
+        public long Id { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public int ParticipantId { get; set; }
+
+        public int AnswerId { get; set; }
+
+        public bool IsCorrectAnswer { get; set; }
+
+        public QuestionAnswer Answer { get; set; }
+
+        public Question Question { get; set; }
+
+        public ApplicationUser Gamer { get; set; }
+
+        public Card Card { get; set; }
+
+        public GameParticipant Participant { get; set; }
     }
 }

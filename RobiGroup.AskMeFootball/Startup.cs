@@ -22,6 +22,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 using RobiGroup.AskMeFootball.Common.Localization;
+using RobiGroup.AskMeFootball.Core.Game;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.Web.Common;
@@ -89,6 +90,8 @@ namespace RobiGroup.AskMeFootball
             services.AddScoped<IAuthService<ApplicationUser>, AuthService<ApplicationUser>>();
             services.AddTransient<ISmsSender, MobizonSmsSender>();
             services.AddSingleton<IStringLocalizerFactory, ApplicationStringLocalizerFactory<Resources>>();
+
+            services.AddSingleton<IGameManager, GameManager>();
 
             services.AddMvc(o =>
             {

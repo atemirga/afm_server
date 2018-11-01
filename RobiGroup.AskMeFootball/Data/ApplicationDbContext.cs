@@ -35,6 +35,7 @@ namespace RobiGroup.AskMeFootball.Data
                 new CardType {Id = 10, Name = "Ежедневный", Code = "Daily"},
                 new CardType {Id = 20, Name = "Еженедельный", Code = "Weekly"},
                 new CardType {Id = 30, Name = "Ежемесячный", Code = "Monthly"});
+
         }
     }
 }

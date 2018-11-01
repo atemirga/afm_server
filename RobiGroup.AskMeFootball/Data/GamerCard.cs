@@ -12,7 +12,7 @@ namespace RobiGroup.AskMeFootball.Data
 
         public DateTime StartTime { get; set; }
 
-        public int Points { get; set; }
+        public int Score { get; set; }
 
         public ApplicationUser Gamer { get; set; }
 

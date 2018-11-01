@@ -91,23 +91,27 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                 if (user != null)
                 {
-                    if (!await _userManager.HasPasswordAsync(user))
-                    {
-                        await _userManager.DeleteAsync(user); 
-                    }
-                    else
-                    {
-                        var action = LoginAction.RequestToken;
+                    await SendConfirmationCode(user, model.Phone);
 
-                        if (!user.PhoneNumberConfirmed)
-                        {
-                            action = LoginAction.ConfirmPhone;
-                            await SendConfirmationCode(user, model.Phone);
-                        }
-
-                        return Ok(new LoginResponseModel { Action = action });
-                    }
+                    return Ok(new LoginResponseModel { Action = LoginAction.ConfirmPhone });
+                /*
+                if (!await _userManager.HasPasswordAsync(user))
+                {
+                    await _userManager.DeleteAsync(user); 
                 }
+                else
+                {
+                    var action = LoginAction.RequestToken;
+
+                    if (!user.PhoneNumberConfirmed)
+                    {
+                        action = LoginAction.ConfirmPhone;
+                        await SendConfirmationCode(user, model.Phone);
+                    }
+
+                    return Ok(new LoginResponseModel { Action = action });
+                }*/
+            }
 
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
