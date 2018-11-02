@@ -14,7 +14,7 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string ImageUrl { get; set; }
 
-        public int GameQuestions { get; set; }
+        public int MatchQuestions { get; set; }
 
         public int TypeId { get; set; }
 
@@ -26,29 +26,35 @@ namespace RobiGroup.AskMeFootball.Data
 
         public CardType Type { get; set; }
 
-        public List<Game> Games { get; set; }
+        public List<Match> Matches { get; set; }
     }
 
-    public class Game
+    public class Match
     {
         public int Id { get; set; }
 
-        public DateTime StartTime { get; set; }
+        public DateTime CreateTime { get; set; }
+
+        public DateTime? StartTime { get; set; }
 
         public int CardId { get; set; }
 
         public Card Card { get; set; }
 
-        public List<GameParticipant> Participants { get; set; }
+        public List<MatchParticipant> Participants { get; set; }
     }
 
-    public class GameParticipant
+    public class MatchParticipant
     {
         public int Id { get; set; }
 
-        public int GameId { get; set; }
+        public int MacthId { get; set; }
 
-        public int GamerId { get; set; }
+        public string GamerId { get; set; }
+
+        public bool Confirmed { get; set; }
+
+        public DateTime? JoinTime { get; set; }
 
         public int Score { get; set; }
 
@@ -56,12 +62,12 @@ namespace RobiGroup.AskMeFootball.Data
 
         public ApplicationUser Gamer { get; set; }
 
-        public Game Game { get; set; }
+        public Match Match { get; set; }
 
-        public List<GamerAnswer> GamerAnswers { get; set; }
+        public List<MatchAnswer> MatchAnswers { get; set; }
     }
 
-    public class GamerAnswer
+    public class MatchAnswer
     {
         public long Id { get; set; }
 
@@ -81,6 +87,6 @@ namespace RobiGroup.AskMeFootball.Data
 
         public Card Card { get; set; }
 
-        public GameParticipant Participant { get; set; }
+        public MatchParticipant Participant { get; set; }
     }
 }

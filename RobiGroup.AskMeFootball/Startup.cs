@@ -28,6 +28,7 @@ using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.Web.Common;
 using RobiGroup.Web.Common.Binders;
 using RobiGroup.Web.Common.Configuration;
+using RobiGroup.Web.Common.Identity;
 using RobiGroup.Web.Common.Localizer;
 using RobiGroup.Web.Common.Services;
 using Swashbuckle.AspNetCore.Swagger;
@@ -84,8 +85,8 @@ namespace RobiGroup.AskMeFootball
 
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultUI()
-                .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders()
+                .AddPhoneNumber4DigitTokenProvider();
 
             services.AddScoped<IAuthService<ApplicationUser>, AuthService<ApplicationUser>>();
             services.AddTransient<ISmsSender, MobizonSmsSender>();

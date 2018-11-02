@@ -20,6 +20,12 @@ namespace RobiGroup.AskMeFootball.Data
 
         public DbSet<GamerRank> GamerRanks { get; set; }
 
+        public DbSet<Match> Matches { get; set; }
+
+        public DbSet<MatchParticipant> MatchParticipants { get; set; }
+
+        public DbSet<MatchAnswer> MatchAnswers { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
