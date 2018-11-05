@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -21,6 +22,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using RobiGroup.AskMeFootball.Common.Localization;
 using RobiGroup.AskMeFootball.Core.Game;
 using RobiGroup.AskMeFootball.Core.Handlers;
@@ -92,7 +94,39 @@ namespace RobiGroup.AskMeFootball
             services.AddTransient<ISmsSender, MobizonSmsSender>();
             services.AddSingleton<IStringLocalizerFactory, ApplicationStringLocalizerFactory<Resources>>();
 
-            services.AddSingleton<IGameManager, GameManager>();
+            services.AddSingleton<IMatchManager, MatchManager>();
+
+            var providerOptions = services.BuildServiceProvider().GetService<IOptions<TokenProviderOptions>>();
+            services.AddAuthentication()
+                .AddJwtBearer(x =>
+                {
+                    x.Audience = providerOptions.Value.Audience;
+                    x.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = true,
+                        ValidateIssuer = true,
+                        ValidIssuer = providerOptions.Value.Issuer,
+                        IssuerSigningKey = providerOptions.Value.SigningCredentials.Key,
+                    };
+                    x.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["token"];
+
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                (context.HttpContext.WebSockets.IsWebSocketRequest || context.Request.Headers["Accept"] == "text/event-stream"))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+                    x.SaveToken = true;
+                });
+
+            services.AddAuthorization();
 
             services.AddMvc(o =>
             {
@@ -101,28 +135,12 @@ namespace RobiGroup.AskMeFootball
                     .GetService(typeof(IStringLocalizerFactory));
                 o.ModelMetadataDetailsProviders.Add(new ApplicationDisplayMetadataProvider<Resources>(stringLocalizerFactory));
             })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
-                .AddDataAnnotationsLocalization();
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+            .AddDataAnnotationsLocalization();
 
-            var providerOptions = services.BuildServiceProvider().GetService<IOptions<TokenProviderOptions>>();
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(x =>
-                {
-                    x.RequireHttpsMetadata = false;
-                    x.SaveToken = true;
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = providerOptions.Value.SigningCredentials.Key,
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
-                });
+            services.AddDistributedMemoryCache();
+            services.AddSession();
 
             services.Configure<RequestLocalizationOptions>(options =>
             {
@@ -191,13 +209,17 @@ namespace RobiGroup.AskMeFootball
             app.UseStaticFiles();
             //app.UseCookiePolicy();
 
+
+
             app.UseRequestLocalization(app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>()
                 .Value);
 
             app.UseAuthentication();
 
             app.UseWebSockets();
-            app.MapWebSocketManager("/game", serviceProvider.GetService<GamersHandler>(), "");
+            app.MapWebSocketManager("/game", serviceProvider.GetService<GamersHandler>(), JwtBearerDefaults.AuthenticationScheme);
+
+            app.UseSession();
 
             app.UseMvc(routes =>
             {
@@ -211,11 +233,74 @@ namespace RobiGroup.AskMeFootball
             // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
+                var hostingEnvironment = serviceProvider.GetService<IHostingEnvironment>();
+
+                c.IndexStream = () =>
+                {
+                    return new FileStream(
+                            $"{hostingEnvironment.WebRootPath}/Swagger.index.html",
+                            FileMode.Open);
+                };
+
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AskMeFootball API");
                 c.RoutePrefix = "swagger";
+
+                c.InjectJavascript("/js/WebSocketManager.js");
+                c.InjectJavascript("/js/swagger.websocket.js");
             });
 
             roleManager.AddRolesToDbIfNotExists(ApplicationRoles.Roles);
+
+            var dbContext = serviceProvider.GetService<ApplicationDbContext>();
+
+            if (!dbContext.Cards.Any())
+            {
+                var card = new Card
+                {
+                    Name = "Premier League",
+                    MatchQuestions = 10,
+                    Prize = "2000 KZT",
+                    TypeId = 10,
+                    ResetPeriod = 1,
+                    ResetTime = DateTime.Now.AddDays(1)
+                };
+
+                dbContext.Cards.Add(card);
+                dbContext.SaveChanges();
+
+                for (int i = 0; i < 1000; i++)
+                {
+                    var question = new Question
+                    {
+                        CardId = card.Id,
+                        Text = "Question " + (i + 1),
+                    };
+                    dbContext.Questions.Add(question);
+                }
+
+                dbContext.SaveChanges();
+
+                foreach (var question in dbContext.Questions)
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        dbContext.QuestionAnswers.Add(new QuestionAnswer
+                        {
+                            Text = "Answer " + (i+1),
+                            QuestionId = question.Id
+                        });
+                    }
+                }
+
+                dbContext.SaveChanges();
+
+                foreach (var question in dbContext.Questions.Include(q => q.Answers))
+                {
+                    question.CorrectAnswerId = question.Answers.OrderBy(a => a.Id).First().Id;
+                }
+
+                dbContext.SaveChanges();
+            }
         }
     }
 }

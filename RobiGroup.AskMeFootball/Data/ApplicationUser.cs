@@ -8,6 +8,8 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string LastName { get; set; }
 
+        public string FullName { get; set; }
+
         public string PhotoUrl { get; set; }
 
         public int TotalScore { get; set; }

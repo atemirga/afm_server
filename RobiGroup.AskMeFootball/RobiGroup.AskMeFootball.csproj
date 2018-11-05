@@ -15,17 +15,24 @@
 
   <ItemGroup>
     <Compile Remove="wwwroot\css\**" />
-    <Compile Remove="wwwroot\js\**" />
     <Compile Remove="wwwroot\lib\**" />
     <Content Remove="wwwroot\css\**" />
-    <Content Remove="wwwroot\js\**" />
     <Content Remove="wwwroot\lib\**" />
     <EmbeddedResource Remove="wwwroot\css\**" />
-    <EmbeddedResource Remove="wwwroot\js\**" />
     <EmbeddedResource Remove="wwwroot\lib\**" />
     <None Remove="wwwroot\css\**" />
-    <None Remove="wwwroot\js\**" />
     <None Remove="wwwroot\lib\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\Migrations\20181031150125_AddGameTables.cs" />
+    <Compile Remove="Data\Migrations\20181031150125_AddGameTables.Designer.cs" />
+    <Compile Remove="Data\Migrations\20181103134402_AddMatchTables.cs" />
+    <Compile Remove="Data\Migrations\20181103134402_AddMatchTables.Designer.cs" />
+    <Compile Remove="Data\Migrations\20181103135808_AddMatchTables.cs" />
+    <Compile Remove="Data\Migrations\20181103135808_AddMatchTables.Designer.cs" />
+    <Compile Remove="Data\Migrations\20181103144308_AddMatchTables.cs" />
+    <Compile Remove="Data\Migrations\20181103144308_AddMatchTables.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +50,13 @@
   <ItemGroup>
     <Folder Include="Common\Handlers\" />
     <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\site.js" />
+    <None Include="wwwroot\js\site.min.js" />
+    <None Include="wwwroot\lib\jquery\dist\jquery.min.js" />
+    <None Include="wwwroot\Swagger.index.html" />
   </ItemGroup>
 
 </Project>

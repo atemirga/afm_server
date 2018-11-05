@@ -1,6 +1,6 @@
-﻿namespace RobiGroup.AskMeFootball.Models.Games
+﻿namespace RobiGroup.AskMeFootball.Models.Match
 {
-    public class GameModel
+    public class MatchModel
     {
         public int Id { get; set; }
 

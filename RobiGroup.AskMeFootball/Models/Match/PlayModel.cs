@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RobiGroup.AskMeFootball.Models.Games
+namespace RobiGroup.AskMeFootball.Models.Match
 {
     public class PlayModel
     {

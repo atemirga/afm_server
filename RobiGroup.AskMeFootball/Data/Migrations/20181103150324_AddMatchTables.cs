@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace RobiGroup.AskMeFootball.Data.Migrations
 {
-    public partial class AddGameTables : Migration
+    public partial class AddMatchTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -68,6 +68,12 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                 oldClrType: typeof(string),
                 oldMaxLength: 128);
 
+            migrationBuilder.AddColumn<string>(
+                name: "FullName",
+                table: "AspNetUsers",
+                nullable: true,
+                computedColumnSql: "[LastName] + ' ' + [FirstName]");
+
             migrationBuilder.CreateTable(
                 name: "CardTypes",
                 columns: table => new
@@ -104,6 +110,7 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     Name = table.Column<string>(nullable: true),
                     Prize = table.Column<string>(nullable: true),
                     ImageUrl = table.Column<string>(nullable: true),
+                    MatchQuestions = table.Column<int>(nullable: false),
                     TypeId = table.Column<int>(nullable: false),
                     ResetTime = table.Column<DateTime>(nullable: false),
                     ResetPeriod = table.Column<int>(nullable: false)
@@ -120,26 +127,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Game",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    StartTime = table.Column<DateTime>(nullable: false),
-                    CardId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Game", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Game_Cards_CardId",
-                        column: x => x.CardId,
-                        principalTable: "Cards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "GamerCards",
                 columns: table => new
                 {
@@ -148,7 +135,7 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     GamerId = table.Column<string>(nullable: false),
                     CardId = table.Column<int>(nullable: false),
                     StartTime = table.Column<DateTime>(nullable: false),
-                    Points = table.Column<int>(nullable: false)
+                    Score = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -169,14 +156,34 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Matches",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    CreateTime = table.Column<DateTime>(nullable: false),
+                    Questions = table.Column<string>(nullable: true),
+                    StartTime = table.Column<DateTime>(nullable: true),
+                    CardId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Matches", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Matches_Cards_CardId",
+                        column: x => x.CardId,
+                        principalTable: "Cards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Text = table.Column<string>(nullable: true),
-                    Duration = table.Column<int>(nullable: false),
-                    Order = table.Column<int>(nullable: false),
                     CardId = table.Column<int>(nullable: false),
                     CorrectAnswerId = table.Column<int>(nullable: false)
                 },
@@ -192,31 +199,33 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GameParticipant",
+                name: "MatchGamers",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    GameId = table.Column<int>(nullable: false),
-                    GamerId = table.Column<int>(nullable: false),
+                    MatchId = table.Column<int>(nullable: false),
+                    GamerId = table.Column<string>(nullable: true),
+                    Confirmed = table.Column<bool>(nullable: false),
+                    JoinTime = table.Column<DateTime>(nullable: true),
                     Score = table.Column<int>(nullable: false),
-                    GamerId1 = table.Column<string>(nullable: true)
+                    IsPlay = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GameParticipant", x => x.Id);
+                    table.PrimaryKey("PK_MatchGamers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GameParticipant_Game_GameId",
-                        column: x => x.GameId,
-                        principalTable: "Game",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GameParticipant_AspNetUsers_GamerId1",
-                        column: x => x.GamerId1,
+                        name: "FK_MatchGamers_AspNetUsers_GamerId",
+                        column: x => x.GamerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MatchGamers_Matches_MatchId",
+                        column: x => x.MatchId,
+                        principalTable: "Matches",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -238,6 +247,41 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                         principalTable: "Questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MatchAnswers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    MatchGamerId = table.Column<int>(nullable: false),
+                    QuestionId = table.Column<int>(nullable: false),
+                    AnswerId = table.Column<int>(nullable: false),
+                    IsCorrectAnswer = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MatchAnswers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MatchAnswers_QuestionAnswers_AnswerId",
+                        column: x => x.AnswerId,
+                        principalTable: "QuestionAnswers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_MatchAnswers_MatchGamers_MatchGamerId",
+                        column: x => x.MatchGamerId,
+                        principalTable: "MatchGamers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_MatchAnswers_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.InsertData(
@@ -266,24 +310,39 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                 column: "TypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Game_CardId",
-                table: "Game",
-                column: "CardId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameParticipant_GameId",
-                table: "GameParticipant",
-                column: "GameId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameParticipant_GamerId1",
-                table: "GameParticipant",
-                column: "GamerId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GamerCards_GamerId",
                 table: "GamerCards",
                 column: "GamerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MatchAnswers_AnswerId",
+                table: "MatchAnswers",
+                column: "AnswerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MatchAnswers_MatchGamerId",
+                table: "MatchAnswers",
+                column: "MatchGamerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MatchAnswers_QuestionId",
+                table: "MatchAnswers",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Matches_CardId",
+                table: "Matches",
+                column: "CardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MatchGamers_GamerId",
+                table: "MatchGamers",
+                column: "GamerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MatchGamers_MatchId",
+                table: "MatchGamers",
+                column: "MatchId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionAnswers_QuestionId",
@@ -311,22 +370,25 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                 table: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "GameParticipant");
-
-            migrationBuilder.DropTable(
                 name: "GamerCards");
 
             migrationBuilder.DropTable(
                 name: "GamerRanks");
 
             migrationBuilder.DropTable(
+                name: "MatchAnswers");
+
+            migrationBuilder.DropTable(
                 name: "QuestionAnswers");
 
             migrationBuilder.DropTable(
-                name: "Game");
+                name: "MatchGamers");
 
             migrationBuilder.DropTable(
                 name: "Questions");
+
+            migrationBuilder.DropTable(
+                name: "Matches");
 
             migrationBuilder.DropTable(
                 name: "Cards");
@@ -340,6 +402,10 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "FirstName",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "FullName",
                 table: "AspNetUsers");
 
             migrationBuilder.DropColumn(

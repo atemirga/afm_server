@@ -146,6 +146,10 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<string>("FirstName");
 
+                    b.Property<string>("FullName")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasComputedColumnSql("[LastName] + ' ' + [FirstName]");
+
                     b.Property<string>("LastName");
 
                     b.Property<bool>("LockoutEnabled");
@@ -202,6 +206,8 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<string>("ImageUrl");
 
+                    b.Property<int>("MatchQuestions");
+
                     b.Property<string>("Name");
 
                     b.Property<string>("Prize");
@@ -240,46 +246,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     );
                 });
 
-            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Game", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CardId");
-
-                    b.Property<DateTime>("StartTime");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CardId");
-
-                    b.ToTable("Game");
-                });
-
-            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.GameParticipant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("GameId");
-
-                    b.Property<int>("GamerId");
-
-                    b.Property<string>("GamerId1");
-
-                    b.Property<int>("Score");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("GamerId1");
-
-                    b.ToTable("GameParticipant");
-                });
-
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.GamerCard", b =>
                 {
                     b.Property<int>("Id")
@@ -291,7 +257,7 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.Property<string>("GamerId")
                         .IsRequired();
 
-                    b.Property<int>("Points");
+                    b.Property<int>("Score");
 
                     b.Property<DateTime>("StartTime");
 
@@ -317,6 +283,81 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.ToTable("GamerRanks");
                 });
 
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Match", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CardId");
+
+                    b.Property<DateTime>("CreateTime");
+
+                    b.Property<string>("Questions");
+
+                    b.Property<DateTime?>("StartTime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CardId");
+
+                    b.ToTable("Matches");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MatchAnswer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AnswerId");
+
+                    b.Property<DateTime>("CreatedAt");
+
+                    b.Property<bool>("IsCorrectAnswer");
+
+                    b.Property<int>("MatchGamerId");
+
+                    b.Property<int>("QuestionId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
+
+                    b.HasIndex("MatchGamerId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("MatchAnswers");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MatchGamer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Confirmed");
+
+                    b.Property<string>("GamerId");
+
+                    b.Property<bool>("IsPlay");
+
+                    b.Property<DateTime?>("JoinTime");
+
+                    b.Property<int>("MatchId");
+
+                    b.Property<int>("Score");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GamerId");
+
+                    b.HasIndex("MatchId");
+
+                    b.ToTable("MatchGamers");
+                });
+
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Question", b =>
                 {
                     b.Property<int>("Id")
@@ -326,10 +367,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.Property<int>("CardId");
 
                     b.Property<int>("CorrectAnswerId");
-
-                    b.Property<int>("Duration");
-
-                    b.Property<int>("Order");
 
                     b.Property<string>("Text");
 
@@ -419,26 +456,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Game", b =>
-                {
-                    b.HasOne("RobiGroup.AskMeFootball.Data.Card", "Card")
-                        .WithMany("Games")
-                        .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.GameParticipant", b =>
-                {
-                    b.HasOne("RobiGroup.AskMeFootball.Data.Game", "Game")
-                        .WithMany("Participants")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("RobiGroup.AskMeFootball.Data.ApplicationUser", "Gamer")
-                        .WithMany()
-                        .HasForeignKey("GamerId1");
-                });
-
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.GamerCard", b =>
                 {
                     b.HasOne("RobiGroup.AskMeFootball.Data.Card", "Card")
@@ -449,6 +466,44 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.HasOne("RobiGroup.AskMeFootball.Data.ApplicationUser", "Gamer")
                         .WithMany()
                         .HasForeignKey("GamerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Match", b =>
+                {
+                    b.HasOne("RobiGroup.AskMeFootball.Data.Card", "Card")
+                        .WithMany("Matches")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MatchAnswer", b =>
+                {
+                    b.HasOne("RobiGroup.AskMeFootball.Data.QuestionAnswer", "Answer")
+                        .WithMany()
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("RobiGroup.AskMeFootball.Data.MatchGamer", "MatchGamer")
+                        .WithMany("Answers")
+                        .HasForeignKey("MatchGamerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("RobiGroup.AskMeFootball.Data.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MatchGamer", b =>
+                {
+                    b.HasOne("RobiGroup.AskMeFootball.Data.ApplicationUser", "Gamer")
+                        .WithMany()
+                        .HasForeignKey("GamerId");
+
+                    b.HasOne("RobiGroup.AskMeFootball.Data.Match", "Match")
+                        .WithMany("Gamers")
+                        .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -26,6 +26,7 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
 
             var userId = _httpContextAccessor.HttpContext.User.GetUserId();
             WebSocketConnectionManager.AddToGroup(socketId, userId);
+            WebSocketConnectionManager.Connections[socketId].UserId = userId;
         }
     }
 }

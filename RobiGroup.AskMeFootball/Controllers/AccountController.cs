@@ -1,9 +1,13 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using RobiGroup.AskMeFootball.Common.Localization;
@@ -20,7 +24,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
     [Route("api/account")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AccountController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
@@ -39,6 +43,36 @@ namespace RobiGroup.AskMeFootball.Controllers
             _signInManager = signInManager;
             _localizer = localizer;
         }
+
+        /// <summary>
+        /// Получить токен
+        /// </summary>
+        /// <param name="username">Имя пользователя / номер телефона</param>
+        /// <param name="password">Пароль</param>
+        /// <returns></returns>
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("/token")]
+        [ProducesResponseType(typeof(UserTokenModel), 200)]
+        public async Task<IActionResult> GetAuthTokenForm([Required]string username, [Required]string password)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser>>();
+                    return Ok(await authService.AuthenticateAsync(username, password));
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError(String.Empty, e.Message);
+                    return BadRequest(ModelState);
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
 
         /// <summary>
         /// Получить токен
@@ -87,7 +121,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                 model.Phone = FormatHelpers.NormalizePhoneNumber(model.Phone);
 
-                var user = await _userManager.FindByNameAsync(model.Phone);
+                var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.PhoneNumber == model.Phone);
 
                 if (user != null)
                 {
@@ -117,7 +151,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 {
                     user = new ApplicationUser
                     {
-                        UserName = model.Phone,
+                        UserName = "player" + (_dbContext.Users.Count() + 1),
                         PhoneNumber = model.Phone
                     };
                     var result = await _userManager.CreateAsync(user);
@@ -185,7 +219,7 @@ namespace RobiGroup.AskMeFootball.Controllers
             if (ModelState.IsValid)
             {
                 string normalizedPhone = FormatHelpers.NormalizePhoneNumber(model.Phone);
-                var user = await _userManager.FindByNameAsync(normalizedPhone);
+                var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.PhoneNumber == normalizedPhone);
 
                 if (user != null)
                 {

@@ -9,10 +9,6 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string Text { get; set; }
 
-        public int Duration { get; set; }
-
-        public int Order { get; set; }
-
         public int CardId { get; set; }
 
         public int CorrectAnswerId { get; set; }
