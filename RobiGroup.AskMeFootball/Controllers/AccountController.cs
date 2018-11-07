@@ -44,6 +44,21 @@ namespace RobiGroup.AskMeFootball.Controllers
             _localizer = localizer;
         }
 
+        #region Profile
+
+        [HttpGet]
+        [Route("/profile")]
+        [ProducesResponseType(typeof(UserTokenModel), 200)]
+        public IActionResult Profile()
+        {
+
+            return Ok();
+        }
+
+        #endregion
+
+        #region Auth
+
         /// <summary>
         /// Получить токен
         /// </summary>
@@ -128,24 +143,24 @@ namespace RobiGroup.AskMeFootball.Controllers
                     await SendConfirmationCode(user, model.Phone);
 
                     return Ok(new LoginResponseModel { Action = LoginAction.ConfirmPhone });
-                /*
-                if (!await _userManager.HasPasswordAsync(user))
-                {
-                    await _userManager.DeleteAsync(user); 
-                }
-                else
-                {
-                    var action = LoginAction.RequestToken;
-
-                    if (!user.PhoneNumberConfirmed)
+                    /*
+                    if (!await _userManager.HasPasswordAsync(user))
                     {
-                        action = LoginAction.ConfirmPhone;
-                        await SendConfirmationCode(user, model.Phone);
+                        await _userManager.DeleteAsync(user); 
                     }
+                    else
+                    {
+                        var action = LoginAction.RequestToken;
 
-                    return Ok(new LoginResponseModel { Action = action });
-                }*/
-            }
+                        if (!user.PhoneNumberConfirmed)
+                        {
+                            action = LoginAction.ConfirmPhone;
+                            await SendConfirmationCode(user, model.Phone);
+                        }
+
+                        return Ok(new LoginResponseModel { Action = action });
+                    }*/
+                }
 
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
@@ -277,5 +292,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
             return BadRequest(ModelState);
         }
+
+        #endregion
     }
 }

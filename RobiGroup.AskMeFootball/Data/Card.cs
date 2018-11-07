@@ -27,6 +27,8 @@ namespace RobiGroup.AskMeFootball.Data
         public CardType Type { get; set; }
 
         public List<Match> Matches { get; set; }
+
+        public List<GamerCard> GamerCards { get; set; }
     }
 
     public class Match

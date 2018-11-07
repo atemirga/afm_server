@@ -24,6 +24,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using RobiGroup.AskMeFootball.Common.Localization;
+using RobiGroup.AskMeFootball.Common.Options;
 using RobiGroup.AskMeFootball.Core.Game;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Core.Identity;
@@ -54,6 +55,7 @@ namespace RobiGroup.AskMeFootball
             services.Configure<TokenProviderOptions>(Configuration.GetSection("TokenProviderOptions"));
             services.Configure<DefaultsOptions>(Configuration.GetSection("Defaults"));
             services.Configure<MobizonOptions>(Configuration.GetSection("Mobizon"));
+            services.Configure<MatchOptions>(Configuration.GetSection("MatchOptions"));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -95,6 +97,8 @@ namespace RobiGroup.AskMeFootball
             services.AddSingleton<IStringLocalizerFactory, ApplicationStringLocalizerFactory<Resources>>();
 
             services.AddSingleton<IMatchManager, MatchManager>();
+
+            services.AddHostedService<GameTimerService>();
 
             var providerOptions = services.BuildServiceProvider().GetService<IOptions<TokenProviderOptions>>();
             services.AddAuthentication()
@@ -252,6 +256,8 @@ namespace RobiGroup.AskMeFootball
             roleManager.AddRolesToDbIfNotExists(ApplicationRoles.Roles);
 
             var dbContext = serviceProvider.GetService<ApplicationDbContext>();
+
+            dbContext.Database.Migrate();
 
             if (!dbContext.Cards.Any())
             {

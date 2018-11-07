@@ -10,4 +10,11 @@
 
         public string GamerPhotoUrl { get; set; }
     }
+
+    public class MatchResultModel
+    {
+        public int MatchScore { get; set; }
+
+        public int CardScore { get; set; }
+    }
 }

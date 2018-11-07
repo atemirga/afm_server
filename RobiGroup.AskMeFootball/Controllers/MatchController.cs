@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using RobiGroup.AskMeFootball.Common.Options;
 using RobiGroup.AskMeFootball.Core.Game;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
@@ -208,5 +211,66 @@ namespace RobiGroup.AskMeFootball.Controllers
 
             return BadRequest(ModelState);
         }
+
+
+
+
+        /// <summary>
+        /// Получить результат матча  
+        /// </summary> 
+        /// <param name="id">ID матча</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("{id}/result")]
+        [ProducesResponseType(typeof(MatchResultModel), 200)]
+        public IActionResult GetMatchResult([FromRoute]int id)
+        {
+            if (ModelState.IsValid)
+            {
+                string userId = User.GetUserId();
+
+                using (var transaction = _dbContext.Database.BeginTransaction())
+                {
+                    var matchGamer = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Include(m => m.Gamer).Single(g => g.MatchId == id && g.GamerId == userId);
+                    if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
+                    {
+                        var matchOptions = HttpContext.RequestServices.GetService<IOptions<MatchOptions>>();
+                        var pointsForMacth = matchGamer.Answers.Sum(m => (m.IsCorrectAnswer ? matchOptions.Value.ScoreForWinner : matchOptions.Value.ScoreForLoser));
+                        matchGamer.Score = pointsForMacth;
+                        matchGamer.IsPlay = false;
+
+                        var gamerCard = _dbContext.GamerCards.SingleOrDefault(gc => gc.CardId == matchGamer.Match.CardId);
+                        if (gamerCard == null)
+                        {
+                            // Создаем новую карточку для игрока
+                            gamerCard = new GamerCard
+                            {
+                                CardId = matchGamer.Match.CardId,
+                                GamerId = matchGamer.GamerId,
+                                StartTime = DateTime.Now,
+                            };
+                            _dbContext.GamerCards.Add(gamerCard);
+                        }
+
+                        gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
+
+                        matchGamer.Gamer.Score -= Math.Abs(matchGamer.Score); // Отнимаем из текущих очков у игрока
+
+                        _dbContext.SaveChanges();
+
+                        transaction.Commit();
+                    }
+
+                    return Ok(new MatchResultModel
+                    {
+                        MatchScore = matchGamer.Score
+                    });
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
+
     }
 }

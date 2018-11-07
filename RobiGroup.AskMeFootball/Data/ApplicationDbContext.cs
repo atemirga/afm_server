@@ -46,12 +46,9 @@ namespace RobiGroup.AskMeFootball.Data
             builder.Entity<GamerCard>().HasAlternateKey(gc => new {gc.CardId, gc.GamerId});
 
             builder.Entity<CardType>().HasData(
-                new CardType {Id = 10, Name = "Ежедневный", Code = "Daily"},
-                new CardType {Id = 20, Name = "Еженедельный", Code = "Weekly"},
-                new CardType {Id = 30, Name = "Ежемесячный", Code = "Monthly"});
-
-
-           
+                new CardType {Id = 10, Name = "Ежедневный", Code = Data.CardTypes.Daily.ToString() },
+                new CardType {Id = 20, Name = "Еженедельный", Code = Data.CardTypes.Weekly.ToString() },
+                new CardType {Id = 30, Name = "Ежемесячный", Code = Data.CardTypes.Monthly.ToString() });
 
         }
     }

@@ -12,8 +12,14 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string PhotoUrl { get; set; }
 
+        /// <summary>
+        /// Итоговые очки
+        /// </summary>
         public int TotalScore { get; set; }
-
+        
+        /// <summary>
+        /// Текущие очки (раз в день начисляется 1000)
+        /// </summary>
         public int Score { get; set; }
 
         public int? RankId { get; set; }
