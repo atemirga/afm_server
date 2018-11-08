@@ -1,7 +1,17 @@
-﻿namespace RobiGroup.AskMeFootball.Models.Match
+﻿using RobiGroup.AskMeFootball.Data;
+
+namespace RobiGroup.AskMeFootball.Models.Match
 {
-    public class MatchRequest
+    public class MatchModel
     {
+        public MatchModel(int matchId, ApplicationUser gamer)
+        {
+            MatchId = matchId;
+            GamerFullName = gamer.FullName;
+            GamerName = gamer.UserName;
+            GamerPhotoUrl = gamer.PhotoUrl;
+        }
+
         public int MatchId { get; set; }
 
         public string GamerName { get; set; }

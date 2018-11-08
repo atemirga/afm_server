@@ -19,10 +19,10 @@ namespace RobiGroup.AskMeFootball.Core.Game
             _dbContext = dbContext;
         }
 
-        public async Task<MatchModel> SearchMatch(string gamerId, int cardId)
+        public async Task<MatchSearchResultModel> SearchMatch(string gamerId, int cardId)
         {
             var enemy = _gamersHandler.WebSocketConnectionManager.Connections.Values.Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId).OrderByDescending(c => c.ConnectedTime).FirstOrDefault();
-            var model = new MatchModel();
+            var model = new MatchSearchResultModel();
 
             if (enemy != null)
             {
@@ -46,17 +46,9 @@ namespace RobiGroup.AskMeFootball.Core.Game
                 });
                 _dbContext.SaveChanges();
 
-                var enemyUser = _dbContext.Users.Find(enemy.UserId);
+                await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest", new MatchModel(match.Id, _dbContext.Users.Find(gamerId)));
 
-                await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest", new MatchRequest
-                {
-                    MatchId = match.Id,
-                    GamerFullName = enemyUser.FullName,
-                    GamerName = enemyUser.UserName,
-                    GamerPhotoUrl = enemyUser.PhotoUrl
-                });
-
-                model.Id = match.Id;
+                model.Match = new MatchModel(match.Id, _dbContext.Users.Find(enemy.UserId));
                 model.Found = true;
             }
 
@@ -66,39 +58,40 @@ namespace RobiGroup.AskMeFootball.Core.Game
         public async Task<ConfirmResponseModel> Confirm(string gamerId, int matchId)
         {
             var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
-                m.GamerId == gamerId && m.MatchId == matchId && !m.Confirmed && !m.JoinTime.HasValue);
+                m.GamerId == gamerId && m.MatchId == matchId && !m.JoinTime.HasValue);
 
             if (matchParticipant != null)
             {
-                matchParticipant.Confirmed = true;
-                matchParticipant.JoinTime = DateTime.Now;
-                matchParticipant.IsPlay = true;
-
-                _dbContext.SaveChanges();
-
                 var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == matchId);
+
+                if (!matchParticipant.Confirmed)
+                {
+                    matchParticipant.Confirmed = true;
+                    matchParticipant.JoinTime = DateTime.Now;
+                    matchParticipant.IsPlay = true;
+
+                    _dbContext.SaveChanges();
+
+                    var match = _dbContext.Matches.Include(m => m.Card).ThenInclude(c => c.Questions).Single(m => m.Id == matchId);
+                    match.StartTime = DateTime.Now;
+                    match.Questions = string.Join(',', match.Card.Questions
+                        .OrderBy(o => Guid.NewGuid())
+                        .Take(match.Card.MatchQuestions)
+                        .Select(q => q.Id));
+                    _dbContext.SaveChanges();
+                }
+
                 var confirm = new ConfirmResponseModel
                 {
                     MatchId = matchId,
                     Confirmed = matchParticipants.All(p => p.Confirmed)
                 };
 
-                if (confirm.Confirmed)
+                var participants = matchParticipants.Where(p => p.GamerId != gamerId).Select(p => p.GamerId).ToList();
+
+                foreach (var participant in participants)
                 {
-                    var match = _dbContext.Matches.Include(m => m.Card).ThenInclude(c => c.Questions).Single(m => m.Id == matchId);
-                    match.StartTime = DateTime.Now;
-                    match.Questions = string.Join(',',  match.Card.Questions
-                                                        .OrderBy(o => Guid.NewGuid())
-                                                        .Take(match.Card.MatchQuestions)
-                                                        .Select(q => q.Id));
-                    _dbContext.SaveChanges();
-
-                    var participants = matchParticipants.Where(p => p.GamerId != gamerId).Select(p => p.GamerId).ToList();
-
-                    foreach (var participant in participants)
-                    {
-                        await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchConfirmed", confirm);
-                    }
+                    await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchConfirmed", confirm);
                 }
 
                 return confirm;

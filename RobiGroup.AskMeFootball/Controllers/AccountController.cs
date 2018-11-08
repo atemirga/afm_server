@@ -14,7 +14,9 @@ using RobiGroup.AskMeFootball.Common.Localization;
 using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Account;
+using RobiGroup.AskMeFootball.Models.Account.Profile;
 using RobiGroup.Web.Common;
+using RobiGroup.Web.Common.Identity;
 using RobiGroup.Web.Common.Services;
 using RobiGroup.Web.Common.Services.Models;
 using RobiGroup.Web.Common.Validation;
@@ -43,19 +45,6 @@ namespace RobiGroup.AskMeFootball.Controllers
             _signInManager = signInManager;
             _localizer = localizer;
         }
-
-        #region Profile
-
-        [HttpGet]
-        [Route("/profile")]
-        [ProducesResponseType(typeof(UserTokenModel), 200)]
-        public IActionResult Profile()
-        {
-
-            return Ok();
-        }
-
-        #endregion
 
         #region Auth
 

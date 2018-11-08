@@ -28,14 +28,11 @@ namespace RobiGroup.AskMeFootball.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MatchController : ControllerBase
     {
-        private readonly GamersHandler _gamersHandler;
-
         private readonly IMatchManager _matchManager;
         private readonly ApplicationDbContext _dbContext;
 
-        public MatchController(GamersHandler gamersHandler, IMatchManager matchManager, ApplicationDbContext dbContext)
+        public MatchController(IMatchManager matchManager, ApplicationDbContext dbContext)
         {
-            _gamersHandler = gamersHandler;
             _matchManager = matchManager;
             _dbContext = dbContext;
         }
@@ -47,7 +44,7 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{id}/search")]
-        [ProducesResponseType(typeof(MatchModel), 200)]
+        [ProducesResponseType(typeof(MatchSearchResultModel), 200)]
         public async Task<IActionResult> Search(int id)
         {
             if (ModelState.IsValid)
@@ -69,13 +66,11 @@ namespace RobiGroup.AskMeFootball.Controllers
         [Route("{id}/confirm")]
         [ProducesResponseType(typeof(ConfirmResponseModel), 200)]
         [ProducesResponseType(400)]
-        public IActionResult Confirm(int id)
+        public async Task<IActionResult> Confirm(int id)
         {
             if (ModelState.IsValid)
             {
-                _matchManager.Confirm(User.GetUserId(), id);
-
-                return Ok();
+                return Ok(await _matchManager.Confirm(User.GetUserId(), id));
             }
 
             return BadRequest(ModelState);
@@ -163,58 +158,6 @@ namespace RobiGroup.AskMeFootball.Controllers
             return BadRequest(ModelState);
         }
 
-
-        /// <summary>
-        /// Получить ответы  
-        /// </summary> 
-        /// <param name="id">ID матча</param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("{id}/answers")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public IActionResult GetQuestionsAnswers([FromRoute]int id, [FromBody]List<MatchQuestionAnswerModel> answers)
-        {
-            if (ModelState.IsValid)
-            {
-
-
-                string userId = User.GetUserId();
-                var matchGamer = _dbContext.MatchGamers.Single(g => g.MatchId == id && g.GamerId == userId);
-                if (matchGamer.IsPlay)
-                {
-                    var match = _dbContext.Matches.Find(id);
-                    var matchQuestions = match.Questions.SplitToIntArray();
-
-                    foreach (var answer in answers)
-                    {
-                        if (matchQuestions.Contains(answer.QuestionId))
-                        {
-                            var correctAnswerId = _dbContext.Questions.Where(q => q.Id == answer.QuestionId)
-                                .Select(q => q.CorrectAnswerId).Single();
-                            _dbContext.MatchAnswers.Add(new MatchAnswer
-                            {
-                                QuestionId = answer.QuestionId,
-                                AnswerId = answer.AnswerId,
-                                CreatedAt = DateTime.Now,
-                                MatchGamerId = matchGamer.Id,
-                                IsCorrectAnswer = correctAnswerId == answer.AnswerId
-                            });
-                        }
-                    }
-
-                    _dbContext.SaveChanges();
-                }
-
-                return Ok();
-            }
-
-            return BadRequest(ModelState);
-        }
-
-
-
-
         /// <summary>
         /// Получить результат матча  
         /// </summary> 
@@ -232,6 +175,9 @@ namespace RobiGroup.AskMeFootball.Controllers
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
                     var matchGamer = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Include(m => m.Gamer).Single(g => g.MatchId == id && g.GamerId == userId);
+
+                    var resultModel = new MatchResultModel();
+
                     if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
                     {
                         var matchOptions = HttpContext.RequestServices.GetService<IOptions<MatchOptions>>();
@@ -239,7 +185,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                         matchGamer.Score = pointsForMacth;
                         matchGamer.IsPlay = false;
 
-                        var gamerCard = _dbContext.GamerCards.SingleOrDefault(gc => gc.CardId == matchGamer.Match.CardId);
+                        var gamerCard = _dbContext.GamerCards.SingleOrDefault(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == userId);
                         if (gamerCard == null)
                         {
                             // Создаем новую карточку для игрока
@@ -259,12 +205,17 @@ namespace RobiGroup.AskMeFootball.Controllers
                         _dbContext.SaveChanges();
 
                         transaction.Commit();
+
+                        resultModel.MatchScore = matchGamer.Score;
+                        resultModel.CardScore = gamerCard.Score;
+                    }
+                    else
+                    {
+                        resultModel.CardScore = _dbContext.GamerCards.Where(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == userId).Select(c => c.Score).FirstOrDefault();
+                        resultModel.MatchScore = matchGamer.Score;
                     }
 
-                    return Ok(new MatchResultModel
-                    {
-                        MatchScore = matchGamer.Score
-                    });
+                    return Ok(resultModel);
                 }
             }
 

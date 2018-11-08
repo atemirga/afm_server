@@ -1,9 +1,9 @@
 ﻿namespace RobiGroup.AskMeFootball.Models.Match
 {
-    public class MatchModel
+    public class MatchSearchResultModel
     {
-        public int Id { get; set; }
-
         public bool Found { get; set; }
+
+        public MatchModel Match { get; set; }
     }
 }

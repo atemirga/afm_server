@@ -1,6 +1,6 @@
 ﻿namespace RobiGroup.AskMeFootball.Models.Account.Profile
 {
-    public class ProfileModel
+    public class UserProfileModel
     {
         public string Username { get; set; }
 
