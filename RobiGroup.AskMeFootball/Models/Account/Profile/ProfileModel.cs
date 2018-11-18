@@ -4,6 +4,8 @@
     {
         public string Username { get; set; }
 
+        public string Nickname { get; set; }
+
         public string Rank { get; set; }
 
         public string PhotoUrl { get; set; }

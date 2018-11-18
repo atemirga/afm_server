@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Cards;
+using RobiGroup.AskMeFootball.Models.Leaderboard;
 
 namespace RobiGroup.AskMeFootball.Controllers
 {
@@ -57,6 +58,30 @@ namespace RobiGroup.AskMeFootball.Controllers
             return Ok(_dbContext.Cards.Find(id));
         }
 
+        /// <summary>
+        /// Leaderboard
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("{id}/leaderboard")]
+        [ProducesResponseType(typeof(List<LeaderboardCardGamerModel>), 200)]
+        public IActionResult GetLeaderboard(int id)
+        {
+           var gamers = (from gc in _dbContext.GamerCards
+                join u in _dbContext.Users on gc.GamerId equals u.Id
+                where gc.CardId == id
+                select new LeaderboardCardGamerModel
+                {
+                    Id = u.Id,
+                    PhotoUrl = u.PhotoUrl,
+                    Nickname = u.NickName,
+                    CardScore = gc.Score,
+                    CurrentScore = u.Score,
+                    TotalScore = u.TotalScore
+                });
+
+            return Ok(gamers);
+        }
 
     }
 }

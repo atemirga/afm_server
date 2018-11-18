@@ -64,6 +64,8 @@ namespace RobiGroup.AskMeFootball.Data
 
         public bool IsPlay { get; set; }
 
+        public bool IsWinner { get; set; }
+
         public ApplicationUser Gamer { get; set; }
 
         public Match Match { get; set; }

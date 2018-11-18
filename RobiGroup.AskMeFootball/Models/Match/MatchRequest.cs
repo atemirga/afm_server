@@ -23,8 +23,24 @@ namespace RobiGroup.AskMeFootball.Models.Match
 
     public class MatchResultModel
     {
+        /// <summary>
+        /// Очки за матч
+        /// </summary>
         public int MatchScore { get; set; }
 
+        /// <summary>
+        /// Итоговые очки на карточке
+        /// </summary>
         public int CardScore { get; set; }
+
+        /// <summary>
+        /// Текущие очки
+        /// </summary>
+        public int CurrentGamerScore { get; set; }
+
+        /// <summary>
+        /// Победитель
+        /// </summary>
+        public bool IsWinner { get; set; }
     }
 }

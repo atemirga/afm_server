@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Account.Profile;
 using RobiGroup.Web.Common.Identity;
+using RobiGroup.Web.Common.Services;
 
 namespace RobiGroup.AskMeFootball.Controllers
 {
@@ -43,6 +45,7 @@ namespace RobiGroup.AskMeFootball.Controllers
             return Ok(new UserProfileModel
             {
                 Username = user.UserName,
+                Nickname = user.NickName,
                 Rank = user.Rank?.Name,
                 Score = user.Score,
                 TotalScore = user.TotalScore,
@@ -50,6 +53,67 @@ namespace RobiGroup.AskMeFootball.Controllers
             });
         }
 
+        /// <summary>
+        /// Изменить имя
+        /// </summary>
+        /// <param name="nickname">Имя</param>
+        /// <returns></returns>
+        [HttpPost("nickname/{nickname}")]
+        [ProducesResponseType(200)]
+        public IActionResult SetNickname([FromRoute]string nickname)
+        {
+            var userId = User.GetUserId();
+            var user = _dbContext.Users.Include(u => u.Rank).Single(u => u.Id == userId);
+            user.NickName = nickname;
+            _dbContext.SaveChanges();
 
+            return Ok();
+        }
+
+        [HttpPost("photo")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> SetPhoto()
+        {
+            var files = HttpContext.Request.Form.Files;
+
+            if (files.Count == 0)
+            {
+                return BadRequest();
+            }
+
+            var userId = User.GetUserId();
+            var user = _dbContext.Users.Find(userId);
+
+            var fileService = HttpContext.RequestServices.GetService<IFileService>();
+            var photoPath = await fileService.Save(files[0], $"data/user/{user.Id}/profile");
+
+            user.PhotoUrl = photoPath;
+            _dbContext.SaveChanges();
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Статистика
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("statistics")]
+        [ProducesResponseType(typeof(UserProfileModel), 200)]
+        public IActionResult GetStatistics()
+        {
+            var userId = User.GetUserId();
+
+            var matches = (from m in _dbContext.Matches
+                           join mg in _dbContext.MatchGamers on m.Id equals mg.MatchId
+                           where mg.GamerId == userId
+                           select mg.IsWinner);
+
+            return Ok(new ProfileStatisticsModel()
+            {
+                Id = userId,
+                Wins = matches.Count(m => m),
+                Losses = matches.Count(m => !m)
+            });
+        }
     }
 }

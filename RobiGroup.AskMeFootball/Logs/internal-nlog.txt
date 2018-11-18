@@ -491,3 +491,554 @@
 2018-11-08 17:02:39.4455 Info Configured from an XML element in C:\Ss\RobiGroup\RobiGroup.AskMeFootball\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
 2018-11-08 17:02:39.4685 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
 2018-11-08 17:02:39.4791 Info Found 59 configuration items
+2018-11-10 11:52:56.9949 Info Message Template Auto Format enabled
+2018-11-10 11:52:57.0101 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-10 11:52:57.2260 Info Adding target File Target[file]
+2018-11-10 11:52:57.2260 Info Adding target Console Target[console]
+2018-11-10 11:52:57.2434 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-10 11:52:57.2674 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-10 11:52:57.2836 Info Found 59 configuration items
+2018-11-10 12:10:03.1353 Info Message Template Auto Format enabled
+2018-11-10 12:10:03.1485 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-10 12:10:03.2358 Info Adding target File Target[file]
+2018-11-10 12:10:03.2358 Info Adding target Console Target[console]
+2018-11-10 12:10:03.2502 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-10 12:10:03.2661 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-10 12:10:03.2790 Info Found 59 configuration items
+2018-11-16 21:31:24.7657 Info Message Template Auto Format enabled
+2018-11-16 21:31:24.7917 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-16 21:31:25.0431 Info Adding target File Target[file]
+2018-11-16 21:31:25.0473 Info Adding target Console Target[console]
+2018-11-16 21:31:25.0596 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-16 21:31:25.0761 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-16 21:31:25.0761 Info Found 59 configuration items
+2018-11-17 14:13:10.0826 Info Message Template Auto Format enabled
+2018-11-17 14:13:10.0974 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:13:10.2678 Info Adding target File Target[file]
+2018-11-17 14:13:10.2678 Info Adding target Console Target[console]
+2018-11-17 14:13:10.2816 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\NLog.config...
+2018-11-17 14:13:10.2966 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:13:10.2966 Info Found 59 configuration items
+2018-11-17 14:13:10.3325 Info Configuration initialized.
+2018-11-17 14:13:10.3521 Info NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.5.11.8645. Product version: 4.5.11.
+2018-11-17 14:13:12.6418 Info Shutting down logging...
+2018-11-17 14:13:12.6709 Info Logger has been shut down.
+2018-11-17 14:14:08.5619 Info Message Template Auto Format enabled
+2018-11-17 14:14:08.5771 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:14:08.6658 Info Adding target File Target[file]
+2018-11-17 14:14:08.6689 Info Adding target Console Target[console]
+2018-11-17 14:14:08.6689 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\NLog.config...
+2018-11-17 14:14:08.6959 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:14:08.7057 Info Found 59 configuration items
+2018-11-17 14:14:08.7311 Info Configuration initialized.
+2018-11-17 14:14:08.7367 Info NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.5.11.8645. Product version: 4.5.11.
+2018-11-17 14:14:09.9774 Info Shutting down logging...
+2018-11-17 14:14:10.0069 Info Logger has been shut down.
+2018-11-17 14:14:42.0021 Info Message Template Auto Format enabled
+2018-11-17 14:14:42.0212 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:14:42.1319 Info Adding target File Target[file]
+2018-11-17 14:14:42.1319 Info Adding target Console Target[console]
+2018-11-17 14:14:42.1501 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:14:42.1699 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:14:42.1882 Info Found 59 configuration items
+2018-11-17 14:20:22.2657 Info Message Template Auto Format enabled
+2018-11-17 14:20:22.2799 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:20:22.3747 Info Adding target File Target[file]
+2018-11-17 14:20:22.3747 Info Adding target Console Target[console]
+2018-11-17 14:20:22.3935 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:20:22.4089 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:20:22.4233 Info Found 59 configuration items
+2018-11-17 14:20:34.7810 Info Message Template Auto Format enabled
+2018-11-17 14:20:34.7810 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:20:34.8782 Info Adding target File Target[file]
+2018-11-17 14:20:34.8782 Info Adding target Console Target[console]
+2018-11-17 14:20:34.8951 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:20:34.9130 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:20:34.9309 Info Found 59 configuration items
+2018-11-17 14:20:40.5568 Info Message Template Auto Format enabled
+2018-11-17 14:20:40.5733 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:20:40.6838 Info Adding target File Target[file]
+2018-11-17 14:20:40.6891 Info Adding target Console Target[console]
+2018-11-17 14:20:40.7022 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:20:40.7215 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:20:40.7348 Info Found 59 configuration items
+2018-11-17 14:21:52.5609 Info Message Template Auto Format enabled
+2018-11-17 14:21:52.5609 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:21:52.6694 Info Adding target File Target[file]
+2018-11-17 14:21:52.6694 Info Adding target Console Target[console]
+2018-11-17 14:21:52.6865 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:21:52.7119 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:21:52.7257 Info Found 59 configuration items
+2018-11-17 14:22:00.7453 Info Message Template Auto Format enabled
+2018-11-17 14:22:00.7596 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:22:00.8509 Info Adding target File Target[file]
+2018-11-17 14:22:00.8509 Info Adding target Console Target[console]
+2018-11-17 14:22:00.8677 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:22:00.8845 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:22:00.8965 Info Found 59 configuration items
+2018-11-17 14:22:13.6093 Info Message Template Auto Format enabled
+2018-11-17 14:22:13.6229 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:22:13.7102 Info Adding target File Target[file]
+2018-11-17 14:22:13.7102 Info Adding target Console Target[console]
+2018-11-17 14:22:13.7242 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:22:13.7518 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:22:13.7642 Info Found 59 configuration items
+2018-11-17 14:22:20.6852 Info Message Template Auto Format enabled
+2018-11-17 14:22:20.6852 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:22:20.7926 Info Adding target File Target[file]
+2018-11-17 14:22:20.7959 Info Adding target Console Target[console]
+2018-11-17 14:22:20.8099 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:22:20.8266 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:22:20.8266 Info Found 59 configuration items
+2018-11-17 14:22:33.2879 Info Message Template Auto Format enabled
+2018-11-17 14:22:33.3006 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:22:33.4076 Info Adding target File Target[file]
+2018-11-17 14:22:33.4076 Info Adding target Console Target[console]
+2018-11-17 14:22:33.4247 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:22:33.4415 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:22:33.4536 Info Found 59 configuration items
+2018-11-17 14:22:42.9396 Info Message Template Auto Format enabled
+2018-11-17 14:22:42.9514 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:22:43.0374 Info Adding target File Target[file]
+2018-11-17 14:22:43.0374 Info Adding target Console Target[console]
+2018-11-17 14:22:43.0519 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:22:50.9406 Info Message Template Auto Format enabled
+2018-11-17 14:22:50.9532 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:22:51.0439 Info Adding target File Target[file]
+2018-11-17 14:22:51.0439 Info Adding target Console Target[console]
+2018-11-17 14:22:51.0608 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:22:51.0771 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:22:51.0771 Info Found 59 configuration items
+2018-11-17 14:23:00.5583 Info Message Template Auto Format enabled
+2018-11-17 14:23:00.5706 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:23:00.6583 Info Adding target File Target[file]
+2018-11-17 14:23:00.6583 Info Adding target Console Target[console]
+2018-11-17 14:23:00.6720 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:23:00.6875 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:23:00.6875 Info Found 59 configuration items
+2018-11-17 14:23:19.5519 Info Message Template Auto Format enabled
+2018-11-17 14:23:19.5680 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:23:19.6691 Info Adding target File Target[file]
+2018-11-17 14:23:19.6691 Info Adding target Console Target[console]
+2018-11-17 14:23:19.6853 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:23:19.7027 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:23:19.7159 Info Found 59 configuration items
+2018-11-17 14:23:28.3502 Info Message Template Auto Format enabled
+2018-11-17 14:23:28.3636 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:23:28.4662 Info Adding target File Target[file]
+2018-11-17 14:23:28.4662 Info Adding target Console Target[console]
+2018-11-17 14:23:28.4828 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:23:28.4996 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:23:28.5122 Info Found 59 configuration items
+2018-11-17 14:23:37.6003 Info Message Template Auto Format enabled
+2018-11-17 14:23:37.6134 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:23:37.7197 Info Adding target File Target[file]
+2018-11-17 14:23:37.7197 Info Adding target Console Target[console]
+2018-11-17 14:23:37.7454 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:23:37.7618 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:23:37.7739 Info Found 59 configuration items
+2018-11-17 14:24:02.7032 Info Message Template Auto Format enabled
+2018-11-17 14:24:02.7159 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:24:02.8015 Info Adding target File Target[file]
+2018-11-17 14:24:02.8015 Info Adding target Console Target[console]
+2018-11-17 14:24:02.8228 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:24:02.8499 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:24:02.8684 Info Found 59 configuration items
+2018-11-17 14:24:08.5924 Info Message Template Auto Format enabled
+2018-11-17 14:24:08.5924 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:24:08.6998 Info Adding target File Target[file]
+2018-11-17 14:24:08.7029 Info Adding target Console Target[console]
+2018-11-17 14:24:08.7029 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:24:08.7334 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:24:08.7334 Info Found 59 configuration items
+2018-11-17 14:25:24.2810 Info Message Template Auto Format enabled
+2018-11-17 14:25:24.2954 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:25:24.3878 Info Adding target File Target[file]
+2018-11-17 14:25:24.3878 Info Adding target Console Target[console]
+2018-11-17 14:25:24.4056 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:25:24.4213 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:25:24.4213 Info Found 59 configuration items
+2018-11-17 14:25:54.5285 Info Message Template Auto Format enabled
+2018-11-17 14:25:54.5285 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:25:54.6264 Info Adding target File Target[file]
+2018-11-17 14:25:54.6264 Info Adding target Console Target[console]
+2018-11-17 14:25:54.6411 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:25:54.6586 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:25:54.6701 Info Found 59 configuration items
+2018-11-17 14:29:07.6080 Info Message Template Auto Format enabled
+2018-11-17 14:29:07.6080 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:29:07.7037 Info Adding target File Target[file]
+2018-11-17 14:29:07.7037 Info Adding target Console Target[console]
+2018-11-17 14:29:07.7185 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:29:07.7346 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:29:07.7514 Info Found 59 configuration items
+2018-11-17 14:30:04.4553 Info Message Template Auto Format enabled
+2018-11-17 14:30:04.4673 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:30:04.5534 Info Adding target File Target[file]
+2018-11-17 14:30:04.5534 Info Adding target Console Target[console]
+2018-11-17 14:30:04.5684 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:30:04.5838 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:30:04.5957 Info Found 59 configuration items
+2018-11-17 14:30:14.5737 Info Message Template Auto Format enabled
+2018-11-17 14:30:14.5874 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:30:14.6750 Info Adding target File Target[file]
+2018-11-17 14:30:14.6750 Info Adding target Console Target[console]
+2018-11-17 14:30:14.6898 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:30:14.7066 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:30:14.7185 Info Found 59 configuration items
+2018-11-17 14:30:22.6035 Info Message Template Auto Format enabled
+2018-11-17 14:30:22.6240 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:30:22.7081 Info Adding target File Target[file]
+2018-11-17 14:30:22.7081 Info Adding target Console Target[console]
+2018-11-17 14:30:22.7222 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:30:22.7376 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:30:22.7491 Info Found 59 configuration items
+2018-11-17 14:30:42.5032 Info Message Template Auto Format enabled
+2018-11-17 14:30:42.5153 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:30:42.6021 Info Adding target File Target[file]
+2018-11-17 14:30:42.6067 Info Adding target Console Target[console]
+2018-11-17 14:30:42.6067 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:30:42.6360 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:30:42.6478 Info Found 59 configuration items
+2018-11-17 14:30:49.5210 Info Message Template Auto Format enabled
+2018-11-17 14:30:49.5331 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:30:49.6156 Info Adding target File Target[file]
+2018-11-17 14:30:49.6156 Info Adding target Console Target[console]
+2018-11-17 14:30:49.6298 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:30:49.6450 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:30:49.6568 Info Found 59 configuration items
+2018-11-17 14:30:58.0354 Info Message Template Auto Format enabled
+2018-11-17 14:30:58.0516 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:30:58.1497 Info Adding target File Target[file]
+2018-11-17 14:30:58.1497 Info Adding target Console Target[console]
+2018-11-17 14:30:58.1637 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:30:58.1790 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:30:58.1909 Info Found 59 configuration items
+2018-11-17 14:31:34.8137 Info Message Template Auto Format enabled
+2018-11-17 14:31:34.8258 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:31:34.9180 Info Adding target File Target[file]
+2018-11-17 14:31:34.9215 Info Adding target Console Target[console]
+2018-11-17 14:31:34.9343 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:31:34.9517 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:31:34.9517 Info Found 59 configuration items
+2018-11-17 14:31:46.8469 Info Message Template Auto Format enabled
+2018-11-17 14:31:46.8592 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:31:46.9504 Info Adding target File Target[file]
+2018-11-17 14:31:46.9504 Info Adding target Console Target[console]
+2018-11-17 14:31:46.9504 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:31:46.9809 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:31:46.9929 Info Found 59 configuration items
+2018-11-17 14:31:55.5962 Info Message Template Auto Format enabled
+2018-11-17 14:31:55.6085 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:31:55.6994 Info Adding target File Target[file]
+2018-11-17 14:31:55.6994 Info Adding target Console Target[console]
+2018-11-17 14:31:55.7176 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:31:55.7330 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:31:55.7330 Info Found 59 configuration items
+2018-11-17 14:32:15.7000 Info Message Template Auto Format enabled
+2018-11-17 14:32:15.7119 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:32:15.7928 Info Adding target File Target[file]
+2018-11-17 14:32:15.7959 Info Adding target Console Target[console]
+2018-11-17 14:32:15.7959 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:32:15.8226 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:32:15.8339 Info Found 59 configuration items
+2018-11-17 14:32:22.3224 Info Message Template Auto Format enabled
+2018-11-17 14:32:22.3350 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:32:22.4368 Info Adding target File Target[file]
+2018-11-17 14:32:22.4368 Info Adding target Console Target[console]
+2018-11-17 14:32:22.4544 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 14:32:22.4719 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:32:22.4847 Info Found 59 configuration items
+2018-11-17 14:33:11.8465 Info Message Template Auto Format enabled
+2018-11-17 14:33:11.8639 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 14:33:11.9879 Info Adding target File Target[file]
+2018-11-17 14:33:11.9879 Info Adding target Console Target[console]
+2018-11-17 14:33:12.0066 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Release\netcoreapp2.1\nlog.config...
+2018-11-17 14:33:12.0295 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 14:33:12.0437 Info Found 59 configuration items
+2018-11-17 15:19:06.1403 Info Message Template Auto Format enabled
+2018-11-17 15:19:06.1586 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 15:19:06.4407 Info Adding target File Target[file]
+2018-11-17 15:19:06.4407 Info Adding target Console Target[console]
+2018-11-17 15:19:06.4665 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Release\netcoreapp2.1\nlog.config...
+2018-11-17 15:19:06.4931 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 15:19:06.5139 Info Found 59 configuration items
+2018-11-17 17:48:28.3921 Info Message Template Auto Format enabled
+2018-11-17 17:48:28.4050 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 17:48:28.4975 Info Adding target File Target[file]
+2018-11-17 17:48:28.4975 Info Adding target Console Target[console]
+2018-11-17 17:48:28.4975 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Release\netcoreapp2.1\nlog.config...
+2018-11-17 17:48:28.5287 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 17:48:28.5287 Info Found 59 configuration items
+2018-11-17 17:48:37.0803 Info Message Template Auto Format enabled
+2018-11-17 17:48:37.0923 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 17:48:37.1762 Info Adding target File Target[file]
+2018-11-17 17:48:37.1762 Info Adding target Console Target[console]
+2018-11-17 17:48:37.1908 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 17:48:37.2067 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 17:48:37.2195 Info Found 59 configuration items
+2018-11-17 18:12:59.2843 Info Message Template Auto Format enabled
+2018-11-17 18:12:59.3004 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:12:59.4070 Info Adding target File Target[file]
+2018-11-17 18:12:59.4070 Info Adding target Console Target[console]
+2018-11-17 18:12:59.4286 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:12:59.4450 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:12:59.4576 Info Found 59 configuration items
+2018-11-17 18:13:47.0533 Info Message Template Auto Format enabled
+2018-11-17 18:13:47.0655 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:13:47.1687 Info Adding target File Target[file]
+2018-11-17 18:13:47.1736 Info Adding target Console Target[console]
+2018-11-17 18:13:47.1890 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:13:47.2064 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:13:47.2195 Info Found 59 configuration items
+2018-11-17 18:13:56.7249 Info Message Template Auto Format enabled
+2018-11-17 18:13:56.7376 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:13:56.8310 Info Adding target File Target[file]
+2018-11-17 18:13:56.8310 Info Adding target Console Target[console]
+2018-11-17 18:13:56.8460 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:13:56.8618 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:13:56.8737 Info Found 59 configuration items
+2018-11-17 18:14:02.9072 Info Message Template Auto Format enabled
+2018-11-17 18:14:02.9205 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:14:03.0092 Info Adding target File Target[file]
+2018-11-17 18:14:03.0138 Info Adding target Console Target[console]
+2018-11-17 18:14:03.0138 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:14:03.0423 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:14:03.0549 Info Found 59 configuration items
+2018-11-17 18:14:11.8929 Info Message Template Auto Format enabled
+2018-11-17 18:14:11.9115 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:14:12.0688 Info Adding target File Target[file]
+2018-11-17 18:14:12.0688 Info Adding target Console Target[console]
+2018-11-17 18:14:12.0899 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:14:12.1093 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:14:12.1223 Info Found 59 configuration items
+2018-11-17 18:16:09.9819 Info Message Template Auto Format enabled
+2018-11-17 18:16:09.9819 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:16:10.0920 Info Adding target File Target[file]
+2018-11-17 18:16:10.0920 Info Adding target Console Target[console]
+2018-11-17 18:16:10.1091 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:16:10.1272 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:16:10.1428 Info Found 59 configuration items
+2018-11-17 18:16:59.2497 Info Message Template Auto Format enabled
+2018-11-17 18:16:59.2497 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:16:59.3484 Info Adding target File Target[file]
+2018-11-17 18:16:59.3484 Info Adding target Console Target[console]
+2018-11-17 18:16:59.3652 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:16:59.3817 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:16:59.3972 Info Found 59 configuration items
+2018-11-17 18:17:05.9852 Info Message Template Auto Format enabled
+2018-11-17 18:17:06.0046 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:17:06.1104 Info Adding target File Target[file]
+2018-11-17 18:17:06.1104 Info Adding target Console Target[console]
+2018-11-17 18:17:06.1255 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:17:06.1411 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:17:06.1411 Info Found 59 configuration items
+2018-11-17 18:18:14.1421 Info Message Template Auto Format enabled
+2018-11-17 18:18:14.1551 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:18:14.2474 Info Adding target File Target[file]
+2018-11-17 18:18:14.2474 Info Adding target Console Target[console]
+2018-11-17 18:18:14.2627 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:18:14.2786 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:18:14.2786 Info Found 59 configuration items
+2018-11-17 18:18:24.7143 Info Message Template Auto Format enabled
+2018-11-17 18:18:24.7268 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:18:24.8360 Info Adding target File Target[file]
+2018-11-17 18:18:24.8360 Info Adding target Console Target[console]
+2018-11-17 18:18:24.8537 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:18:24.8732 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:18:24.8732 Info Found 59 configuration items
+2018-11-17 18:18:30.7472 Info Message Template Auto Format enabled
+2018-11-17 18:18:30.7472 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:18:30.8660 Info Adding target File Target[file]
+2018-11-17 18:18:30.8660 Info Adding target Console Target[console]
+2018-11-17 18:18:30.8829 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:18:30.9015 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:18:30.9178 Info Found 59 configuration items
+2018-11-17 18:18:57.5047 Info Message Template Auto Format enabled
+2018-11-17 18:18:57.5167 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:18:57.6040 Info Adding target File Target[file]
+2018-11-17 18:18:57.6074 Info Adding target Console Target[console]
+2018-11-17 18:18:57.6074 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:18:57.6373 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:18:57.6373 Info Found 59 configuration items
+2018-11-17 18:19:55.5254 Info Configuration file change detected! Reloading in 1000ms...
+2018-11-17 18:19:55.5254 Info Configuration file change detected! Reloading in 1000ms...
+2018-11-17 18:19:55.5254 Info Configuration file change detected! Reloading in 1000ms...
+2018-11-17 18:19:56.5356 Info Reloading configuration...
+2018-11-17 18:19:56.5537 Info Message Template Auto Format enabled
+2018-11-17 18:19:56.5596 Info Found 59 configuration items
+2018-11-17 18:19:56.5596 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:19:56.5755 Info Adding target File Target[file]
+2018-11-17 18:19:56.5755 Info Adding target Console Target[console]
+2018-11-17 18:19:56.5755 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:19:56.5755 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:19:56.5755 Info Closing old configuration.
+2018-11-17 18:19:56.6238 Info Found 59 configuration items
+2018-11-17 18:20:14.2587 Info Message Template Auto Format enabled
+2018-11-17 18:20:14.2708 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:20:14.3572 Info Adding target File Target[file]
+2018-11-17 18:20:14.3572 Info Adding target Console Target[console]
+2018-11-17 18:20:14.3728 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:20:14.3882 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:20:14.3882 Info Found 59 configuration items
+2018-11-17 18:20:43.7200 Info Message Template Auto Format enabled
+2018-11-17 18:20:43.7327 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:20:43.8320 Info Adding target File Target[file]
+2018-11-17 18:20:43.8320 Info Adding target Console Target[console]
+2018-11-17 18:20:43.8479 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:20:43.8637 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:20:43.8754 Info Found 59 configuration items
+2018-11-17 18:25:26.8893 Info Message Template Auto Format enabled
+2018-11-17 18:25:26.8893 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:25:26.9970 Info Adding target File Target[file]
+2018-11-17 18:25:26.9970 Info Adding target Console Target[console]
+2018-11-17 18:25:26.9970 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:25:27.0320 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:25:27.0442 Info Found 59 configuration items
+2018-11-17 18:25:39.6693 Info Message Template Auto Format enabled
+2018-11-17 18:25:39.6693 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:25:39.7682 Info Adding target File Target[file]
+2018-11-17 18:25:39.7682 Info Adding target Console Target[console]
+2018-11-17 18:25:39.7869 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:25:39.8051 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:25:39.8190 Info Found 59 configuration items
+2018-11-17 18:25:51.1570 Info Message Template Auto Format enabled
+2018-11-17 18:25:51.1696 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 18:25:51.2602 Info Adding target File Target[file]
+2018-11-17 18:25:51.2632 Info Adding target Console Target[console]
+2018-11-17 18:25:51.2632 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 18:25:51.2941 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 18:25:51.2941 Info Found 59 configuration items
+2018-11-17 22:32:14.9779 Info Message Template Auto Format enabled
+2018-11-17 22:32:14.9976 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:32:15.2217 Info Adding target File Target[file]
+2018-11-17 22:32:15.2217 Info Adding target Console Target[console]
+2018-11-17 22:32:15.2385 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:32:15.2564 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:32:15.2705 Info Found 59 configuration items
+2018-11-17 22:33:43.5846 Info Message Template Auto Format enabled
+2018-11-17 22:33:43.5984 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:33:43.7095 Info Adding target File Target[file]
+2018-11-17 22:33:43.7095 Info Adding target Console Target[console]
+2018-11-17 22:33:43.7259 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:33:43.7454 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:33:43.7586 Info Found 59 configuration items
+2018-11-17 22:33:59.7964 Info Message Template Auto Format enabled
+2018-11-17 22:33:59.8117 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:33:59.9291 Info Adding target File Target[file]
+2018-11-17 22:33:59.9291 Info Adding target Console Target[console]
+2018-11-17 22:33:59.9484 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:33:59.9651 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:33:59.9651 Info Found 59 configuration items
+2018-11-17 22:34:06.4067 Info Message Template Auto Format enabled
+2018-11-17 22:34:06.4192 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:34:06.5219 Info Adding target File Target[file]
+2018-11-17 22:34:06.5219 Info Adding target Console Target[console]
+2018-11-17 22:34:06.5407 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:34:06.5573 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:34:06.5696 Info Found 59 configuration items
+2018-11-17 22:34:49.7705 Info Message Template Auto Format enabled
+2018-11-17 22:34:49.7867 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:34:49.8834 Info Adding target File Target[file]
+2018-11-17 22:34:49.8834 Info Adding target Console Target[console]
+2018-11-17 22:34:49.8988 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:34:49.9184 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:34:49.9184 Info Found 59 configuration items
+2018-11-17 22:35:14.3901 Info Message Template Auto Format enabled
+2018-11-17 22:35:14.4030 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:35:14.5011 Info Adding target File Target[file]
+2018-11-17 22:35:14.5011 Info Adding target Console Target[console]
+2018-11-17 22:35:14.5186 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:35:14.5507 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:35:14.6040 Info Found 59 configuration items
+2018-11-17 22:35:32.9755 Info Message Template Auto Format enabled
+2018-11-17 22:35:32.9984 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:35:33.1411 Info Adding target File Target[file]
+2018-11-17 22:35:33.1411 Info Adding target Console Target[console]
+2018-11-17 22:35:33.1648 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Release\netcoreapp2.1\nlog.config...
+2018-11-17 22:35:33.1893 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:35:33.2069 Info Found 59 configuration items
+2018-11-17 22:43:05.0679 Info Message Template Auto Format enabled
+2018-11-17 22:43:05.0862 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:43:05.2108 Info Adding target File Target[file]
+2018-11-17 22:43:05.2108 Info Adding target Console Target[console]
+2018-11-17 22:43:05.2278 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:43:05.2461 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:43:05.2461 Info Found 59 configuration items
+2018-11-17 22:44:29.0514 Info Message Template Auto Format enabled
+2018-11-17 22:44:29.0661 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:44:29.1800 Info Adding target File Target[file]
+2018-11-17 22:44:29.1800 Info Adding target Console Target[console]
+2018-11-17 22:44:29.1972 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:44:29.2146 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:44:29.2146 Info Found 59 configuration items
+2018-11-17 22:44:44.1004 Info Message Template Auto Format enabled
+2018-11-17 22:44:44.1196 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:44:44.2654 Info Adding target File Target[file]
+2018-11-17 22:44:44.2654 Info Adding target Console Target[console]
+2018-11-17 22:44:44.2895 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:44:44.3172 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:44:44.3394 Info Found 59 configuration items
+2018-11-17 22:44:51.0806 Info Message Template Auto Format enabled
+2018-11-17 22:44:51.0961 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:44:51.2195 Info Adding target File Target[file]
+2018-11-17 22:44:51.2195 Info Adding target Console Target[console]
+2018-11-17 22:44:51.2356 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:44:51.2526 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:44:51.2715 Info Found 59 configuration items
+2018-11-17 22:45:23.6544 Info Message Template Auto Format enabled
+2018-11-17 22:45:23.6544 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:45:23.7592 Info Adding target File Target[file]
+2018-11-17 22:45:23.7592 Info Adding target Console Target[console]
+2018-11-17 22:45:23.7741 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:45:23.7922 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:45:23.8046 Info Found 59 configuration items
+2018-11-17 22:45:37.4864 Info Message Template Auto Format enabled
+2018-11-17 22:45:37.5005 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:45:37.6162 Info Adding target File Target[file]
+2018-11-17 22:45:37.6162 Info Adding target Console Target[console]
+2018-11-17 22:45:37.6372 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:45:37.6576 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:45:37.6752 Info Found 59 configuration items
+2018-11-17 22:46:09.8238 Info Message Template Auto Format enabled
+2018-11-17 22:46:09.8367 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:46:09.9339 Info Adding target File Target[file]
+2018-11-17 22:46:09.9339 Info Adding target Console Target[console]
+2018-11-17 22:46:09.9495 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Release\netcoreapp2.1\nlog.config...
+2018-11-17 22:46:09.9666 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:46:09.9806 Info Found 59 configuration items
+2018-11-17 22:56:07.2698 Info Message Template Auto Format enabled
+2018-11-17 22:56:07.2840 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:56:07.3786 Info Adding target File Target[file]
+2018-11-17 22:56:07.3786 Info Adding target Console Target[console]
+2018-11-17 22:56:07.3945 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:56:07.4149 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:56:07.4315 Info Found 59 configuration items
+2018-11-17 22:58:08.5488 Info Message Template Auto Format enabled
+2018-11-17 22:58:08.5618 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:58:08.6699 Info Adding target File Target[file]
+2018-11-17 22:58:08.6699 Info Adding target Console Target[console]
+2018-11-17 22:58:08.6890 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:58:08.7064 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:58:08.7216 Info Found 59 configuration items
+2018-11-17 22:58:17.9459 Info Message Template Auto Format enabled
+2018-11-17 22:58:17.9627 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:58:18.0658 Info Adding target File Target[file]
+2018-11-17 22:58:18.0658 Info Adding target Console Target[console]
+2018-11-17 22:58:18.0846 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:58:18.1013 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:58:18.1151 Info Found 59 configuration items
+2018-11-17 22:58:28.9711 Info Message Template Auto Format enabled
+2018-11-17 22:58:28.9862 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:58:29.0974 Info Adding target File Target[file]
+2018-11-17 22:58:29.0974 Info Adding target Console Target[console]
+2018-11-17 22:58:29.1153 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:58:29.1323 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:58:29.1482 Info Found 59 configuration items
+2018-11-17 22:58:39.4509 Info Message Template Auto Format enabled
+2018-11-17 22:58:39.4509 Info Loading assembly: NLog.Web.AspNetCore
+2018-11-17 22:58:39.5523 Info Adding target File Target[file]
+2018-11-17 22:58:39.5523 Info Adding target Console Target[console]
+2018-11-17 22:58:39.5669 Info Configured from an XML element in C:\Sources\robi-group\ask-me-football\RobiGroup.AskMeFootball\bin\Debug\netcoreapp2.1\nlog.config...
+2018-11-17 22:58:39.5842 Warn Unused target detected. Add a rule for this target to the configuration. TargetName: console
+2018-11-17 22:58:39.5974 Info Found 59 configuration items

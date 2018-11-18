@@ -2,8 +2,10 @@
 {
     public class MatchOptions
     {
-        public int ScoreForWinner { get; set; }
+        public int CorrectAnswerScore { get; set; }
 
-        public int ScoreForLoser { get; set; }
+        public int IncorrectAnswerScore { get; set; }
+
+        public int BonusForAnswer { get; set; }
     }
 }

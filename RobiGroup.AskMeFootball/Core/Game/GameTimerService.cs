@@ -16,15 +16,15 @@ namespace RobiGroup.AskMeFootball.Core.Game
 {
     internal class GameTimerService : IHostedService, IDisposable
     {
-        private readonly IServiceProvider _services;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger _logger;
         private Timer _timer;
 
         private DateTime _gamersDailyScoresLastResetTime = DateTime.MinValue;
 
-        public GameTimerService(IServiceProvider services, ILogger<GameTimerService> logger)
+        public GameTimerService(IServiceScopeFactory scopeFactory, ILogger<GameTimerService> logger)
         {
-            _services = services;
+            _scopeFactory = scopeFactory;
             _logger = logger;
         }
 
@@ -41,20 +41,29 @@ namespace RobiGroup.AskMeFootball.Core.Game
         private void DoWork(object state)
         {
             _logger.LogInformation("Timed Game Service is working.");
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    ResetCardGamers(scope.ServiceProvider);
 
-            ResetCardGamers();
-
-            ResetGamerDailyScores().Wait();
+                    ResetGamerDailyScores(scope.ServiceProvider).Wait();
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "ERROR");
+            }
         }
 
-        private async Task ResetGamerDailyScores()
+        private async Task ResetGamerDailyScores(IServiceProvider services)
         {
             if (_gamersDailyScoresLastResetTime.Date < DateTime.Today)
             {
-                var gamerOptions = _services.GetService<IOptions<GamerOptions>>();
+                var gamerOptions = services.GetService<IOptions<GamerOptions>>();
                 _gamersDailyScoresLastResetTime = DateTime.Now;
 
-                var userManager = _services.GetService<UserManager<ApplicationUser>>();
+                var userManager = services.GetService<UserManager<ApplicationUser>>();
                 foreach (var gamer in await userManager.GetUsersInRoleAsync(ApplicationRoles.Gamer))
                 {
                     gamer.Score = gamerOptions.Value.DailyPoints;
@@ -63,38 +72,38 @@ namespace RobiGroup.AskMeFootball.Core.Game
             }
         }
 
-        private void ResetCardGamers()
+        private void ResetCardGamers(IServiceProvider services)
         {
-            var dbContext = _services.GetService<ApplicationDbContext>();
-
-            var cards = dbContext.Cards.Include(c => c.Type).Where(c => c.ResetTime > DateTime.Now).ToList();
-
-            foreach (var card in cards)
+            try
             {
-                using (var tran = dbContext.Database.BeginTransaction())
+                var dbContext = services.GetService<ApplicationDbContext>();
+
+                var cards = dbContext.Cards.Include(c => c.Type).Where(c => c.ResetTime > DateTime.Now).ToList();
+
+                foreach (var card in cards)
                 {
-                    try
+                    using (var tran = dbContext.Database.BeginTransaction())
                     {
-                        if (card.Type.Name == CardTypes.Daily.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod);
-                        else if (card.Type.Name == CardTypes.Weekly.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod * 7);
-                        else if (card.Type.Name == CardTypes.Monthly.ToString()) card.ResetTime = card.ResetTime.AddMonths(card.ResetPeriod);
-                        else throw new Exception($"Unknown CardType {card.Type.Name}");
+                            if (card.Type.Name == CardTypes.Daily.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod);
+                            else if (card.Type.Name == CardTypes.Weekly.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod * 7);
+                            else if (card.Type.Name == CardTypes.Monthly.ToString()) card.ResetTime = card.ResetTime.AddMonths(card.ResetPeriod);
+                            else throw new Exception($"Unknown CardType {card.Type.Name}");
 
-                        foreach (var gamerCard in dbContext.GamerCards.Include(c => c.Gamer).Where(g => g.CardId == card.Id))
-                        {
-                            gamerCard.Gamer.TotalScore += gamerCard.Score; // Добавляем текушие очки игрока к итоговому
-                            gamerCard.Score = 0; // Обнуляем очки игрока в карточке
-                        }
+                            foreach (var gamerCard in dbContext.GamerCards.Include(c => c.Gamer).Where(g => g.CardId == card.Id))
+                            {
+                                gamerCard.Gamer.TotalScore += gamerCard.Score; // Добавляем текушие очки игрока к итоговому
+                                gamerCard.Score = 0; // Обнуляем очки игрока в карточке
+                            }
 
-                        dbContext.SaveChanges();
+                            dbContext.SaveChanges();
 
-                        tran.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(e, "Reset card: {0}", card.Id);
+                            tran.Commit();
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "ERROR");
             }
         }
 
