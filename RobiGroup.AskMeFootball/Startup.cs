@@ -239,12 +239,7 @@ namespace RobiGroup.AskMeFootball
             {
                 var hostingEnvironment = serviceProvider.GetService<IHostingEnvironment>();
 
-                c.IndexStream = () =>
-                {
-                    return new FileStream(
-                            $"{hostingEnvironment.WebRootPath}/Swagger.index.html",
-                            FileMode.Open);
-                };
+                c.IndexStream = () => new FileStream($"{hostingEnvironment.WebRootPath}/Swagger.index.html", FileMode.Open);
 
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AskMeFootball API");
                 c.RoutePrefix = "swagger";
