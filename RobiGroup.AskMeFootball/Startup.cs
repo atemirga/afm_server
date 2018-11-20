@@ -70,13 +70,13 @@ namespace RobiGroup.AskMeFootball
                     Configuration.GetConnectionString("DefaultConnection")));
 
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            services.AddDefaultIdentity<ApplicationUser>(options =>
             {
                 //config.SignIn.RequireConfirmedPhoneNumber = true;
 
                 // Password settings
                 options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
+                options.Password.RequiredLength = 7;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
@@ -87,11 +87,11 @@ namespace RobiGroup.AskMeFootball
                 // User settings
                 options.User.RequireUniqueEmail = false;
                 options.SignIn.RequireConfirmedEmail = false;
-
             })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders()
-                .AddPhoneNumber4DigitTokenProvider();
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders()
+            .AddPhoneNumber4DigitTokenProvider();
 
             services.AddScoped<IFileService, HostingFileService>();
             services.AddScoped<IAuthService<ApplicationUser>, AuthService<ApplicationUser>>();
@@ -100,11 +100,16 @@ namespace RobiGroup.AskMeFootball
 
             services.AddSingleton<IMatchManager, MatchManager>();
 
+            services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, AmfClaimsPrincipalFactory>();
+
             services.AddHostedService<GameTimerService>();
 
             var providerOptions = services.BuildServiceProvider().GetService<IOptions<TokenProviderOptions>>();
             services.AddAuthentication()
-                .AddCookie()
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Identity/Account/Login";
+                })
                 .AddJwtBearer(x =>
                 {
                     x.Audience = providerOptions.Value.Audience;
@@ -231,6 +236,9 @@ namespace RobiGroup.AskMeFootball
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
+                    name: "areas",
+                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
@@ -256,6 +264,27 @@ namespace RobiGroup.AskMeFootball
             var dbContext = serviceProvider.GetService<ApplicationDbContext>();
 
             dbContext.Database.Migrate();
+
+            if (userManager.FindByNameAsync("admin").Result == null)
+            {
+                var user = new ApplicationUser();
+                user.UserName = "admin";
+                user.Email = "admin@amf.com";
+                user.PhoneNumber = "77011234567";
+                user.FirstName = "";
+                user.LastName = "Админисратор";
+
+                var resultTask = userManager.CreateAsync
+                    (user, "Admin!2");
+                resultTask.Wait();
+
+                IdentityResult result = resultTask.Result;
+
+                if (result.Succeeded)
+                {
+                    userManager.AddToRoleAsync(user, ApplicationRoles.Admin).Wait();
+                }
+            }
 
             if (!dbContext.Cards.Any())
             {

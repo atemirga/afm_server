@@ -52,6 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Identity\Services\" />
     <Folder Include="Common\Handlers\" />
     <Folder Include="Services\" />
   </ItemGroup>
