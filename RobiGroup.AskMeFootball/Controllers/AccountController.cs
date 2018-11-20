@@ -155,7 +155,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                 {
                     user = new ApplicationUser
                     {
-                        UserName = "player" + (_dbContext.Users.Count() + 1),
+                        NickName = "player" + (_dbContext.Users.Count() + 1),
+                        UserName = model.Phone,
                         PhoneNumber = model.Phone
                     };
                     var result = await _userManager.CreateAsync(user);

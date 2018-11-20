@@ -148,7 +148,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                         _dbContext.SaveChanges();
 
-                        return Ok(new MatchQuestionAnswerResponse{ IsCorrect = isCorrectAnswer });
+                        return Ok(new MatchQuestionAnswerResponse { IsCorrect = isCorrectAnswer, });
                     }    
                 }
 
@@ -171,49 +171,84 @@ namespace RobiGroup.AskMeFootball.Controllers
             if (ModelState.IsValid)
             {
                 string userId = User.GetUserId();
+                var matchOptions = HttpContext.RequestServices.GetService<IOptions<MatchOptions>>();
+
+                MatchGamer currentMatchGamer = null;
 
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
-                    var matchGamer = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Include(m => m.Gamer).Single(g => g.MatchId == id && g.GamerId == userId);
+                    var match = _dbContext.Matches.Find(id);
+                    var matchGamers = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Include(m => m.Gamer).Where(g => g.MatchId == id);
 
                     var resultModel = new MatchResultModel();
 
-                    if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
-                    {
-                        var matchOptions = HttpContext.RequestServices.GetService<IOptions<MatchOptions>>();
-                        var pointsForMacth = matchGamer.Answers.Sum(m => (m.IsCorrectAnswer ? matchOptions.Value.ScoreForWinner : matchOptions.Value.ScoreForLoser));
-                        matchGamer.Score = pointsForMacth;
-                        matchGamer.IsPlay = false;
+                    int winnerScore = 0;
 
-                        var gamerCard = _dbContext.GamerCards.SingleOrDefault(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == userId);
-                        if (gamerCard == null)
+                    var matchGamerBonuses = new List<Tuple<MatchGamer, GamerCard, int>>();
+
+                    foreach (var matchGamer in matchGamers)
+                    {
+                        if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
                         {
-                            // Создаем новую карточку для игрока
-                            gamerCard = new GamerCard
+                            var questionsCount = match.Questions.SplitToIntArray().Length;
+                            var answersCount = matchGamer.Answers.Count();
+                            var correctAnswersCount = matchGamer.Answers.Count(a => a.IsCorrectAnswer);
+                            var incorrectAnswersCount = questionsCount - correctAnswersCount;
+
+                            var pointsForMacth = correctAnswersCount * matchOptions.Value.CorrectAnswerScore - incorrectAnswersCount * matchOptions.Value.IncorrectAnswerScore;
+                            matchGamer.Score = pointsForMacth;
+                            matchGamer.IsPlay = false;
+
+                            var gamerCard = _dbContext.GamerCards.SingleOrDefault(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == matchGamer.GamerId);
+                            if (gamerCard == null)
                             {
-                                CardId = matchGamer.Match.CardId,
-                                GamerId = matchGamer.GamerId,
-                                StartTime = DateTime.Now,
-                            };
-                            _dbContext.GamerCards.Add(gamerCard);
+                                // Создаем новую карточку для игрока
+                                gamerCard = new GamerCard
+                                {
+                                    CardId = matchGamer.Match.CardId,
+                                    GamerId = matchGamer.GamerId,
+                                    StartTime = DateTime.Now,
+                                };
+                                _dbContext.GamerCards.Add(gamerCard);
+                            }
+
+                            matchGamerBonuses.Add(new Tuple<MatchGamer, GamerCard, int>(matchGamer, gamerCard, answersCount * matchOptions.Value.BonusForAnswer));
+
+                            gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
+                            matchGamer.Gamer.Score -= Math.Abs(matchGamer.Score); // Отнимаем из текущих очков у игрока
+
+                            if (matchGamer.Score > winnerScore)
+                            {
+                                winnerScore = matchGamer.Score;
+                            }
                         }
 
-                        gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
-
-                        matchGamer.Gamer.Score -= Math.Abs(matchGamer.Score); // Отнимаем из текущих очков у игрока
-
-                        _dbContext.SaveChanges();
-
-                        transaction.Commit();
-
-                        resultModel.MatchScore = matchGamer.Score;
-                        resultModel.CardScore = gamerCard.Score;
+                        if (matchGamer.GamerId == userId)
+                        {
+                            currentMatchGamer = matchGamer;
+                        }
                     }
-                    else
+
+                    foreach (var gamerBonus in matchGamerBonuses)
                     {
-                        resultModel.CardScore = _dbContext.GamerCards.Where(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == userId).Select(c => c.Score).FirstOrDefault();
-                        resultModel.MatchScore = matchGamer.Score;
+                        if (gamerBonus.Item1.Score == winnerScore)
+                        {
+                            gamerBonus.Item1.IsWinner = true;
+                        }
+
+                        int bonus = gamerBonus.Item1.IsWinner ? +gamerBonus.Item3 : -gamerBonus.Item3;
+                        gamerBonus.Item1.Score += bonus;
+                        gamerBonus.Item2.Score -= bonus;
                     }
+
+                    _dbContext.SaveChanges();
+
+                    transaction.Commit();
+
+                    resultModel.CardScore = _dbContext.GamerCards.Where(gc => gc.CardId == currentMatchGamer.Match.CardId && gc.GamerId == userId).Select(c => c.Score).FirstOrDefault();
+                    resultModel.MatchScore = currentMatchGamer.Score;
+                    resultModel.IsWinner = currentMatchGamer.IsWinner;
+                    resultModel.CurrentGamerScore = currentMatchGamer.Gamer.Score;
 
                     return Ok(resultModel);
                 }

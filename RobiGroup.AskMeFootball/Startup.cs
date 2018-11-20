@@ -56,6 +56,7 @@ namespace RobiGroup.AskMeFootball
             services.Configure<DefaultsOptions>(Configuration.GetSection("Defaults"));
             services.Configure<MobizonOptions>(Configuration.GetSection("Mobizon"));
             services.Configure<MatchOptions>(Configuration.GetSection("MatchOptions"));
+            services.Configure<GamerOptions>(Configuration.GetSection("GamerOptions"));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -92,6 +93,7 @@ namespace RobiGroup.AskMeFootball
                 .AddDefaultTokenProviders()
                 .AddPhoneNumber4DigitTokenProvider();
 
+            services.AddScoped<IFileService, HostingFileService>();
             services.AddScoped<IAuthService<ApplicationUser>, AuthService<ApplicationUser>>();
             services.AddTransient<ISmsSender, MobizonSmsSender>();
             services.AddSingleton<IStringLocalizerFactory, ApplicationStringLocalizerFactory<Resources>>();
@@ -102,6 +104,7 @@ namespace RobiGroup.AskMeFootball
 
             var providerOptions = services.BuildServiceProvider().GetService<IOptions<TokenProviderOptions>>();
             services.AddAuthentication()
+                .AddCookie()
                 .AddJwtBearer(x =>
                 {
                     x.Audience = providerOptions.Value.Audience;
