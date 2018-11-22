@@ -38,7 +38,7 @@ namespace RobiGroup.AskMeFootball.Core.Identity
             //if (await UserManager.IsInRoleAsync(user, UTutorRoles.Teacher))
             //{
             //    var teacher = _context.Teachers.Find(user.Id);
-            //    identity.AddClaim(new Claim(ToihanaClaimTypes.TeacherLocked, teacher.IsLocked.ToString()));
+            //    identity.AddClaim(new Claim(AskMeFootballClaimTypes.TeacherLocked, teacher.IsLocked.ToString()));
             //}
 
             return principal;

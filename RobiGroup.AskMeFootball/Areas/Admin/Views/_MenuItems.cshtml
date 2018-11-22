@@ -1,0 +1,10 @@
+﻿@using RobiGroup.AskMeFootball.Core.Identity
+
+@if (User.IsInRole(ApplicationRoles.Admin))
+{
+    <li>
+        <a asp-action="Index" asp-controller="Cards" asp-area="Admin">
+            <i class="fa fa-home"></i> <span>Карты</span>
+        </a>
+    </li>
+}

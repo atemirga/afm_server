@@ -20,6 +20,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
         private readonly ILogger _logger;
         private Timer _timer;
 
+        private object _locker = new object();
+
         private DateTime _gamersDailyScoresLastResetTime = DateTime.MinValue;
 
         public GameTimerService(IServiceScopeFactory scopeFactory, ILogger<GameTimerService> logger)
@@ -76,17 +78,19 @@ namespace RobiGroup.AskMeFootball.Core.Game
         {
             try
             {
-                var dbContext = services.GetService<ApplicationDbContext>();
-
-                var cards = dbContext.Cards.Include(c => c.Type).Where(c => c.ResetTime > DateTime.Now).ToList();
-
-                foreach (var card in cards)
+                lock (_locker)
                 {
-                    using (var tran = dbContext.Database.BeginTransaction())
+                    var dbContext = services.GetService<ApplicationDbContext>();
+
+                    var cards = dbContext.Cards.Include(c => c.Type).Where(c => c.ResetTime < DateTime.Now).ToList();
+
+                    foreach (var card in cards)
                     {
-                            if (card.Type.Name == CardTypes.Daily.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod);
-                            else if (card.Type.Name == CardTypes.Weekly.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod * 7);
-                            else if (card.Type.Name == CardTypes.Monthly.ToString()) card.ResetTime = card.ResetTime.AddMonths(card.ResetPeriod);
+                        using (var tran = dbContext.Database.BeginTransaction())
+                        {
+                            if (card.Type.Code == CardTypes.Daily.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod);
+                            else if (card.Type.Code == CardTypes.Weekly.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod * 7);
+                            else if (card.Type.Code == CardTypes.Monthly.ToString()) card.ResetTime = card.ResetTime.AddMonths(card.ResetPeriod);
                             else throw new Exception($"Unknown CardType {card.Type.Name}");
 
                             foreach (var gamerCard in dbContext.GamerCards.Include(c => c.Gamer).Where(g => g.CardId == card.Id))
@@ -98,6 +102,9 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             dbContext.SaveChanges();
 
                             tran.Commit();
+
+                            _logger.LogInformation($"Reset {card.Id} success.");
+                        }
                     }
                 }
             }

@@ -24,6 +24,8 @@ namespace RobiGroup.AskMeFootball.Models.Cards
             }
         }
 
+        public DateTime ServerTime => DateTime.Now;
+
         public TimeSpan RemainingTime { get; set; }
     }
 }

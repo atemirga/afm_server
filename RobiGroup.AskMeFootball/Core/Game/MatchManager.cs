@@ -21,35 +21,40 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
         public async Task<MatchSearchResultModel> SearchMatch(string gamerId, int cardId)
         {
-            var enemy = _gamersHandler.WebSocketConnectionManager.Connections.Values.Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId).OrderByDescending(c => c.ConnectedTime).FirstOrDefault();
             var model = new MatchSearchResultModel();
 
-            if (enemy != null)
+            var card = _dbContext.Cards.Find(cardId);
+            if ((card.ResetTime - DateTime.Now) > TimeSpan.FromMinutes(10))
             {
-                var match = new Match()
+                var enemy = _gamersHandler.WebSocketConnectionManager.Connections.Values.Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId).OrderByDescending(c => c.ConnectedTime).FirstOrDefault();
+                if (enemy != null)
                 {
-                    CardId = cardId,
-                    CreateTime = DateTime.Now,
-                };
-                _dbContext.Matches.Add(match);
-                _dbContext.SaveChanges();
-                
-                _dbContext.MatchGamers.Add(new MatchGamer
-                {
-                    MatchId = match.Id,
-                    GamerId = gamerId
-                });
-                _dbContext.MatchGamers.Add(new MatchGamer
-                {
-                    MatchId = match.Id,
-                    GamerId = enemy.UserId
-                });
-                _dbContext.SaveChanges();
+                    var match = new Match()
+                    {
+                        CardId = cardId,
+                        CreateTime = DateTime.Now,
+                    };
+                    _dbContext.Matches.Add(match);
+                    _dbContext.SaveChanges();
 
-                await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest", new MatchModel(match.Id, _dbContext.Users.Find(gamerId)));
+                    _dbContext.MatchGamers.Add(new MatchGamer
+                    {
+                        MatchId = match.Id,
+                        GamerId = gamerId
+                    });
+                    _dbContext.MatchGamers.Add(new MatchGamer
+                    {
+                        MatchId = match.Id,
+                        GamerId = enemy.UserId
+                    });
+                    _dbContext.SaveChanges();
 
-                model.Match = new MatchModel(match.Id, _dbContext.Users.Find(enemy.UserId));
-                model.Found = true;
+                    await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest",
+                        new MatchModel(match.Id, _dbContext.Users.Find(gamerId)));
+
+                    model.Match = new MatchModel(match.Id, _dbContext.Users.Find(enemy.UserId));
+                    model.Found = true;
+                }
             }
 
             return model;

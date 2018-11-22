@@ -1,0 +1,21 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using RobiGroup.AskMeFootball.Areas.Identity.Pages.Account.Manage
+@using RobiGroup.AskMeFootball.Data
+@using RobiGroup.Web.Common
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+<li class="treeview @Url.PageNavTreeClass("/Identity/Account/Manage")">
+    <a href="#">
+        <i class="fa fa-cog"></i>
+        <span>Настройки</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+    <ul class="treeview-menu">
+        <li class="@ManageNavPages.IndexNavClass(ViewContext)"><a asp-area="Identity" asp-page="/Account/Manage/Index"><i class="fa fa-user"></i> Профиль</a></li>
+        <li class="@ManageNavPages.ChangePasswordNavClass(ViewContext)"><a asp-area="Identity" asp-page="/Account/Manage/ChangePassword"><i class="fa fa-user-secret"></i> Изменить пароль</a></li>
+    </ul>
+</li>

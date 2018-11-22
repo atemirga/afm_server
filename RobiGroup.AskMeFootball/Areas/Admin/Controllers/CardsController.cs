@@ -10,7 +10,7 @@ using RobiGroup.AskMeFootball.Core.Identity;
 namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = ApplicationRoles.Admin)]
+    [Authorize(Roles = ApplicationRoles.Admin)]
     public class CardsController : Controller
     {
         public IActionResult Index()

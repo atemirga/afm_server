@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using RobiGroup.AskMeFootball.Data;
@@ -108,6 +110,7 @@ namespace RobiGroup.AskMeFootball
             services.AddAuthentication()
                 .AddCookie(options =>
                 {
+                    options.SlidingExpiration = true;
                     options.LoginPath = "/Identity/Account/Login";
                 })
                 .AddJwtBearer(x =>
@@ -146,6 +149,11 @@ namespace RobiGroup.AskMeFootball
                 var stringLocalizerFactory = (IStringLocalizerFactory)services.BuildServiceProvider()
                     .GetService(typeof(IStringLocalizerFactory));
                 o.ModelMetadataDetailsProviders.Add(new ApplicationDisplayMetadataProvider<Resources>(stringLocalizerFactory));
+
+                //var policy = new AuthorizationPolicyBuilder()
+                //    .RequireAuthenticatedUser()
+                //    .Build();
+                //o.Filters.Add(new AuthorizeFilter(policy));
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
