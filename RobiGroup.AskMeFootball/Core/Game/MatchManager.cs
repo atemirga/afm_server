@@ -55,6 +55,14 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     model.Match = new MatchModel(match.Id, _dbContext.Users.Find(enemy.UserId));
                     model.Found = true;
                 }
+                else
+                {
+                    throw new Exception("No enemy error.");
+                }
+            }
+            else
+            {
+                throw new Exception("Card reset time error.");
             }
 
             return model;

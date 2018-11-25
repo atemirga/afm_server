@@ -13,8 +13,10 @@ namespace RobiGroup.AskMeFootball.Data
 
         public int CorrectAnswerId { get; set; }
 
-        public Card Card { get; set; }
+        public bool IsDeleted { get; set; }
 
+        public Card Card { get; set; }
+        
         public List<QuestionAnswer> Answers { get; set; }
     }
 }

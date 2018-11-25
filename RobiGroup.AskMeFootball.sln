@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketManager", "..\utut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketManager.Common", "..\ututor\backend\WebSocketManager.Common\WebSocketManager.Common.csproj", "{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JQuery.DataTables.Extensions", "..\ututor\backend\JQuery.DataTables.Extensions\JQuery.DataTables.Extensions.csproj", "{A43DD0EF-E6DD-4230-8A6F-E2929D7E1ED2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C50A9506-DF16-41ED-987A-DBAAE1E2F03F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A43DD0EF-E6DD-4230-8A6F-E2929D7E1ED2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A43DD0EF-E6DD-4230-8A6F-E2929D7E1ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A43DD0EF-E6DD-4230-8A6F-E2929D7E1ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A43DD0EF-E6DD-4230-8A6F-E2929D7E1ED2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

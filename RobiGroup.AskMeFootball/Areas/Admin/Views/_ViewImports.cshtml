@@ -1,5 +1,8 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using Common.Localization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Localization
 @using RobiGroup.AskMeFootball.Areas.Identity
 @using RobiGroup.AskMeFootball.Data
-@namespace RobiGroup.AskMeFootball.Areas.Identity.Pages
+@namespace RobiGroup.AskMeFootball.Areas.Admin.Views
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IStringLocalizer<Resources> Localizer

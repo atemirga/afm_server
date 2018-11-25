@@ -1,0 +1,203 @@
+﻿@using Microsoft.AspNetCore.Hosting
+@using Models.Cards
+@model CardCreateModel
+@inject IHostingEnvironment HostingEnvironment
+
+@{
+    if (Model.Id.HasValue)
+    {
+        ViewData["Title"] = "Редактировать";
+    }
+    else
+    {
+        ViewData["Title"] = "Новыя карта";
+    }
+}
+
+<div class="box box-info">
+    <!-- /.box-header -->
+    <!-- form start -->
+    <form class="form-horizontal" method="post">
+        <div class="box-body">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label col-sm-4"></label>
+                <div class="col-sm-8">
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="TypeId" class="control-label col-sm-4"></label>
+                <div class="col-sm-8">
+                    <select asp-for="TypeId" class="form-control" asp-items="ViewBag.Types"></select>
+                    <span asp-validation-for="TypeId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="ResetPeriod" class="control-label col-sm-4"></label>
+                <div class="col-sm-8">
+                    <input asp-for="ResetPeriod" class="form-control" />
+                    <span asp-validation-for="ResetPeriod" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Prize" class="control-label col-sm-4"></label>
+                <div class="col-sm-8">
+                    <input asp-for="Prize" class="form-control" />
+                    <span asp-validation-for="Prize" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="ImageUrl" class="control-label col-sm-4"></label>
+                <input id="resphotos" asp-for="ImageUrl" type="hidden" class="form-control" />
+                <div class="col-sm-8">
+                    <span class="btn btn-success fileinput-button">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        <span>Выбрать файлы</span>
+                        <!-- The file input field used as target for the file upload widget -->
+                        <input id="fileupload" type="file" name="files[]" multiple>
+                    </span>
+                    <br>
+                    <br>
+                    <!-- The global progress bar -->
+                    <div id="progress" class="progress">
+                        <div class="progress-bar progress-bar-success"></div>
+                    </div>
+                    <!-- The container for the uploaded files -->
+                    <table role="presentation" class="table table-striped">
+                        <tbody id="files">
+                            @if (Model != null && !string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="/@Url.Content(Model.ImageUrl)" />
+                                    </td>
+                                    <td>
+                                        @System.IO.Path.GetFileName(Model.ImageUrl)
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        <a class="btn btn-danger" href="javascript:void(0);" onclick="deletePhoto(this, encodeURI('@Model.ImageUrl'), @Model.Id)"><i class="glyphicon glyphicon-trash"></i> Удалить<a />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="MatchQuestions" class="control-label col-sm-4"></label>
+                <div class="col-sm-8">
+                    <input asp-for="MatchQuestions" class="form-control" />
+                    <span asp-validation-for="MatchQuestions" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="ResetTime" class="control-label col-sm-4"></label>
+                <div class="col-sm-8">
+                    <input asp-for="ResetTime" class="form-control" />
+                    <span asp-validation-for="ResetTime" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+            <button type="submit" class="btn btn-default">Отмена</button>
+            <button type="submit" class="btn btn-info pull-right">Сохранить</button>
+        </div>
+        <!-- /.box-footer -->
+    </form>
+</div>
+
+@section Styles {
+    <link href="~/lib/jquery.fileupload/css/jquery.fileupload.css" rel="stylesheet" />
+    <link href="~/lib/jquery.fileupload/css/jquery.fileupload-ui.css" rel="stylesheet" />
+    <noscript><link href="~/lib/jquery.fileupload/css/jquery.fileupload-noscript.css" rel="stylesheet" /></noscript>
+    <noscript><link href="~/lib/jquery.fileupload/css/jquery.fileupload-ui-noscript.css" rel="stylesheet" /></noscript>
+}
+
+@section Scripts
+    {
+
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/jquery.fileupload/js/vendor/jquery.ui.widget.js"></script>
+    <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+    <script src="https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+    <!-- The Canvas to Blob plugin is included for image resizing functionality -->
+    <script src="https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+    <script src="~/lib/jquery.fileupload/js/jquery.iframe-transport.js"></script>
+    <script src="~/lib/jquery.fileupload/js/jquery.fileupload.js"></script>
+    <script src="~/lib/jquery.fileupload/js/jquery.fileupload-process.js"></script>
+    <script src="~/lib/jquery.fileupload/js/jquery.fileupload-image.js"></script>
+    <script src="~/lib/jquery.fileupload/js/jquery.fileupload-validate.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            $('#fileupload').fileupload({
+                    url: '@Url.Action("Upload", "Photos", new{Area="Admin"})',
+                    dataType: 'json',
+                    acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+                    maxFileSize: 999000,
+                    done: function (e, data) {
+                        var files = data.response().result;
+                        $.each(data.files, function (index, file) {
+
+                            var fr = $('<tr>').appendTo('#files');
+
+                            var reader = new FileReader();
+
+                            var imgTd = $('<td>').appendTo(fr);
+                            reader.onload = function (e) {
+                                $('<img>').appendTo(imgTd).attr('src', e.target.result);
+                            };
+
+                            reader.readAsDataURL(file);
+
+                            $('<td>').text(file.name).appendTo(fr);
+                            $('<td>').text(Math.round(file.size / 10) / 100 + ' KB').appendTo(fr);
+                            $('<td>').html('<a class="btn btn-danger" href="javascript:void(0);" onclick="deletePhoto(this, \''
+                                + encodeURI(files[index].path) +
+                                '\')"><i class="glyphicon glyphicon-trash"></i> Удалить<a/>')
+                                .appendTo(fr);
+
+                            $('#resphotos').val(files[index].path);
+                        });
+                    },
+                    progressall: function (e, data) {
+                        var progress = parseInt(data.loaded / data.total * 100, 10);
+                        $('#progress .progress-bar').css(
+                            'width',
+                            progress + '%'
+                        );
+                    }
+                }).prop('disabled', !$.support.fileInput)
+                .parent().addClass($.support.fileInput ? undefined : 'disabled');
+
+        });
+
+        function deletePhoto(btn, path, rest) {
+
+            var deletePath = decodeURI(path);
+            $('#resphotos').val($('#resphotos').val().replace(deletePath + ';', ''));
+            $(btn).closest('tr').remove();
+
+            $.ajax({
+                    method: "POST",
+                    url: '@Url.Action("Delete", "Photos", new { Area = "Admin" })',
+                    data: {
+                        path: deletePath,
+                        restaurant: rest
+                    }
+                })
+                .done(function() {
+                    //$('.btn-order').addClass('disabled');
+                });
+
+            return false;
+        }
+    </script>
+}
