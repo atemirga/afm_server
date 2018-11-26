@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Match;
+using RobiGroup.Web.Common;
 
 namespace RobiGroup.AskMeFootball.Core.Game
 {
     public class MatchManager : IMatchManager
     {
         private GamersHandler _gamersHandler;
-        private readonly ApplicationDbContext _dbContext;
+        private ApplicationDbContext _dbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public MatchManager(GamersHandler gamersHandler, ApplicationDbContext dbContext)
+        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+
+        public MatchManager(GamersHandler gamersHandler, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _gamersHandler = gamersHandler;
             _dbContext = dbContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<MatchSearchResultModel> SearchMatch(string gamerId, int cardId)
@@ -70,6 +77,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
         public async Task<ConfirmResponseModel> Confirm(string gamerId, int matchId)
         {
+          //  await semaphoreSlim.WaitAsync();
+            _dbContext = _httpContextAccessor.HttpContext.GetService<ApplicationDbContext>();
             var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
                 m.GamerId == gamerId && m.MatchId == matchId && !m.JoinTime.HasValue);
 

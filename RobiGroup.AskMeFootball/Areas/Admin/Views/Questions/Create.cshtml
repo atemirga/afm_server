@@ -24,7 +24,7 @@
                         <div class="input-group">
                             <span class="input-group-addon">
                                 <input type="radio" name="CorrectAnswer" />
-                            </span><input class="form-control" asp-for="Answers[i]" placeholder="Введите вариант ответа" />
+                            </span><input class="form-control answer" asp-for="Answers[i]" placeholder="Введите вариант ответа" />
                         </div>
                     }
                     <span asp-validation-for="Answers" class="text-danger"></span>
@@ -50,6 +50,8 @@
                 var radioButtons = $("#create-form input:radio[name='CorrectAnswer']");
                 var selectedIndex = radioButtons.index(radioButtons.find(':checked'));
                 $("#CorrectAnswerId").val(selectedIndex);    
+
+               // $('input.answer').app
             });
         });
 

@@ -195,7 +195,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                             var correctAnswersCount = matchGamer.Answers.Count(a => a.IsCorrectAnswer);
                             var incorrectAnswersCount = questionsCount - correctAnswersCount;
 
-                            var pointsForMacth = correctAnswersCount * matchOptions.Value.CorrectAnswerScore - incorrectAnswersCount * matchOptions.Value.IncorrectAnswerScore;
+                            var pointsForMacth = correctAnswersCount * matchOptions.Value.CorrectAnswerScore + incorrectAnswersCount * matchOptions.Value.IncorrectAnswerScore;
                             matchGamer.Score = pointsForMacth;
                             matchGamer.IsPlay = false;
 
