@@ -239,6 +239,11 @@ namespace RobiGroup.AskMeFootball.Controllers
                         int bonus = gamerBonus.Item1.IsWinner ? +gamerBonus.Item3 : -gamerBonus.Item3;
                         gamerBonus.Item1.Score += bonus;
                         gamerBonus.Item2.Score -= bonus;
+
+                        if (gamerBonus.Item1 != currentMatchGamer)
+                        {
+                            resultModel.RivalMatchScore = gamerBonus.Item1.Score;
+                        }
                     }
 
                     _dbContext.SaveChanges();

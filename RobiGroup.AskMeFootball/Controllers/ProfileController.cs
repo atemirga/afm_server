@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -85,9 +87,11 @@ namespace RobiGroup.AskMeFootball.Controllers
             var user = _dbContext.Users.Find(userId);
 
             var fileService = HttpContext.RequestServices.GetService<IFileService>();
+            var hostingEnvironment = HttpContext.RequestServices.GetService<IHostingEnvironment>();
+
             var photoPath = await fileService.Save(files[0], $"data/user/{user.Id}/profile");
 
-            user.PhotoUrl = photoPath;
+            user.PhotoUrl = Path.GetRelativePath(hostingEnvironment.WebRootPath, photoPath);
             _dbContext.SaveChanges();
 
             return Ok();

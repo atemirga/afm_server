@@ -29,6 +29,11 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public int MatchScore { get; set; }
 
         /// <summary>
+        /// Очки за матч соперника
+        /// </summary>
+        public int RivalMatchScore { get; set; }
+
+        /// <summary>
         /// Итоговые очки на карточке
         /// </summary>
         public int CardScore { get; set; }
@@ -39,7 +44,7 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public int CurrentGamerScore { get; set; }
 
         /// <summary>
-        /// Победитель
+        /// Победиль или нет
         /// </summary>
         public bool IsWinner { get; set; }
     }
