@@ -220,11 +220,12 @@ namespace RobiGroup.AskMeFootball.Controllers
                 var matchOptions = HttpContext.RequestServices.GetService<IOptions<MatchOptions>>();
 
                 MatchGamer currentMatchGamer = null;
+                ApplicationUser currentGamer = null;
 
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
                     var match = _dbContext.Matches.Find(id);
-                    var matchGamers = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Include(m => m.Gamer).Where(g => g.MatchId == id);
+                    var matchGamers = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Where(g => g.MatchId == id);
 
                     var resultModel = new MatchResultModel();
 
@@ -234,6 +235,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                     foreach (var matchGamer in matchGamers)
                     {
+                        var gamer = _dbContext.Users.Find(matchGamer.GamerId);
                         if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
                         {
                             var questionsCount = match.Questions.SplitToIntArray().Length;
@@ -261,7 +263,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                             matchGamerBonuses.Add(new Tuple<MatchGamer, GamerCard, int>(matchGamer, gamerCard, answersCount * matchOptions.Value.BonusForAnswer));
 
                             gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
-                            matchGamer.Gamer.Score -= Math.Abs(matchGamer.Score); // Отнимаем из текущих очков у игрока
+
+                            gamer.Score -= Math.Abs(matchGamer.Score); // Отнимаем из текущих очков у игрока
 
                             if (matchGamer.Score > winnerScore)
                             {
@@ -272,6 +275,11 @@ namespace RobiGroup.AskMeFootball.Controllers
                         if (matchGamer.GamerId == userId)
                         {
                             currentMatchGamer = matchGamer;
+                            currentGamer = gamer;
+                        }
+                        else
+                        {
+                            resultModel.RivalMatchScore = matchGamer.Score;
                         }
                     }
 
@@ -290,6 +298,10 @@ namespace RobiGroup.AskMeFootball.Controllers
                         {
                             resultModel.RivalMatchScore = gamerBonus.Item1.Score;
                         }
+                        else
+                        {
+                            resultModel.MatchBonus = bonus;
+                        }
                     }
 
                     _dbContext.SaveChanges();
@@ -299,7 +311,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     resultModel.CardScore = _dbContext.GamerCards.Where(gc => gc.CardId == currentMatchGamer.Match.CardId && gc.GamerId == userId).Select(c => c.Score).FirstOrDefault();
                     resultModel.MatchScore = currentMatchGamer.Score;
                     resultModel.IsWinner = currentMatchGamer.IsWinner;
-                    resultModel.CurrentGamerScore = currentMatchGamer.Gamer.Score;
+                    resultModel.CurrentGamerScore = currentGamer.Score;
 
                     return Ok(resultModel);
                 }

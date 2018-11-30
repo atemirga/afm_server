@@ -39,7 +39,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                     PhotoUrl = u.PhotoUrl,
                     Nickname = u.NickName,
                     CurrentScore = u.Score,
-                    TotalScore = u.TotalScore
+                    TotalScore = u.TotalScore,
+                    Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 });
 
             return Ok(gamers);

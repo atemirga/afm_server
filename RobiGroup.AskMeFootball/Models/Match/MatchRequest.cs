@@ -33,6 +33,11 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public int MatchScore { get; set; }
 
         /// <summary>
+        /// Бонусные очки за матч
+        /// </summary>
+        public int MatchBonus { get; set; }
+
+        /// <summary>
         /// Очки за матч соперника
         /// </summary>
         public int RivalMatchScore { get; set; }

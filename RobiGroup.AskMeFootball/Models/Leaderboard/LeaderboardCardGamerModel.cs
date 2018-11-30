@@ -26,6 +26,11 @@
         /// Итоговые очки игрока
         /// </summary>
         public int TotalScore { get; set; }
+
+        /// <summary>
+        /// Рейтинг
+        /// </summary>
+        public int Raiting { get; set; }
     }
 
     public class LeaderboardCardGamerModel : LeaderboardGamerModel

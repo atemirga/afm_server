@@ -51,7 +51,9 @@ namespace RobiGroup.AskMeFootball.Controllers
                 Rank = user.Rank?.Name,
                 Score = user.Score,
                 TotalScore = user.TotalScore,
-                PhotoUrl = user.PhotoUrl
+                PhotoUrl = user.PhotoUrl,
+                Raiting = _dbContext.Users.Count(u => u.TotalScore > user.TotalScore) + 1,
+
             });
         }
 
