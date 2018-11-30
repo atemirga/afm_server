@@ -23,7 +23,7 @@
                     {
                         <div class="input-group">
                             <span class="input-group-addon">
-                                <input type="radio" name="CorrectAnswer" />
+                                <input type="radio" name="CorrectAnswer" value="@i" />
                             </span><input class="form-control answer" asp-for="Answers[i]" placeholder="Введите вариант ответа" />
                         </div>
                     }
@@ -48,10 +48,15 @@
         $(function() {
             $('#create-form').submit(function() {
                 var radioButtons = $("#create-form input:radio[name='CorrectAnswer']");
-                var selectedIndex = radioButtons.index(radioButtons.find(':checked'));
+                var selectedIndex = -1;
+                radioButtons.each(function (i, j) {
+                    if (j.checked) {
+                        selectedIndex = i;
+                    }
+                });
                 $("#CorrectAnswerId").val(selectedIndex);    
 
-               // $('input.answer').app
+                // $('input.answer').app
             });
         });
 

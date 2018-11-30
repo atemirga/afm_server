@@ -26,8 +26,6 @@ namespace RobiGroup.AskMeFootball.Data
 
         public DbSet<MatchAnswer> MatchAnswers { get; set; }
 
-        public DbSet<Friend> Friends { get; set; }
-
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {

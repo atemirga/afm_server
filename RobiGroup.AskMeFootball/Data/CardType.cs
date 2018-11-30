@@ -16,21 +16,4 @@ namespace RobiGroup.AskMeFootball.Data
     {
         Daily, Weekly, Monthly
     }
-
-    public class Friend
-    {
-        public int Id { get; set; }
-
-        public string GamerId { get; set; }
-
-        public string FriendId { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        [ForeignKey("GamerId")]
-        public ApplicationUser Gamer { get; set; }
-
-        [ForeignKey("FriendId")]
-        public ApplicationUser FriendUser { get; set; }
-    }
 }

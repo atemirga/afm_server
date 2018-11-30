@@ -9,6 +9,8 @@
 
     public class MatchQuestionAnswerResponse
     {
+        public string GamerId { get; set; }
+
         public bool IsCorrect { get; set; }
     }
 }

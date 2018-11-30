@@ -26,10 +26,5 @@ namespace RobiGroup.AskMeFootball.Models.Friends
         /// Очки
         /// </summary>
         public int TotalScore { get; set; }
-
-        /// <summary>
-        /// Время создания
-        /// </summary>
-        public DateTime CreatedAt { get; set; }
     }
 }

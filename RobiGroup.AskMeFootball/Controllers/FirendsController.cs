@@ -31,30 +31,17 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// Список друзей
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(typeof(List<FriendModel>), 200)]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string[] phones)
         {
-            string userId = User.GetUserId();
-            return Ok(_dbContext.Friends.Include(f => f.FriendUser).Where(f => f.GamerId == userId).Select(f => new FriendModel
+            return Ok(_dbContext.Users.Where(u => phones.Contains(u.PhoneNumber)).Select(u => new FriendModel
             {
-                Id = f.FriendId,
-                Nickname = f.FriendUser.NickName,
-                PhoneNumber = f.FriendUser.PhoneNumber,
-                CreatedAt = f.CreatedAt,
-                TotalScore = f.FriendUser.TotalScore
+                Id = u.Id,
+                Nickname = u.NickName,
+                PhoneNumber = u.PhoneNumber,
+                TotalScore = u.TotalScore
             }).ToList());
-        }
-
-        /// <summary>
-        /// Получить карточку по ID
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(CardModel), 200)]
-        public IActionResult GetById(int id)
-        {
-            return Ok(_dbContext.Cards.Find(id));
         }
     }
 }

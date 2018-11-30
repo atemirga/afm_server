@@ -2,9 +2,12 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DataTables.AspNet.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using RobiGroup.AskMeFootball.Common.Options;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Match;
@@ -65,11 +68,20 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             });
                             _dbContext.SaveChanges();
 
+                            var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
+
+                            var rivalMatchModel = new MatchModel(match.Id, _dbContext.Users.Find(gamerId));
+                            rivalMatchModel.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
+                            rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
+
                             await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest",
-                                new MatchModel(match.Id, _dbContext.Users.Find(gamerId)));
+                                rivalMatchModel);
 
                             model.Match = new MatchModel(match.Id, _dbContext.Users.Find(enemy.UserId));
                             model.Found = true;
+
+                            model.Match.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
+                            model.Match.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
                         }
                         else
                         {

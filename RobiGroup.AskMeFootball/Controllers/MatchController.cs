@@ -30,11 +30,13 @@ namespace RobiGroup.AskMeFootball.Controllers
     {
         private readonly IMatchManager _matchManager;
         private readonly ApplicationDbContext _dbContext;
+        private readonly GamersHandler _gamersHandler;
 
-        public MatchController(IMatchManager matchManager, ApplicationDbContext dbContext)
+        public MatchController(IMatchManager matchManager, ApplicationDbContext dbContext, GamersHandler gamersHandler)
         {
             _matchManager = matchManager;
             _dbContext = dbContext;
+            _gamersHandler = gamersHandler;
         }
 
         /// <summary>
@@ -71,6 +73,36 @@ namespace RobiGroup.AskMeFootball.Controllers
             if (ModelState.IsValid)
             {
                 return Ok(await _matchManager.Confirm(User.GetUserId(), id));
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        /// <summary>
+        /// Отменить матч
+        /// </summary>
+        /// <param name="id">ID матча</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("{id}/cancel")]
+        [ProducesResponseType(typeof(ConfirmResponseModel), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var gamerId = User.GetUserId();
+                var match = (from m in _dbContext.Matches
+                    join g in _dbContext.MatchGamers on m.Id equals g.MatchId
+                    where m.Id == id && g.GamerId == gamerId
+                    select m).FirstOrDefault();
+
+                if (match != null)
+                {
+                    //match.
+                }
+
+                return Ok();
             }
 
             return BadRequest(ModelState);
@@ -121,14 +153,14 @@ namespace RobiGroup.AskMeFootball.Controllers
         [Route("{id}/answers")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public IActionResult AnswerToQuestions([FromRoute]int id, [FromBody]MatchQuestionAnswerModel answer)
+        public async Task<IActionResult> AnswerToQuestions([FromRoute]int id, [FromBody]MatchQuestionAnswerModel answer)
         {
             if (ModelState.IsValid)
             {
                 string userId = User.GetUserId();
                 var matchGamer = _dbContext.MatchGamers.Single(g => g.MatchId == id && g.GamerId == userId);
                 if (matchGamer.IsPlay)
-                {
+                {   
                     var match = _dbContext.Matches.Find(id);
                     var matchQuestions = match.Questions.SplitToIntArray();
 
@@ -148,7 +180,21 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                         _dbContext.SaveChanges();
 
-                        return Ok(new MatchQuestionAnswerResponse { IsCorrect = isCorrectAnswer, });
+
+                        var answerResponse = new MatchQuestionAnswerResponse
+                        {
+                            GamerId = matchGamer.GamerId,
+                            IsCorrect = isCorrectAnswer,
+                        };
+
+                        foreach (var rivalId in _dbContext.MatchGamers
+                                                .Where(g => g.MatchId == id 
+                                                            && g.GamerId != userId)
+                                                .Select(g => g.GamerId).ToList())
+                        {
+                            await _gamersHandler.InvokeClientMethodToGroupAsync(rivalId, "rivalQuestionAnswered", answerResponse);
+                        }
+                        return Ok(answerResponse);
                     }    
                 }
 

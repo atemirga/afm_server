@@ -8,7 +8,7 @@ namespace RobiGroup.AskMeFootball.Models.Match
         {
             MatchId = matchId;
             GamerFullName = gamer.FullName;
-            GamerName = gamer.UserName;
+            GamerName = gamer.NickName;
             GamerPhotoUrl = gamer.PhotoUrl;
         }
 
@@ -19,6 +19,10 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public string GamerFullName { get; set; }
 
         public string GamerPhotoUrl { get; set; }
+
+        public int CorrectAnswerScore { get; set; }
+
+        public int IncorrectAnswerScore { get; set; }
     }
 
     public class MatchResultModel
