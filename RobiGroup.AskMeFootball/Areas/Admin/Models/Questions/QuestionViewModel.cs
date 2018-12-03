@@ -9,6 +9,8 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Models.Questions
     {
         [DisplayName("Поиск")]
         public string Search { get; set; }
+
+        public int CardId { get; set; }
     }
 
     public class QuestionCreateModel

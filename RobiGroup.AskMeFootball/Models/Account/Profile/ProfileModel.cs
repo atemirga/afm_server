@@ -33,5 +33,10 @@
         /// Рейтинг
         /// </summary>
         public int Raiting { get; set; }
+
+        /// <summary>
+        /// ID игрока
+        /// </summary>
+        public string Id { get; set; }
     }
 }

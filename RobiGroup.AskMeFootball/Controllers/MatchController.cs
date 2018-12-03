@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RobiGroup.AskMeFootball.Common.Options;
 using RobiGroup.AskMeFootball.Core.Game;
@@ -29,12 +30,15 @@ namespace RobiGroup.AskMeFootball.Controllers
     public class MatchController : ControllerBase
     {
         private readonly IMatchManager _matchManager;
+        private readonly ILogger<MatchController> _logger;
         private readonly ApplicationDbContext _dbContext;
         private readonly GamersHandler _gamersHandler;
 
-        public MatchController(IMatchManager matchManager, ApplicationDbContext dbContext, GamersHandler gamersHandler)
+        public MatchController(IMatchManager matchManager, ILogger<MatchController> logger,
+            ApplicationDbContext dbContext, GamersHandler gamersHandler)
         {
             _matchManager = matchManager;
+            _logger = logger;
             _dbContext = dbContext;
             _gamersHandler = gamersHandler;
         }
@@ -73,6 +77,64 @@ namespace RobiGroup.AskMeFootball.Controllers
             if (ModelState.IsValid)
             {
                 return Ok(await _matchManager.Confirm(User.GetUserId(), id));
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        /// <summary>
+        /// Готов к игре
+        /// </summary>
+        /// <param name="id">ID матча</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("{id}/ready")]
+        [ProducesResponseType(typeof(ConfirmResponseModel), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Ready(int id)
+        {
+            if (ModelState.IsValid)
+            {
+                string gamerId = User.GetUserId();
+                using (var tran = _dbContext.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        _logger.LogInformation($"Match ready from {gamerId}");
+                        var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                            m.GamerId == gamerId && m.MatchId == id);
+
+                        if (matchParticipant != null)
+                        {
+                            if (!matchParticipant.Ready)
+                            {
+                                matchParticipant.Ready = true;
+                                _dbContext.SaveChanges();
+                            }
+
+                            tran.Commit();
+
+                            var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == id);
+                            _logger.LogInformation(string.Join(',', matchParticipants.Select(p => p.GamerId + ':' + p.Ready)));
+                            if (matchParticipants.All(p => p.Ready))
+                            {
+                                var participants = matchParticipants.Select(p => p.GamerId).ToList();
+
+                                foreach (var participant in participants)
+                                {
+                                    await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchStarted", new{id});
+                                    _logger.LogInformation($"matchStarted for {participant}");
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, $"Error {gamerId}");
+                        tran.Rollback(); 
+                    }
+                }
+                return Ok();
             }
 
             return BadRequest(ModelState);
@@ -172,7 +234,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                         _dbContext.MatchAnswers.Add(new MatchAnswer
                         {
                             QuestionId = answer.QuestionId,
-                            AnswerId = answer.AnswerId,
+                            AnswerId = answer.AnswerId > 0 ? answer.AnswerId : (int?) null,
                             CreatedAt = DateTime.Now,
                             MatchGamerId = matchGamer.Id,
                             IsCorrectAnswer = isCorrectAnswer
@@ -180,21 +242,29 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                         _dbContext.SaveChanges();
 
+                        _logger.LogInformation($"Question answer from {userId}. Question: {answer.QuestionId}, answer: {answer.AnswerId}.");
 
-                        var answerResponse = new MatchQuestionAnswerResponse
-                        {
-                            GamerId = matchGamer.GamerId,
-                            IsCorrect = isCorrectAnswer,
-                        };
+                        var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id);
 
-                        foreach (var rivalId in _dbContext.MatchGamers
-                                                .Where(g => g.MatchId == id 
-                                                            && g.GamerId != userId)
-                                                .Select(g => g.GamerId).ToList())
+                        var answers = (from a in _dbContext.MatchAnswers
+                            join g in _dbContext.MatchGamers on a.MatchGamerId equals g.Id
+                            where g.MatchId == id && a.QuestionId == answer.QuestionId
+                            select new MatchQuestionAnswerResponse
+                            {
+                                GamerId = g.GamerId,
+                                IsCorrect = a.IsCorrectAnswer
+                            });
+
+                        if (matchParticipants == answers.Count())
                         {
-                            await _gamersHandler.InvokeClientMethodToGroupAsync(rivalId, "rivalQuestionAnswered", answerResponse);
+                            foreach (var answerReponse in answers)
+                            {
+                                await _gamersHandler.InvokeClientMethodToGroupAsync(answerReponse.GamerId, "questionAnswersResult", answers);
+                                _logger.LogInformation($"questionAnswersResult for {answerReponse.GamerId}");
+                            }
                         }
-                        return Ok(answerResponse);
+
+                        return Ok();
                     }    
                 }
 

@@ -46,7 +46,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
             var cardsQuery = _dbContext.Cards.AsQueryable();
 
             filter.Total = cardsQuery.Count();
-            return cardsQuery.Include(r => r.Type)
+            return cardsQuery.Include(r => r.Type).Include(r => r.Questions)
                 .OrderBy(t => t.ResetTime)
                 .Skip(filter.DataTablesRequest.Start)
                 .Take(filter.DataTablesRequest.Length)
@@ -58,6 +58,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                     Type = r.Type.Name + "(" + r.ResetPeriod + ")",
                     ImageUrl = r.ImageUrl,
                     MatchQuestions = r.MatchQuestions,
+                    QuestionsTotal = r.Questions.Count,
                     Prize = r.Prize
                 });
         }
@@ -137,7 +138,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                 var photosDir = _hostingEnvironment.GetCardPhotosFolder(card.Id);
                 if (Directory.Exists(photosDir))
                 {
-                    Directory.Delete(photosDir);
+                    Directory.Delete(photosDir, true);
                 }
 
                 Directory.CreateDirectory(photosDir);
@@ -156,7 +157,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                         var dir = Path.GetDirectoryName(photoFile);
                         if (Directory.GetFiles(dir).Length == 0)
                         {
-                            Directory.Delete(dir);
+                            Directory.Delete(dir, true);
                         }
                     }
                 }

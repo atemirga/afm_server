@@ -18,6 +18,11 @@ namespace RobiGroup.AskMeFootball.Models.Friends
         public string Nickname { get; set; }
 
         /// <summary>
+        /// Ник
+        /// </summary>
+        public string PhotoUrl { get; set; }
+
+        /// <summary>
         /// Номер телефона
         /// </summary>
         public string PhoneNumber { get; set; }
@@ -26,5 +31,15 @@ namespace RobiGroup.AskMeFootball.Models.Friends
         /// Очки
         /// </summary>
         public int TotalScore { get; set; }
+
+        /// <summary>
+        /// Онлайн
+        /// </summary>
+        public bool IsOnline { get; set; }
+
+        /// <summary>
+        /// Рейтинг
+        /// </summary>
+        public int Raiting { get; set; }
     }
 }

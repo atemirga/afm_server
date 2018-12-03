@@ -1,4 +1,5 @@
 ﻿@using Admin.Models
+@using Common.Localization
 @using JQuery.DataTables.Extensions
 @using RobiGroup.AskMeFootball.Areas.Admin.Models.Cards
 
@@ -63,7 +64,7 @@
         });
 
         function renderActions(data, type, row, meta) {
-            return '<a href="/Admin/Questions/Index/' + row.id + '">@Localizer["Questions"]</a>'
+            return '<a href="/Admin/Questions/Index/' + row.id + '">@Localizer["Questions"] (' + row.questionsTotal + ')</a>'
                    + ' | <a href="@Url.Action("Create")/' + row.id + '">@Localizer["Edit"]</a>';
         }
 

@@ -31,6 +31,11 @@
         /// Рейтинг
         /// </summary>
         public int Raiting { get; set; }
+
+        /// <summary>
+        /// Онлайн
+        /// </summary>
+        public bool IsOnline { get; set; }
     }
 
     public class LeaderboardCardGamerModel : LeaderboardGamerModel

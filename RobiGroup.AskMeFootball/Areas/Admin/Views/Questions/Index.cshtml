@@ -9,6 +9,7 @@
 }
 
 <form id="search_form" asp-controller="Questions" asp-action="Index" asp-route-id="@ViewBag.CardId">
+    <input type="hidden" asp-for="CardId"/>
     <div class="row form-group">
         <div class="col-sm-9">
             <input class="form-control" asp-for="Search" placeholder="Введите текст вопроса" />
@@ -19,9 +20,27 @@
     </div>
 </form>
 
-<p>
+<div>
     <a asp-action="Create" asp-controller="Questions" asp-route-cardId="@ViewBag.CardId" asp-area="Admin">Создать вопрос</a>
-</p>
+    <form method="post"
+          id="upload-excel-form"
+          class="inline"
+          asp-action="FileUpload"
+          asp-controller="Questions"
+          asp-area="Admin"
+          asp-route-id="@ViewBag.CardId"
+          enctype="multipart/form-data">
+        <input type="file" id="file" name="file" class="hidden" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+        <input id="btn-upload-excel" class="btn btn-success" type="button" value="Загрузить Excel файл" />
+    </form>
+    <div class="text-danger" asp-validation-summary="All"></div>
+</div>
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">
+        @ViewBag.Message
+    </div>
+}
 <table id="rests" class="table table-striped"></table>
 
 <div class="modal fade in" id="modal-question">
@@ -62,6 +81,14 @@
     <script type="text/javascript">
         var restsTable;
         $(function() {
+
+            $('#btn-upload-excel').click(function() {
+                $('#file').click();
+            });
+            $('#file').change(function() {
+                $('#upload-excel-form').submit();
+            });
+
             restsTable = $('#rests').DataTable({
                 "processing": true,
                 "serverSide": true,

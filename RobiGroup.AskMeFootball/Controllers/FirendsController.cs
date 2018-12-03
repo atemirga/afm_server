@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Cards;
 using RobiGroup.AskMeFootball.Models.Friends;
@@ -21,10 +22,12 @@ namespace RobiGroup.AskMeFootball.Controllers
     public class FirendsController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly GamersHandler _gamersHandler;
 
-        public FirendsController(ApplicationDbContext dbContext)
+        public FirendsController(ApplicationDbContext dbContext, GamersHandler gamersHandler)
         {
             _dbContext = dbContext;
+            _gamersHandler = gamersHandler;
         }
 
         /// <summary>
@@ -35,13 +38,22 @@ namespace RobiGroup.AskMeFootball.Controllers
         [ProducesResponseType(typeof(List<FriendModel>), 200)]
         public IActionResult GetAll(string[] phones)
         {
-            return Ok(_dbContext.Users.Where(u => phones.Contains(u.PhoneNumber)).Select(u => new FriendModel
+            var friends = _dbContext.Users.Where(u => phones.Contains(u.PhoneNumber)).Select(u => new FriendModel
             {
                 Id = u.Id,
                 Nickname = u.NickName,
                 PhoneNumber = u.PhoneNumber,
-                TotalScore = u.TotalScore
-            }).ToList());
+                TotalScore = u.TotalScore,
+                PhotoUrl = u.PhotoUrl,
+                Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
+            }).ToList();
+
+            foreach (var gamer in friends)
+            {
+                gamer.IsOnline = _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
+            }
+
+            return Ok(friends);
         }
     }
 }

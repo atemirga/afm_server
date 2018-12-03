@@ -20,6 +20,9 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Models.Cards
         [DataTableColumn(Visible = false)]
         public string ImageUrl { get; set; }
 
+        [DataTableColumn(Visible = false)]
+        public int QuestionsTotal { get; set; }
+
         [DisplayName("Кол-во вопросов в игре")]
         public int MatchQuestions { get; set; }
 

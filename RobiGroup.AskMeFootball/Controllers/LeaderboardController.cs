@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Cards;
 using RobiGroup.AskMeFootball.Models.Leaderboard;
@@ -18,10 +19,12 @@ namespace RobiGroup.AskMeFootball.Controllers
     public class LeaderboardController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly GamersHandler _gamersHandler;
 
-        public LeaderboardController(ApplicationDbContext dbContext)
+        public LeaderboardController(ApplicationDbContext dbContext, GamersHandler gamersHandler)
         {
             _dbContext = dbContext;
+            _gamersHandler = gamersHandler;
         }
 
         /// <summary>
@@ -41,7 +44,40 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
+                }).ToList();
+
+            foreach (var gamer in gamers)
+            {
+                gamer.IsOnline = _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
+            }
+
+            return Ok(gamers);
+        }
+
+        /// <summary>
+        /// Друзья
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("friends")]
+        [ProducesResponseType(typeof(List<LeaderboardGamerModel>), 200)]
+        public IActionResult GetFriends(string[] phones)
+        {
+            var gamers = (from u in _dbContext.Users
+                where phones.Contains(u.PhoneNumber)
+                select new LeaderboardGamerModel
+                {
+                    Id = u.Id,
+                    PhotoUrl = u.PhotoUrl,
+                    Nickname = u.NickName,
+                    CurrentScore = u.Score,
+                    TotalScore = u.TotalScore,
+                    Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 });
+
+            foreach (var gamer in gamers)
+            {
+                gamer.IsOnline = _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
+            }
 
             return Ok(gamers);
         }

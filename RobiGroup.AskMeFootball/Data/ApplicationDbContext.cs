@@ -50,7 +50,7 @@ namespace RobiGroup.AskMeFootball.Data
                 new CardType {Id = 20, Name = "Еженедельный", Code = Data.CardTypes.Weekly.ToString() },
                 new CardType {Id = 30, Name = "Ежемесячный", Code = Data.CardTypes.Monthly.ToString() });
 
-            builder.Entity<MatchAnswer>().HasAlternateKey(a => new {a.MatchGamerId, a.QuestionId, a.AnswerId});
+            builder.Entity<MatchAnswer>().HasAlternateKey(a => new { a.MatchGamerId, a.QuestionId });
 
         }
     }

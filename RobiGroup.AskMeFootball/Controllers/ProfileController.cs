@@ -46,6 +46,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
             return Ok(new UserProfileModel
             {
+                Id = user.Id,
                 Username = user.UserName,
                 Nickname = user.NickName,
                 Rank = user.Rank?.Name,
@@ -53,7 +54,6 @@ namespace RobiGroup.AskMeFootball.Controllers
                 TotalScore = user.TotalScore,
                 PhotoUrl = user.PhotoUrl,
                 Raiting = _dbContext.Users.Count(u => u.TotalScore > user.TotalScore) + 1,
-
             });
         }
 

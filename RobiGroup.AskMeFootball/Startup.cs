@@ -280,7 +280,7 @@ namespace RobiGroup.AskMeFootball
                 user.Email = "admin@amf.com";
                 user.PhoneNumber = "77011234567";
                 user.FirstName = "";
-                user.LastName = "Админисратор";
+                user.LastName = "Администратор";
 
                 var resultTask = userManager.CreateAsync
                     (user, "Admin!2");

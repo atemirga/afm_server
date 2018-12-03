@@ -6,8 +6,10 @@ using DataTables.AspNet.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RobiGroup.AskMeFootball.Common.Options;
+using RobiGroup.AskMeFootball.Controllers;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Match;
@@ -19,14 +21,19 @@ namespace RobiGroup.AskMeFootball.Core.Game
     {
         private GamersHandler _gamersHandler;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<MatchController> _logger;
         private readonly IServiceProvider _serviceProvider;
 
         static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
-        public MatchManager(GamersHandler gamersHandler, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
+        public MatchManager(GamersHandler gamersHandler,
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<MatchController> logger,
+            IServiceProvider serviceProvider)
         {
             _gamersHandler = gamersHandler;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
             _serviceProvider = serviceProvider;
         }
 
@@ -74,6 +81,10 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             rivalMatchModel.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
                             rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
 
+                            var gamerCardScore = _dbContext.GamerCards.Where(gc => gc.CardId == cardId && gc.GamerId == gamerId).Select(gc => gc.Score).SingleOrDefault();
+                            rivalMatchModel.GamerRaiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId).Count(gr => gr.Score > gamerCardScore) + 1;
+                            rivalMatchModel.GamerCardScore = gamerCardScore;
+
                             await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest",
                                 rivalMatchModel);
 
@@ -82,6 +93,10 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
                             model.Match.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
                             model.Match.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
+
+                            var rivaCardScore = _dbContext.GamerCards.Where(gc => gc.CardId == cardId && gc.GamerId == enemy.UserId).Select(gc => gc.Score).SingleOrDefault();
+                            model.Match.GamerRaiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId).Count(gr => gr.Score > rivaCardScore) + 1;
+                            model.Match.GamerCardScore = rivaCardScore;
                         }
                         else
                         {
@@ -100,47 +115,61 @@ namespace RobiGroup.AskMeFootball.Core.Game
             using (var scope = _serviceProvider.CreateScope())
             {
                 var _dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
-                _dbContext = _httpContextAccessor.HttpContext.GetService<ApplicationDbContext>();
-                var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
-                    m.GamerId == gamerId && m.MatchId == matchId && !m.JoinTime.HasValue);
 
-                if (matchParticipant != null)
+                using (var tran = _dbContext.Database.BeginTransaction())
                 {
-                    var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == matchId);
-
-                    if (!matchParticipant.Confirmed)
+                    try
                     {
-                        matchParticipant.Confirmed = true;
-                        matchParticipant.JoinTime = DateTime.Now;
-                        matchParticipant.IsPlay = true;
+                        _logger.LogInformation($"Match confirm from {gamerId}");
+                        var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                            m.GamerId == gamerId && m.MatchId == matchId && !m.JoinTime.HasValue);
 
-                        _dbContext.SaveChanges();
+                        if (matchParticipant != null)
+                        {
+                            if (!matchParticipant.Confirmed)
+                            {
+                                matchParticipant.Confirmed = true;
+                                matchParticipant.JoinTime = DateTime.Now;
+                                matchParticipant.IsPlay = true;
 
-                        var match = _dbContext.Matches.Include(m => m.Card).ThenInclude(c => c.Questions)
-                            .Single(m => m.Id == matchId);
-                        match.StartTime = DateTime.Now;
-                        match.Questions = string.Join(',', match.Card.Questions
-                            .OrderBy(o => Guid.NewGuid())
-                            .Take(match.Card.MatchQuestions)
-                            .Select(q => q.Id));
-                        _dbContext.SaveChanges();
+                                _dbContext.SaveChanges();
+
+                                var match = _dbContext.Matches.Include(m => m.Card).ThenInclude(c => c.Questions)
+                                    .Single(m => m.Id == matchId);
+                                match.StartTime = DateTime.Now;
+                                match.Questions = string.Join(',', match.Card.Questions
+                                    .OrderBy(o => Guid.NewGuid())
+                                    .Take(match.Card.MatchQuestions)
+                                    .Select(q => q.Id));
+                                _dbContext.SaveChanges();
+                            }
+
+                            var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == matchId);
+                            var confirm = new ConfirmResponseModel
+                            {
+                                MatchId = matchId,
+                                Confirmed = matchParticipants.All(p => p.Confirmed)
+                            };
+
+                            var participants = matchParticipants.Where(p => p.GamerId != gamerId).Select(p => p.GamerId)
+                                .ToList();
+
+                            tran.Commit();
+
+                            foreach (var participant in participants)
+                            {
+                                await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchConfirmed", confirm);
+                                _logger.LogInformation($"matchConfirmed for {participant}");
+                            }
+
+                            return confirm;
+                        }
                     }
-
-                    var confirm = new ConfirmResponseModel
+                    catch (Exception e)
                     {
-                        MatchId = matchId,
-                        Confirmed = matchParticipants.All(p => p.Confirmed)
-                    };
-
-                    var participants = matchParticipants.Where(p => p.GamerId != gamerId).Select(p => p.GamerId)
-                        .ToList();
-
-                    foreach (var participant in participants)
-                    {
-                        await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchConfirmed", confirm);
+                        _logger.LogError(e, $"Error {gamerId}");
+                        tran.Rollback();
                     }
-
-                    return confirm;
                 }
 
                 throw new Exception("Match not found.");

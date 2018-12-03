@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RobiGroup.AskMeFootball.Data;
 
 namespace RobiGroup.AskMeFootball.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181202134900_AddedMatchReadyCancelColumn")]
+    partial class AddedMatchReadyCancelColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,7 +322,8 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("AnswerId");
+                    b.Property<int?>("AnswerId")
+                        .IsRequired();
 
                     b.Property<DateTime>("CreatedAt");
 
@@ -332,7 +335,7 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("MatchGamerId", "QuestionId");
+                    b.HasAlternateKey("MatchGamerId", "QuestionId", "AnswerId");
 
                     b.HasIndex("AnswerId");
 
@@ -501,7 +504,8 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                 {
                     b.HasOne("RobiGroup.AskMeFootball.Data.QuestionAnswer", "Answer")
                         .WithMany()
-                        .HasForeignKey("AnswerId");
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("RobiGroup.AskMeFootball.Data.MatchGamer", "MatchGamer")
                         .WithMany("Answers")

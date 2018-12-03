@@ -78,7 +78,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CardScore = gc.Score,
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
-                    Raiting = _dbContext.GamerCards.Count(gr => gr.Score > gc.Score) + 1,
+                    Raiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == id).Count(gr => gr.Score > gc.Score) + 1,
                 });
 
             return Ok(gamers);

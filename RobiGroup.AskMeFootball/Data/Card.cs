@@ -58,6 +58,10 @@ namespace RobiGroup.AskMeFootball.Data
 
         public bool Confirmed { get; set; }
 
+        public bool Ready { get; set; }
+
+        public bool Cancel { get; set; }
+
         public DateTime? JoinTime { get; set; }
 
         public int Score { get; set; }
@@ -83,7 +87,7 @@ namespace RobiGroup.AskMeFootball.Data
 
         public int QuestionId { get; set; }
 
-        public int AnswerId { get; set; }
+        public int? AnswerId { get; set; }
 
         public bool IsCorrectAnswer { get; set; }
 
