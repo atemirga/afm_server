@@ -153,15 +153,25 @@ namespace RobiGroup.AskMeFootball.Controllers
         {
             if (ModelState.IsValid)
             {
-                var gamerId = User.GetUserId();
-                var match = (from m in _dbContext.Matches
-                    join g in _dbContext.MatchGamers on m.Id equals g.MatchId
-                    where m.Id == id && g.GamerId == gamerId
-                    select m).FirstOrDefault();
+                var userId = User.GetUserId();
+                var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                    m.GamerId == userId && m.MatchId == id);
 
-                if (match != null)
+                if (matchParticipant != null && !matchParticipant.Cancel)
                 {
-                    //match.
+                    _logger.LogInformation($"Match {id} canceled from {userId}");
+                    matchParticipant.Cancel = true;
+                    _dbContext.SaveChanges();
+
+                    var matchParticipants = _dbContext.MatchGamers
+                                                .Where(p => p.MatchId == id && p.GamerId == userId)
+                                                .Select(p => p.GamerId).ToList();
+
+                    foreach (var participant in matchParticipants)
+                    {
+                        await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchCanceled", new { id, gamerId = userId });
+                        _logger.LogInformation($"matchCanceled {id} for {participant}");
+                    }
                 }
 
                 return Ok();
