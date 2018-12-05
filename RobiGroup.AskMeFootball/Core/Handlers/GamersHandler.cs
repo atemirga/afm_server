@@ -73,7 +73,6 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                 var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
                 if (_pausedMatches.TryRemove(gamerId, out var pausedMatch))
                 {
-                    _logger.LogWarning($"Resume match for: {gamerId}, match: {pausedMatch.MatchId}");
                     var resumeMatch = DateTime.Now - pausedMatch.PausedTime < _matchOptions.MatchPauseDuration;
 
                     var gamers = dbContext.MatchGamers.Where(g => !g.Cancelled && g.IsPlay);
@@ -82,6 +81,8 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                     {
                         if (resumeMatch)
                         {
+
+                            _logger.LogWarning($"matchResumed for: {game.GamerId}, match: {pausedMatch.MatchId}");
                             await InvokeClientMethodToGroupAsync(game.GamerId, "matchResumed",
                                 new {id = game.MatchId, gamerId});
                         }
@@ -91,6 +92,9 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                             {
                                 game.Cancelled = true;
                             }
+
+
+                            _logger.LogWarning($"matchStoped for: {game.GamerId}, match: {pausedMatch.MatchId}");
                             await InvokeClientMethodToGroupAsync(game.GamerId, "matchStoped",
                                 new {id = game.MatchId, gamerId});
                         }
@@ -115,6 +119,7 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
 
                     foreach (var gamer in matchGamers)
                     {
+                        _logger.LogWarning($"matchStoped for: {gamer.GamerId}, match: {pausedMatch.MatchId}");
                         await InvokeClientMethodToGroupAsync(gamer.GamerId, "matchStoped", new { id = gamer.MatchId, gamer.GamerId });
                     }
                 }
