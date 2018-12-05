@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RobiGroup.AskMeFootball.Common.Options;
+using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.AskMeFootball.Data;
 
@@ -17,25 +18,31 @@ namespace RobiGroup.AskMeFootball.Core.Game
     internal class GameTimerService : IHostedService, IDisposable
     {
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly GamersHandler _gamersHandler;
         private readonly ILogger _logger;
+        private readonly MatchOptions _matchOptions;
         private Timer _timer;
+
+        private bool firstRun = true;
 
         private object _locker = new object();
 
         private DateTime _gamersDailyScoresLastResetTime = DateTime.MinValue;
 
-        public GameTimerService(IServiceScopeFactory scopeFactory, ILogger<GameTimerService> logger)
+        public GameTimerService(IServiceScopeFactory scopeFactory, GamersHandler gamersHandler, ILogger<GameTimerService> logger, IOptions<MatchOptions> matchOptions)
         {
             _scopeFactory = scopeFactory;
+            _gamersHandler = gamersHandler;
             _logger = logger;
+            _matchOptions = matchOptions.Value;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Timed Game Service is starting.");
 
-            _timer = new Timer(DoWork, null, TimeSpan.Zero,
-                TimeSpan.FromSeconds(5));
+            _timer = new Timer(DoWork, null, TimeSpan.FromSeconds(30),
+                TimeSpan.FromSeconds(10));
 
             return Task.CompletedTask;
         }
@@ -47,6 +54,10 @@ namespace RobiGroup.AskMeFootball.Core.Game
             {
                 using (var scope = _scopeFactory.CreateScope())
                 {
+                    //ResetCurrentMatches(scope.ServiceProvider).Wait();
+
+                    _gamersHandler.ResumeMatchForAll().Wait();
+
                     ResetCardGamers(scope.ServiceProvider);
 
                     ResetGamerDailyScores(scope.ServiceProvider).Wait();
@@ -55,6 +66,32 @@ namespace RobiGroup.AskMeFootball.Core.Game
             catch (Exception e)
             {
                 _logger.LogError(e, "ERROR");
+            }
+        }
+
+        private async Task ResetCurrentMatches(IServiceProvider serviceProvider)
+        {
+            if (firstRun)
+            {
+                firstRun = false;
+
+                var dbContext = serviceProvider.GetService<ApplicationDbContext>();
+
+                var matchGamers = dbContext.MatchGamers.Where(g => g.IsPlay);
+                foreach (var matchGamer in matchGamers)
+                {
+                    matchGamer.IsPlay = false;
+                    matchGamer.Cancelled = true;
+                    _logger.LogWarning("Match {0} cancelled for game {1} by server.", matchGamer.MatchId, matchGamer.GamerId);
+                }
+
+                dbContext.SaveChanges();
+
+                foreach (var gamer in matchGamers)
+                {
+                    await _gamersHandler.InvokeClientMethodToGroupAsync(gamer.GamerId, "matchStoped", new { id = gamer.MatchId, gamer.GamerId });
+                }
+                // dbContext.MatchGamers.Whe
             }
         }
 

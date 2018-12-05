@@ -55,9 +55,16 @@ namespace RobiGroup.AskMeFootball.Controllers
         {
             if (ModelState.IsValid)
             {
-                var match = await _matchManager.SearchMatch(User.GetUserId(), id);
+                try
+                {
+                    var match = await _matchManager.SearchMatch(User.GetUserId(), id);
 
-                return Ok(match);
+                    return Ok(match);
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError(string.Empty, e.Message);
+                }
             }
 
             return BadRequest(ModelState);
@@ -157,10 +164,10 @@ namespace RobiGroup.AskMeFootball.Controllers
                 var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
                     m.GamerId == userId && m.MatchId == id);
 
-                if (matchParticipant != null && !matchParticipant.Cancel)
+                if (matchParticipant != null && !matchParticipant.Cancelled)
                 {
                     _logger.LogInformation($"Match {id} canceled from {userId}");
-                    matchParticipant.Cancel = true;
+                    matchParticipant.Cancelled = true;
                     _dbContext.SaveChanges();
 
                     var matchParticipants = _dbContext.MatchGamers
@@ -231,8 +238,17 @@ namespace RobiGroup.AskMeFootball.Controllers
             {
                 string userId = User.GetUserId();
                 var matchGamer = _dbContext.MatchGamers.Single(g => g.MatchId == id && g.GamerId == userId);
-                if (matchGamer.IsPlay)
+
+                if (matchGamer.Cancelled)
+                {
+                    ModelState.AddModelError(string.Empty, "Матч отменен.");
+                }
+                else if (!matchGamer.IsPlay)
                 {   
+                    ModelState.AddModelError(string.Empty, "Матч закончен.");
+                }
+                else
+                {
                     var match = _dbContext.Matches.Find(id);
                     var matchQuestions = match.Questions.SplitToIntArray();
 
@@ -244,7 +260,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                         _dbContext.MatchAnswers.Add(new MatchAnswer
                         {
                             QuestionId = answer.QuestionId,
-                            AnswerId = answer.AnswerId > 0 ? answer.AnswerId : (int?) null,
+                            AnswerId = answer.AnswerId > 0 ? answer.AnswerId : (int?)null,
                             CreatedAt = DateTime.Now,
                             MatchGamerId = matchGamer.Id,
                             IsCorrectAnswer = isCorrectAnswer
@@ -257,13 +273,13 @@ namespace RobiGroup.AskMeFootball.Controllers
                         var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id);
 
                         var answers = (from a in _dbContext.MatchAnswers
-                            join g in _dbContext.MatchGamers on a.MatchGamerId equals g.Id
-                            where g.MatchId == id && a.QuestionId == answer.QuestionId
-                            select new MatchQuestionAnswerResponse
-                            {
-                                GamerId = g.GamerId,
-                                IsCorrect = a.IsCorrectAnswer
-                            });
+                                       join g in _dbContext.MatchGamers on a.MatchGamerId equals g.Id
+                                       where g.MatchId == id && a.QuestionId == answer.QuestionId
+                                       select new MatchQuestionAnswerResponse
+                                       {
+                                           GamerId = g.GamerId,
+                                           IsCorrect = a.IsCorrectAnswer
+                                       });
 
                         if (matchParticipants == answers.Count())
                         {
@@ -275,10 +291,10 @@ namespace RobiGroup.AskMeFootball.Controllers
                         }
 
                         return Ok();
-                    }    
-                }
+                    }
 
-                return Ok();
+                    return Ok();
+                }
             }
 
             return BadRequest(ModelState);

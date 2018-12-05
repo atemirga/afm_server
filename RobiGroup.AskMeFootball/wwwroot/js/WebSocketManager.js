@@ -174,6 +174,10 @@ var WebSocketManager = (function () {
         var onSocketMessage = function (message) {
             console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
             console.log(message);
+            try {
+                console.log(JSON.parse(message.data));
+            } catch (e) {
+            }
             // CONNECTION EVENT
             if (message.MessageType === Message.ConnectionEvent) {
                 // we received the unique identifier from the server.

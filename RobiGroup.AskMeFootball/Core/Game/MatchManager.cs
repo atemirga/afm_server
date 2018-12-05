@@ -14,6 +14,7 @@ using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Match;
 using RobiGroup.Web.Common;
+using WebSocketManager;
 
 namespace RobiGroup.AskMeFootball.Core.Game
 {
@@ -23,8 +24,6 @@ namespace RobiGroup.AskMeFootball.Core.Game
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<MatchController> _logger;
         private readonly IServiceProvider _serviceProvider;
-
-        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
         public MatchManager(GamersHandler gamersHandler,
             IHttpContextAccessor httpContextAccessor,
@@ -50,11 +49,25 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     var card = _dbContext.Cards.Find(cardId);
                     if ((card.ResetTime - DateTime.Now) > TimeSpan.FromMinutes(10))
                     {
-                        var enemy = _gamersHandler.WebSocketConnectionManager.Connections.Values
-                            .Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId).OrderByDescending(c => c.ConnectedTime)
-                            .FirstOrDefault();
-                        if (enemy != null)
+                        var enemyCandidates = _gamersHandler.WebSocketConnectionManager.Connections.Values
+                            .Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId)
+                            .OrderByDescending(c => c.ConnectedTime)
+                            .ToList();
+
+                        CommonWebSocketConnection enemy = null;
+
+                        foreach (var candidate in enemyCandidates)
                         {
+                            if (!_dbContext.MatchGamers.Any(g => g.GamerId == candidate.UserId && (g.IsPlay)))
+                            {
+                                enemy = candidate;
+                                break;
+                            }
+                        }
+
+                        if (enemy != null && !enemy.IsBusy)
+                        {
+                            enemy.IsBusy = true;
                             var match = new Match()
                             {
                                 CardId = cardId,
@@ -81,8 +94,12 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             rivalMatchModel.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
                             rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
 
-                            var gamerCardScore = _dbContext.GamerCards.Where(gc => gc.CardId == cardId && gc.GamerId == gamerId).Select(gc => gc.Score).SingleOrDefault();
-                            rivalMatchModel.GamerRaiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId).Count(gr => gr.Score > gamerCardScore) + 1;
+                            var gamerCardScore = _dbContext.GamerCards
+                                .Where(gc => gc.CardId == cardId && gc.GamerId == gamerId).Select(gc => gc.Score)
+                                .SingleOrDefault();
+                            rivalMatchModel.GamerRaiting =
+                                _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId)
+                                    .Count(gr => gr.Score > gamerCardScore) + 1;
                             rivalMatchModel.GamerCardScore = gamerCardScore;
 
                             await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest",
@@ -94,15 +111,23 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             model.Match.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
                             model.Match.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
 
-                            var rivaCardScore = _dbContext.GamerCards.Where(gc => gc.CardId == cardId && gc.GamerId == enemy.UserId).Select(gc => gc.Score).SingleOrDefault();
-                            model.Match.GamerRaiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId).Count(gr => gr.Score > rivaCardScore) + 1;
+                            var rivaCardScore = _dbContext.GamerCards
+                                .Where(gc => gc.CardId == cardId && gc.GamerId == enemy.UserId).Select(gc => gc.Score)
+                                .SingleOrDefault();
+                            model.Match.GamerRaiting =
+                                _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId)
+                                    .Count(gr => gr.Score > rivaCardScore) + 1;
                             model.Match.GamerCardScore = rivaCardScore;
                         }
                         else
                         {
-                            throw new Exception("No enemy error.");
+                            throw new Exception("Никого не найдено!");
                         }
                     }
+                }
+                else
+                {
+                    throw new Exception($"Недостаточно очков для игры. У вас {gamer.Score} очков.");
                 }
 
                 return model;
