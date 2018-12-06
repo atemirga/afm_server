@@ -71,6 +71,46 @@ namespace RobiGroup.AskMeFootball.Controllers
         }
 
         /// <summary>
+        /// Принять матч
+        /// </summary>
+        /// <param name="id">ID матча</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("{id}/accept")]
+        [ProducesResponseType(typeof(ConfirmResponseModel), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Accept(int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var userId = User.GetUserId();
+                var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                    m.GamerId == userId && m.MatchId == id);
+
+                if (matchParticipant != null 
+                    && !matchParticipant.Cancelled 
+                    && !matchParticipant.Confirmed)
+                {
+                    _logger.LogInformation($"Match {id} accepted by {userId}");
+
+                    var matchParticipants = _dbContext.MatchGamers
+                        .Where(p => p.MatchId == id && p.GamerId != userId)
+                        .Select(p => p.GamerId).ToList();
+
+                    foreach (var participant in matchParticipants)
+                    {
+                        await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchAccepted", new { id, gamerId = userId });
+                        _logger.LogInformation($"matchAccepted {id} by {userId} for {participant}");
+                    }
+
+                    return Ok();
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        /// <summary>
         /// Потвердить матч
         /// </summary>
         /// <param name="id">ID матча</param>
@@ -171,13 +211,13 @@ namespace RobiGroup.AskMeFootball.Controllers
                     _dbContext.SaveChanges();
 
                     var matchParticipants = _dbContext.MatchGamers
-                                                .Where(p => p.MatchId == id && p.GamerId == userId)
+                                                .Where(p => p.MatchId == id && p.GamerId != userId)
                                                 .Select(p => p.GamerId).ToList();
 
                     foreach (var participant in matchParticipants)
                     {
                         await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchCanceled", new { id, gamerId = userId });
-                        _logger.LogInformation($"matchCanceled {id} for {participant}");
+                        _logger.LogInformation($"matchCanceled {id} by {userId} for {participant}");
                     }
                 }
 
@@ -278,7 +318,9 @@ namespace RobiGroup.AskMeFootball.Controllers
                                        select new MatchQuestionAnswerResponse
                                        {
                                            GamerId = g.GamerId,
-                                           IsCorrect = a.IsCorrectAnswer
+                                           IsCorrect = a.IsCorrectAnswer,
+                                           QuestionId = a.QuestionId,
+                                           AnswerId = a.AnswerId ?? 0
                                        });
 
                         if (matchParticipants == answers.Count())

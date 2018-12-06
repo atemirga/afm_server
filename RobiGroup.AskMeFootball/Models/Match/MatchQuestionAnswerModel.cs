@@ -7,7 +7,7 @@
         public int AnswerId { get; set; }
     }
 
-    public class MatchQuestionAnswerResponse
+    public class MatchQuestionAnswerResponse : MatchQuestionAnswerModel
     {
         public string GamerId { get; set; }
 

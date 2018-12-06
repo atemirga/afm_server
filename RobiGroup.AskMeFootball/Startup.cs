@@ -263,6 +263,8 @@ namespace RobiGroup.AskMeFootball
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AskMeFootball API");
                 c.RoutePrefix = "swagger";
 
+                c.ConfigObject.Add("env", Environment.MachineName);
+
                 c.InjectJavascript("/js/WebSocketManager.js");
                 c.InjectJavascript("/js/swagger.websocket.js");
             });
