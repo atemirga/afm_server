@@ -43,6 +43,28 @@ namespace RobiGroup.AskMeFootball.Controllers
             _gamersHandler = gamersHandler;
         }
 
+        [HttpGet("history")]
+        public IActionResult History(int page)
+        {
+            string gamerId = User.GetUserId();
+
+            return Ok((from g in _dbContext.MatchGamers
+                join m in _dbContext.Matches on g.MatchId equals m.Id
+                join c in _dbContext.Cards on m.CardId equals c.Id
+                join rg in _dbContext.MatchGamers on m.Id equals rg.MatchId
+                join ru in _dbContext.Users on rg.GamerId equals ru.Id
+                where g.GamerId == gamerId && rg.GamerId != gamerId
+                select new MatchHistoryModel
+                {
+                    Id = m.Id,
+                    CardName = c.Name,
+                    Score = g.Score,
+                    PhotoUrl = ru.PhotoUrl,
+                    GamerName = ru.NickName,
+                    IsWon = g.IsWinner
+                }).ToList());
+        }
+
         /// <summary>
         /// Поиск соперника
         /// </summary>
