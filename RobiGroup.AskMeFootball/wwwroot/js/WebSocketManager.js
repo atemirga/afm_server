@@ -179,22 +179,22 @@ var WebSocketManager = (function () {
             } catch (e) {
             }
             // CONNECTION EVENT
-            if (message.MessageType === Message.ConnectionEvent) {
+            if (message.messageType === Message.ConnectionEvent) {
                 // we received the unique identifier from the server.
-                _this.id = message.Data;
+                _this.id = message.data;
                 // public event:
                 if (_this.onConnected !== undefined) _this.onConnected(_this.id);
             }
 
             // TEXT EVENT
-            else if (message.MessageType === Message.Text) {
+            else if (message.messageType === Message.Text) {
                 // public event:
-                if (_this.onMessage !== undefined) _this.onMessage(message.Data);
+                if (_this.onMessage !== undefined) _this.onMessage(message.data);
             }
 
             // METHOD INVOCATION EVENT
-            else if (message.MessageType === Message.MethodInvocation) {
-                var data = JSON.parse(message.Data);
+            else if (message.messageType === Message.MethodInvocation) {
+                var data = JSON.parse(message.data);
                 // find the method.
                 if (_this.methods[data.methodName] !== undefined) {
                     // call the method and catch any exceptions.
@@ -226,8 +226,8 @@ var WebSocketManager = (function () {
             }
 
             // METHOD RETURN VALUE EVENT
-            else if (message.MessageType === Message.MethodReturnValue) {
-                var data = JSON.parse(message.Data);
+            else if (message.messageType === Message.MethodReturnValue) {
+                var data = JSON.parse(message.data);
                 // find the waiting remote invocation.
                 var callback = waitingRemoteInvocations[data.identifier];
                 // remove it from the waiting list.

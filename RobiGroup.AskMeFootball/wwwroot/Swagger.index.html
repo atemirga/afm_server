@@ -26,6 +26,10 @@
             margin: 0;
             background: #fafafa;
         }
+
+        .header span {
+            margin: 5px;
+        }
     </style>
     %(HeadContent)
 </head>
@@ -65,14 +69,30 @@
 
         </defs>
     </svg>
-
-    <div id="swagger-ui"></div>
+    
     <div class="swagger-ui">
         <div class="wrapper">
-            <h4>Подключение к WebSocket</h4>
-            <p></p>
+
+            <section class="block col-12 block-desktop col-12-desktop">
+                <section class="models is-open">
+                    <h4 class="header">
+                        <span>Игра <span id="title"></span><span id="my-score" style="float: right;"></span><span id="enemy" style="float: right;"></span><span id="enemy-score" style="float: right;"></span></span>
+                        <div class="auths"></div>
+                    </h4>
+                    <div style="height: auto; border: none; margin: 0px; padding: 0px;"><!-- react-text: 481 --> <!-- /react-text -->
+                        <div class="block-desktop col-6-desktop">
+                            <button id="btn-seacrh" type="button" class="btn hidden">Search</button>
+                            <button id="btn-confirm" type="button" class="btn execute">Confirm</button>
+                            <button id="btn-accept" type="button" class="btn execute">Accept</button>
+                        </div>
+                        <div id="question" class="block col-6">
+                        </div>
+                    </div>
+                </section>
+            </section>
         </div>
     </div>
+    <div id="swagger-ui"></div>
 
 <!-- Workaround for https://github.com/swagger-api/swagger-editor/issues/1371 -->
     <script>
@@ -81,15 +101,273 @@
             window.fetch = undefined;
         }
     </script>
-
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="./swagger-ui-bundle.js"></script>
     <script src="./swagger-ui-standalone-preset.js"></script>
 <script>
+
+    var _tokens;
+    var _token;
+
     var swaggerUi;
+
+    function requestInterceptorCallback(request) {
+        console.log(request);
+        if (request.url.indexOf('/token') > -1) {
+            request.responseInterceptor = function(res) {
+                if (res.ok && res.obj.token) {
+                    // swaggerUi.authActions.authorize({ Bearer: { name: 'Bearer', value: 'Bearer ' + res.obj.token }});
+                }
+            }
+        }
+
+        if (_token) {
+            request.headers = {
+                'Authorization': 'Bearer ' + _token
+            };
+        }
+    }
+
+    function initGame(configObject) {
+        if (configObject.env == 'DEV-PC') {
+            _tokens = {
+                '77070000000':
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZkYTQ0NDRiLWM1ODMtNDA2Mi04NDVlLTFiNGVkNjAwNDY0OSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIyIiwiaHR0cDovL3JvYmkuZ3JvdXAvY2xhaW1zL3Bob25lY29uZmlybWVkIjoiVHJ1ZSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9oYXNwYXNzd29yZCI6IlRydWUiLCJqdGkiOiJiYmY4NWZkMS0yMmRjLTRjOGYtOWVlYi01Mzc3OWQ0YmQzZTciLCJpYXQiOjE1NDE2NjYzMTEsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkdhbWVyIiwibmJmIjoxNTQxNjY2MzExLCJleHAiOjE1NTQ2MjYzMTEsImlzcyI6IkFza01lRm9vdGJhbGxJc3N1ZXIiLCJhdWQiOiJBc2tNZUZvb3RiYWxsQXVkaWVuY2UifQ.D3jFkU9KZF-YSwRPDFjMSoHiSp5P2-T013bVpbqfB84',
+                '77078193563':
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6Ijk3ZDU5OTE3LWI0YjktNDA1My1hMTQ2LTA1ZGQwYjY5MzA0ZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIxIiwiaHR0cDovL3JvYmkuZ3JvdXAvY2xhaW1zL3Bob25lY29uZmlybWVkIjoiVHJ1ZSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9oYXNwYXNzd29yZCI6IlRydWUiLCJqdGkiOiIwZjk4ZjJmNy01OGNmLTRlZDItOWY4ZC04OWRjMGMwYWIxYjIiLCJpYXQiOjE1NDE2NjY0NDIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkdhbWVyIiwibmJmIjoxNTQxNjY2NDQyLCJleHAiOjE1NTQ2MjY0NDIsImlzcyI6IkFza01lRm9vdGJhbGxJc3N1ZXIiLCJhdWQiOiJBc2tNZUZvb3RiYWxsQXVkaWVuY2UifQ.vsxnrB7IaeU1_HfDxFRwKpd1x4_F5vjr6P8ysPe_RwA'
+            }
+        }
+
+        $('.auths').append($('<button type="button" class="btn btn-login" />').text('Login'));
+
+        if (_tokens) {
+            for (var token in _tokens) {
+                // skip loop if the property is from prototype
+
+                $('.auths').append($('<button type="button" class="btn btn-auth" />').attr('token', token).text('Login ' + token));
+            }
+        }
+
+        $('.btn-auth').click(function() {
+            _token = _tokens[$(this).attr('token')];
+            authSwaggerCustom(_token);
+        });
+
+        $('.btn-login').click(function () {
+
+            var phone = prompt('Enter phone number:');
+            var password = prompt('Enter password:');
+
+            $.ajax({
+                url: '/token',
+                method: 'GET',
+                data: {
+                    username: phone,
+                    password: password
+                }
+            }).done(function(response) {
+                _token = response.token;
+                authSwaggerCustom(_token);
+            });
+        });
+
+        $.ajaxSetup({
+            beforeSend: function (xhr)
+            {
+                xhr.setRequestHeader("Accept","application/json");
+                xhr.setRequestHeader("Authorization","Bearer " + _token);        
+            }
+        });
+
+        $('#btn-accept, #btn-seacrh, #btn-confirm').hide();
+
+
+        $('#btn-seacrh').click(function() {
+            $('#title').text('Seacrhing game...');
+            $('#btn-seacrh').prop("disabled", true);
+            $.ajax({
+                url: '/api/match/1/search',
+                method: 'POST'
+            }).done(function(response) {
+                $('#btn-seacrh').hide();
+                match = response.match;
+                $('#enemy').text(match.gamerName);
+            }).fail(function() {
+                $('#btn-seacrh').prop("disabled", false);
+            });
+        });
+
+        $('#btn-accept').click(function() {
+            $('#btn-accept').hide();
+            $('#btn-confirm').show();
+            $('#title').text('Match accepted!');
+            $.ajax({
+                url: '/api/match/' + match.matchId + '/accept',
+                method: 'POST'
+            });
+        });
+
+        $('#btn-confirm').click(function() {
+            $('#btn-confirm').hide();
+            $('#title').text('Match confirmed!');
+            $.ajax({
+                url: '/api/match/' + match.matchId + '/confirm',
+                method: 'POST'
+            }).done(function (response) {
+                if (response.confirmed) {
+                    loadQuestions();
+                }
+            });
+        });
+    }
+
+    function loadQuestions() {
+        $.ajax({
+            url: '/api/match/' + match.matchId + '/questions',
+            method: 'GET'
+        }).done(function (response) {
+            match.questions = response;
+            sendReady();
+        });
+    }
+
+    function sendReady() {
+        $.ajax({
+            url: '/api/match/' + match.matchId + '/ready',
+            method: 'POST'
+        }).done(function (response) {
+           
+        });
+    }
+
+    function nextQuestion() {
+
+        if (match.currentQuestion < match.questions.length) {
+            var question = match.questions[match.currentQuestion];
+
+            $('#question').empty()
+                .append($('<p/>').text(question.text));
+
+            question.answers.forEach(function(item, i) {
+                var $answer = $('<button class="btn"></button>').text(item.text).attr('data-id', item.id);
+                $answer.click(function() {
+                    $('#question button').prop("disabled", true);
+                    var answerId = $(this).css('background', '#61affe').attr('data-id');
+                    $.ajax({
+                        url: '/api/match/' + match.matchId + '/answers',
+                        method: 'POST',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify({
+                            "questionId": question.id,
+                            "answerId": answerId
+                        })
+                }).done(function(response) {
+                });
+                });
+                $('#question').append($('<p/>').html($answer));
+            });
+
+            match.currentQuestion++;
+        } else {
+            $('#title').text('END!');
+
+            $.ajax({
+                url: '/api/match/' + match.matchId + '/result',
+                method: 'GET'
+            }).done(function (response) {
+                var $res = $('<ul/>');
+
+                for (var key in response) {
+                    $res.append($('<li/>').text(key + ': ' + response[key]));
+                }
+
+                $('#question').html($res);
+            });
+        }
+    }
+
+    var match;
+
+    var wsconnection;
+    function authSwaggerCustom(token) {
+
+        if (wsconnection) {
+            wsconnection.onDisconnected = undefined;
+            wsconnection.socket.close();
+        }
+
+        wsconnection = new WebSocketManager((location.protocol == "https:" ? "wss://" : "ws://") + location.host + "/game?token=" + token);
+
+        // optional.
+        // called when the connection has been established together with your id.
+        wsconnection.onConnected = (id) => {
+            appendItem("-> You are now connected! Connection ID: " + wsconnection.id);
+            $('#btn-seacrh').show();
+            $('#title').text('Online!');
+        }
+        // optional.
+        // called when the connection to the server has been lost.
+        wsconnection.onDisconnected = () => {
+            appendItem("-> Disconnected!");
+        };
+
+        wsconnection.methods.matchRequest = function (request) {
+            match = request;
+            $('#title').text('Match request?');
+            $('#enemy').text(match.gamerName);
+            $('#btn-seacrh').hide();
+            $('#btn-accept').show();
+        };
+
+        wsconnection.methods.matchAccepted = function (response) {
+            $('#title').text('Match accepted! ');
+            $('#btn-confirm').show();
+        };
+
+        wsconnection.methods.matchConfirmed = function (response) {
+            if (response.confirmed) {
+                loadQuestions();
+            }
+        };
+
+        wsconnection.methods.matchStarted = function (request) {
+            console.log('matchStarted at:' + new Date());
+            $('#title').text('Match STARTED!!!!! ');
+            match.currentQuestion = 0;
+            $('#enemy-score').text(0);
+            $('#my-score').text(0);
+            nextQuestion();
+        };
+
+        wsconnection.methods.questionAnswersResult = function (results) {
+            
+            results.forEach(function(item, i) {
+                        
+                if (item.gamerId == match.gamerId) {
+                    var enemyScore = parseInt($('#enemy-score').text());
+                    $('#enemy-score').text(enemyScore +
+                        (item.isCorrect ? match.correctAnswerScore : match.incorrectAnswerScore));
+                } else {
+                    var myScore = parseInt($('#my-score').text());
+                    $('#my-score').text(myScore +
+                        (item.isCorrect ? match.correctAnswerScore : match.incorrectAnswerScore));
+                    $('button[data-id=' + item.answerId + ']').css('background', item.isCorrect ? '#49cc90' : '#f91100');
+                }
+            });
+
+            setTimeout(function() {
+                nextQuestion();
+            }, 1500);
+        };
+        
+        wsconnection.connect();
+    }
+
     window.onload = function () {
         var configObject = JSON.parse('%(ConfigObject)');
         var oauthConfigObject = JSON.parse('%(OAuthConfigObject)');
-
+        
         configObject.requestInterceptor = function (request) {
             if (typeof requestInterceptorCallback === 'function')
                 return requestInterceptorCallback(request);
@@ -129,6 +407,8 @@
 
         // Apply OAuth config
         ui.initOAuth(oauthConfigObject);
+
+        initGame(configObject);
     }
 </script>
 </body>
