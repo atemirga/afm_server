@@ -43,6 +43,11 @@ namespace RobiGroup.AskMeFootball.Controllers
             _gamersHandler = gamersHandler;
         }
 
+        /// <summary>
+        /// История игр
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
         [HttpGet("history")]
         public IActionResult History(int page)
         {
@@ -53,7 +58,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 join c in _dbContext.Cards on m.CardId equals c.Id
                 join rg in _dbContext.MatchGamers on m.Id equals rg.MatchId
                 join ru in _dbContext.Users on rg.GamerId equals ru.Id
-                where g.GamerId == gamerId && rg.GamerId != gamerId
+                where g.JoinTime.HasValue && !g.IsPlay && g.GamerId == gamerId && rg.GamerId != gamerId
                 select new MatchHistoryModel
                 {
                     Id = m.Id,
@@ -230,10 +235,20 @@ namespace RobiGroup.AskMeFootball.Controllers
                 {
                     _logger.LogInformation($"Match {id} canceled from {userId}");
                     matchParticipant.Cancelled = true;
+
+                    var matchGamers = _dbContext.MatchGamers
+                        .Where(p => p.MatchId == id && p.GamerId != userId);
+
+                    if (!matchParticipant.Ready)
+                    {
+                        foreach (var matchGamer in matchGamers)
+                        {
+                            matchGamer.Cancelled = true;
+                        }
+                    }
                     _dbContext.SaveChanges();
 
-                    var matchParticipants = _dbContext.MatchGamers
-                                                .Where(p => p.MatchId == id && p.GamerId != userId)
+                    var matchParticipants = matchGamers
                                                 .Select(p => p.GamerId).ToList();
 
                     foreach (var participant in matchParticipants)

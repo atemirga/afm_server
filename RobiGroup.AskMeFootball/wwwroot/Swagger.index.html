@@ -76,13 +76,14 @@
             <section class="block col-12 block-desktop col-12-desktop">
                 <section class="models is-open">
                     <h4 class="header">
-                        <span>Игра <span id="title"></span><span id="my-score" style="float: right;"></span><span id="enemy" style="float: right;"></span><span id="enemy-score" style="float: right;"></span></span>
+                        <span>Игра: <span id="user"></span> <span id="title"></span><span id="my-score" style="float: right;"></span><span id="enemy" style="float: right;"></span><span id="enemy-score" style="float: right;"></span></span>
                         <div class="auths"></div>
                     </h4>
                     <div style="height: auto; border: none; margin: 0px; padding: 0px;"><!-- react-text: 481 --> <!-- /react-text -->
                         <div class="block-desktop col-6-desktop">
                             <button id="btn-seacrh" type="button" class="btn hidden">Search</button>
                             <button id="btn-confirm" type="button" class="btn execute">Confirm</button>
+                            <button id="btn-cancel" type="button" class="btn cancel">Cancel</button>
                             <button id="btn-accept" type="button" class="btn execute">Accept</button>
                         </div>
                         <div id="question" class="block col-6">
@@ -136,6 +137,13 @@
                 '77078193563':
                     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6Ijk3ZDU5OTE3LWI0YjktNDA1My1hMTQ2LTA1ZGQwYjY5MzA0ZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIxIiwiaHR0cDovL3JvYmkuZ3JvdXAvY2xhaW1zL3Bob25lY29uZmlybWVkIjoiVHJ1ZSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9oYXNwYXNzd29yZCI6IlRydWUiLCJqdGkiOiIwZjk4ZjJmNy01OGNmLTRlZDItOWY4ZC04OWRjMGMwYWIxYjIiLCJpYXQiOjE1NDE2NjY0NDIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkdhbWVyIiwibmJmIjoxNTQxNjY2NDQyLCJleHAiOjE1NTQ2MjY0NDIsImlzcyI6IkFza01lRm9vdGJhbGxJc3N1ZXIiLCJhdWQiOiJBc2tNZUZvb3RiYWxsQXVkaWVuY2UifQ.vsxnrB7IaeU1_HfDxFRwKpd1x4_F5vjr6P8ysPe_RwA'
             }
+        } else if (configObject.env == 'BEYBITWIN10') {
+            _tokens = {
+                '77078193563':
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdlMWQwNTMxLTU0ZjQtNDcxZS04MzU0LTYxZWE1YjQ2YjdmOCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIwMSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9waG9uZWNvbmZpcm1lZCI6IlRydWUiLCJodHRwOi8vcm9iaS5ncm91cC9jbGFpbXMvaGFzcGFzc3dvcmQiOiJGYWxzZSIsImp0aSI6IjUyNDgwYTdhLTIxMTAtNDYxNC1hNTI2LTE3NWU0NWMzNTExYSIsImlhdCI6MTU0MTI1Nzc0NSwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiR2FtZXIiLCJuYmYiOjE1NDEyNTc3NDUsImV4cCI6MTU1NDIxNzc0NSwiaXNzIjoiQXNrTWVGb290YmFsbElzc3VlciIsImF1ZCI6IkFza01lRm9vdGJhbGxBdWRpZW5jZSJ9.DepSeNOItjxsEd0dTm23_FncglL0h4sp8zwZwajyb48',
+                '77474828690':
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjA4ZTlmZDhhLTM1OGEtNDMyNi04YzZmLTA0MjE4Yzk4MzFkZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIxMSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9waG9uZWNvbmZpcm1lZCI6IlRydWUiLCJodHRwOi8vcm9iaS5ncm91cC9jbGFpbXMvaGFzcGFzc3dvcmQiOiJGYWxzZSIsImp0aSI6IjAzN2UwMjYxLWY1MjYtNGE1Ni1hNjQxLTg4M2FmNzg0MzE4MSIsImlhdCI6MTU0MTI1Nzk0OCwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiR2FtZXIiLCJuYmYiOjE1NDEyNTc5NDgsImV4cCI6MTU1NDIxNzk0OCwiaXNzIjoiQXNrTWVGb290YmFsbElzc3VlciIsImF1ZCI6IkFza01lRm9vdGJhbGxBdWRpZW5jZSJ9.yBEVifuBuMJ9XR_QdQnOgX6Zga2GGXyC4qspETOIFic'
+            }
         }
 
         $('.auths').append($('<button type="button" class="btn btn-login" />').text('Login'));
@@ -146,6 +154,12 @@
 
                 $('.auths').append($('<button type="button" class="btn btn-auth" />').attr('token', token).text('Login ' + token));
             }
+        }
+
+        _token = sessionStorage.getItem('token');
+        if (_token) {
+            authSwaggerCustom(_token);
+            $('#user').text(sessionStorage.getItem('user'));
         }
 
         $('.btn-auth').click(function() {
@@ -168,6 +182,9 @@
             }).done(function(response) {
                 _token = response.token;
                 authSwaggerCustom(_token);
+                sessionStorage.setItem('token', _token);
+                sessionStorage.setItem('user', response.nickname);
+                $('#user').text(response.nickname);
             });
         });
 
@@ -179,7 +196,7 @@
             }
         });
 
-        $('#btn-accept, #btn-seacrh, #btn-confirm').hide();
+        $('#btn-accept, #btn-seacrh, #btn-confirm, #btn-cancel').hide();
 
 
         $('#btn-seacrh').click(function() {
@@ -204,6 +221,18 @@
             $.ajax({
                 url: '/api/match/' + match.matchId + '/accept',
                 method: 'POST'
+            });
+        });
+
+        $('#btn-cancel').click(function () {
+            $('#btn-cancel').hide();
+            $('#btn-accept').hide();
+            $('#title').text('Match cancelled!');
+            $.ajax({
+                url: '/api/match/' + match.matchId + '/cancel',
+                method: 'POST'
+            }).always(function() {
+                $('#btn-seacrh').show();
             });
         });
 
@@ -318,23 +347,36 @@
             $('#enemy').text(match.gamerName);
             $('#btn-seacrh').hide();
             $('#btn-accept').show();
+            $('#btn-cancel').show();
         };
 
         wsconnection.methods.matchAccepted = function (response) {
             $('#title').text('Match accepted! ');
             $('#btn-confirm').show();
+            match.accepted = true;
         };
 
         wsconnection.methods.matchConfirmed = function (response) {
             if (response.confirmed) {
+                match.confirmed = true;
                 loadQuestions();
+            }
+        };
+
+        wsconnection.methods.matchCanceled = function (response) {
+            $('#title').text('Match CANCELLED by ' + response.gamerId);
+            if (!match.started) {
+                $('#btn-seacrh').show();
             }
         };
 
         wsconnection.methods.matchStarted = function (request) {
             console.log('matchStarted at:' + new Date());
             $('#title').text('Match STARTED!!!!! ');
-            match.currentQuestion = 0;
+        
+            match.started = true;
+            h.currentQuestion = 0;
+
             $('#enemy-score').text(0);
             $('#my-score').text(0);
             nextQuestion();

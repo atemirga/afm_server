@@ -28,11 +28,4 @@ namespace RobiGroup.AskMeFootball.Data
 
         public GamerRank Rank { get; set; }
     }
-
-    public class GamerRank
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-    }
 }

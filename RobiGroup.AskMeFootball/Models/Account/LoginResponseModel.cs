@@ -13,9 +13,4 @@ namespace RobiGroup.AskMeFootball.Models.Account
         [JsonConverter(typeof(StringEnumConverter))]
         public LoginAction Action { get; set; }
     }
-
-    public enum LoginAction
-    {
-        RequestToken, ConfirmPhone
-    }
 }

@@ -33,7 +33,7 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
             IOptions<MatchOptions> matchOptions,
             ILogger<GamersHandler> logger,
             IServiceProvider serviceProvider)
-            : base(webSocketConnectionManager, new ControllerMethodInvocationStrategy(), logger)
+            : base(webSocketConnectionManager, new ControllerMethodInvocationStrategy())
         {
             _pausedMatches = new ConcurrentDictionary<string, PausedMatch>();
             _httpContextAccessor = httpContextAccessor;

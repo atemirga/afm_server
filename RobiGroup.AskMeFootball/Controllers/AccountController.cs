@@ -65,7 +65,12 @@ namespace RobiGroup.AskMeFootball.Controllers
                 try
                 {
                     var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser>>();
-                    return Ok(await authService.AuthenticateAsync(username, password));
+                    var tokenModel = await authService.AuthenticateAsync(username, password);
+
+                    var user = await _userManager.FindByNameAsync(username);
+                    tokenModel.Username = user.NickName;  
+
+                    return Ok(tokenModel);
                 }
                 catch (Exception e)
                 {

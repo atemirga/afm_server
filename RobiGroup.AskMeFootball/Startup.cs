@@ -30,12 +30,14 @@ using RobiGroup.AskMeFootball.Common.Options;
 using RobiGroup.AskMeFootball.Core.Game;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Core.Identity;
+using RobiGroup.AskMeFootball.Models.Account;
 using RobiGroup.Web.Common;
 using RobiGroup.Web.Common.Binders;
 using RobiGroup.Web.Common.Configuration;
 using RobiGroup.Web.Common.Identity;
 using RobiGroup.Web.Common.Localizer;
 using RobiGroup.Web.Common.Services;
+using RobiGroup.Web.Common.Services.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using WebSocketManager;
 
@@ -96,7 +98,7 @@ namespace RobiGroup.AskMeFootball
             .AddPhoneNumber4DigitTokenProvider();
 
             services.AddScoped<IFileService, HostingFileService>();
-            services.AddScoped<IAuthService<ApplicationUser>, AuthService<ApplicationUser>>();
+            services.AddScoped<IAuthService<ApplicationUser, AmfTokenModel>, AuthService<ApplicationUser, AmfTokenModel>>();
             services.AddTransient<ISmsSender, MobizonSmsSender>();
             services.AddSingleton<IStringLocalizerFactory, ApplicationStringLocalizerFactory<Resources>>();
 
