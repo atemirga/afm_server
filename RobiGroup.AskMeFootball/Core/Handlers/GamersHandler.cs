@@ -88,10 +88,10 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                         }
                         else
                         {
-                            if (game.GamerId != gamerId)
+                            if (game.GamerId == gamerId)
                             {
                                 game.Cancelled = true;
-                            }
+                              }
 
 
                             _logger.LogWarning($"matchStoped for: {game.GamerId}, match: {pausedMatch.MatchId}");
@@ -142,14 +142,20 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
             {
                 var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
-                var gamers = dbContext.MatchGamers.Where(g => g.GamerId != gamerId && !g.Cancelled && g.IsPlay);
+                var gamers = dbContext.MatchGamers.Where(g => g.GamerId != gamerId && !g.Cancelled && g.IsPlay).ToList();
 
-                _pausedMatches[gamerId] = new PausedMatch() { MatchId = gamers.First().MatchId, PausedTime = DateTime.Now };
-
-                foreach (var game in gamers)
+                if (gamers.Any())
                 {
-                    await InvokeClientMethodToGroupAsync(game.GamerId, "matchPaused", new { id = game.MatchId, gamerId });
+                    _pausedMatches[gamerId] =
+                        new PausedMatch() {MatchId = gamers.First().MatchId, PausedTime = DateTime.Now};
+
+                    foreach (var game in gamers)
+                    {
+                        await InvokeClientMethodToGroupAsync(game.GamerId, "matchPaused",
+                            new {id = game.MatchId, gamerId});
+                    }
                 }
+
                 //matchManager.SearchMatch( )
             }
         }

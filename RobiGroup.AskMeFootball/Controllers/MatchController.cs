@@ -329,6 +329,11 @@ namespace RobiGroup.AskMeFootball.Controllers
                     var match = _dbContext.Matches.Find(id);
                     var matchQuestions = match.Questions.SplitToIntArray();
 
+                    if (answer.QuestionId == 0)
+                    {
+                        _dbContext.MatchAnswers.Where(a => a.MatchGamerId == matchGamer.Id)
+                    }
+
                     if (matchQuestions.Contains(answer.QuestionId))
                     {
                         var correctAnswerId = _dbContext.Questions.Where(q => q.Id == answer.QuestionId)
@@ -337,7 +342,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                         _dbContext.MatchAnswers.Add(new MatchAnswer
                         {
                             QuestionId = answer.QuestionId,
-                            AnswerId = answer.AnswerId > 0 ? answer.AnswerId : (int?)null,
+                            AnswerId = (answer.AnswerId ?? 0) > 0 ? answer.AnswerId : (int?)null,
                             CreatedAt = DateTime.Now,
                             MatchGamerId = matchGamer.Id,
                             IsCorrectAnswer = isCorrectAnswer
@@ -347,18 +352,18 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                         _logger.LogInformation($"Question answer from {userId}. Question: {answer.QuestionId}, answer: {answer.AnswerId}.");
 
-                        var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id);
+                        var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id && !p.Cancelled);
 
                         var answers = (from a in _dbContext.MatchAnswers
                                        join g in _dbContext.MatchGamers on a.MatchGamerId equals g.Id
-                                       where g.MatchId == id && a.QuestionId == answer.QuestionId
+                                       where g.MatchId == id && a.QuestionId == answer.QuestionId && !g.Cancelled
                                        select new MatchQuestionAnswerResponse
                                        {
                                            GamerId = g.GamerId,
                                            IsCorrect = a.IsCorrectAnswer,
                                            QuestionId = a.QuestionId,
                                            AnswerId = a.AnswerId ?? 0
-                                       });
+                                       }).ToList();
 
                         if (matchParticipants == answers.Count())
                         {

@@ -67,7 +67,6 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
                         if (enemy != null && !enemy.IsBusy)
                         {
-                            enemy.IsBusy = true;
                             var match = new Match()
                             {
                                 CardId = cardId,

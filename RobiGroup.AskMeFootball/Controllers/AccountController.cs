@@ -81,8 +81,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
             return BadRequest(ModelState);
         }
-
-
+        
         /// <summary>
         /// Получить токен
         /// </summary>

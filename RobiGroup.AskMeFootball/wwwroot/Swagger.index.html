@@ -163,7 +163,9 @@
         }
 
         $('.btn-auth').click(function() {
-            _token = _tokens[$(this).attr('token')];
+            var username = $(this).attr('token');
+            _token = _tokens[username];
+            sessionStorage.setItem('user', username);
             authSwaggerCustom(_token);
         });
 
@@ -181,9 +183,8 @@
                 }
             }).done(function(response) {
                 _token = response.token;
-                authSwaggerCustom(_token);
-                sessionStorage.setItem('token', _token);
                 sessionStorage.setItem('user', response.nickname);
+                authSwaggerCustom(_token);
                 $('#user').text(response.nickname);
             });
         });
@@ -207,6 +208,7 @@
                 method: 'POST'
             }).done(function(response) {
                 $('#btn-seacrh').hide();
+                $('#btn-cancel').show();
                 match = response.match;
                 $('#enemy').text(match.gamerName);
             }).fail(function() {
@@ -312,6 +314,9 @@
                 }
 
                 $('#question').html($res);
+
+                $('#btn-seacrh').prop('disabled', false).show();
+                $('#btn-cancel').hide();
             });
         }
     }
@@ -320,6 +325,8 @@
 
     var wsconnection;
     function authSwaggerCustom(token) {
+
+        sessionStorage.setItem('token', token);
 
         if (wsconnection) {
             wsconnection.onDisconnected = undefined;
@@ -363,10 +370,28 @@
             }
         };
 
+        wsconnection.methods.matchResumed = function (response) {
+            if (match.gamerId == response.gamerId) {
+                $('#title').text('Match resumed for rival! ');
+            }
+        };
+
+        wsconnection.methods.matchPaused = function (response) {
+            if (match.gamerId == response.gamerId) {
+                $('#title').text('Match paused for rival! ');
+            }
+        };
+
+        wsconnection.methods.matchStoped = function (response) {
+            if (match.gamerId == response.gamerId) {
+                $('#title').text('Match stoped for rival! ');
+            }
+        };
+
         wsconnection.methods.matchCanceled = function (response) {
             $('#title').text('Match CANCELLED by ' + response.gamerId);
             if (!match.started) {
-                $('#btn-seacrh').show();
+                $('#btn-seacrh').show().prop('disabled', false);
             }
         };
 
@@ -375,7 +400,7 @@
             $('#title').text('Match STARTED!!!!! ');
         
             match.started = true;
-            h.currentQuestion = 0;
+            match.currentQuestion = 0;
 
             $('#enemy-score').text(0);
             $('#my-score').text(0);
@@ -404,6 +429,12 @@
         };
         
         wsconnection.connect();
+    }
+
+    window.onbeforeunload = closingCode;
+    function closingCode() {
+        alert('alert');
+        return null;
     }
 
     window.onload = function () {
