@@ -241,7 +241,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     var result = await _userManager.ChangePhoneNumberAsync(user, normalizedPhone, model.Code);
                     if (result.Succeeded)
                     {
-                        var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser>>();
+                        var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser, AmfTokenModel>>();
                         return Ok(await authService.GenerateTokenAsync(user));
                     }
 
@@ -279,7 +279,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     var result = await _userManager.AddPasswordAsync(user, model.Password);
                     if (result.Succeeded)
                     {
-                        var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser>>();
+                        var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser, AmfTokenModel>>();
                         return Ok(await authService.GenerateTokenAsync(await _userManager.FindByIdAsync(user.Id)));
                     }
 
