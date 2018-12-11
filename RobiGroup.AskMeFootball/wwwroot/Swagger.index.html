@@ -83,8 +83,8 @@
                         <div class="block-desktop col-6-desktop">
                             <button id="btn-seacrh" type="button" class="btn hidden">Search</button>
                             <button id="btn-confirm" type="button" class="btn execute">Confirm</button>
-                            <button id="btn-cancel" type="button" class="btn cancel">Cancel</button>
                             <button id="btn-accept" type="button" class="btn execute">Accept</button>
+                            <button id="btn-cancel" type="button" class="btn cancel">Cancel</button>
                         </div>
                         <div id="question" class="block col-6">
                         </div>
@@ -109,6 +109,7 @@
 
     var _tokens;
     var _token;
+    var rival;
 
     var swaggerUi;
 
@@ -204,14 +205,19 @@
             $('#title').text('Seacrhing game...');
             $('#btn-seacrh').prop("disabled", true);
             $.ajax({
-                url: '/api/match/1/search',
+                url: rival ? '/api/match/1/request/' + rival : '/api/match/1/search',
                 method: 'POST'
-            }).done(function(response) {
-                $('#btn-seacrh').hide();
-                $('#btn-cancel').show();
-                match = response.match;
-                $('#enemy').text(match.gamerName);
-            }).fail(function() {
+            }).done(function (response) {
+                if (response.found) {
+                    $('#btn-seacrh').hide();
+                    $('#btn-cancel').show();
+                    match = response.match;
+                    $('#enemy').text(match.gamerName);
+                } else {
+                    $('#title').text('Match not found!');
+                }
+                
+            }).always(function() {
                 $('#btn-seacrh').prop("disabled", false);
             });
         });
@@ -227,8 +233,7 @@
         });
 
         $('#btn-cancel').click(function () {
-            $('#btn-cancel').hide();
-            $('#btn-accept').hide();
+            $('#btn-cancel, #btn-accept, #btn-confirm').hide();
             $('#title').text('Match cancelled!');
             $.ajax({
                 url: '/api/match/' + match.matchId + '/cancel',
@@ -392,6 +397,7 @@
             $('#title').text('Match CANCELLED by ' + response.gamerId);
             if (!match.started) {
                 $('#btn-seacrh').show().prop('disabled', false);
+                $('#btn-accept, #btn-confirm, #btn-cancel').hide();
             }
         };
 
@@ -429,12 +435,6 @@
         };
         
         wsconnection.connect();
-    }
-
-    window.onbeforeunload = closingCode;
-    function closingCode() {
-        alert('alert');
-        return null;
     }
 
     window.onload = function () {

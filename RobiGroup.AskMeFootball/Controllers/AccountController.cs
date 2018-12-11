@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using RobiGroup.AskMeFootball.Common.Localization;
 using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.AskMeFootball.Data;
@@ -34,16 +35,19 @@ namespace RobiGroup.AskMeFootball.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
 
         private IStringLocalizer<Resources> _localizer;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(ApplicationDbContext dbContext,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IStringLocalizer<Resources> localizer)
+            IStringLocalizer<Resources> localizer,
+            ILogger<AccountController> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _signInManager = signInManager;
             _localizer = localizer;
+            _logger = logger;
         }
 
         #region Auth
@@ -64,16 +68,18 @@ namespace RobiGroup.AskMeFootball.Controllers
             {
                 try
                 {
-                    var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser>>();
+                    var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser, AmfTokenModel>>();
                     var tokenModel = await authService.AuthenticateAsync(username, password);
 
-                    var user = await _userManager.FindByNameAsync(username);
-                    tokenModel.Username = user.NickName;  
+                    var normalizePhoneNumber = FormatHelpers.NormalizePhoneNumber(username);
+                    var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.UserName == normalizePhoneNumber || u.PhoneNumber == normalizePhoneNumber);
+                    tokenModel.Username = user?.NickName;  
 
                     return Ok(tokenModel);
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError(e, "Логин: " + username);
                     ModelState.AddModelError(String.Empty, e.Message);
                     return BadRequest(ModelState);
                 }
@@ -96,7 +102,7 @@ namespace RobiGroup.AskMeFootball.Controllers
             {
                 try
                 {
-                    var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser>>();
+                    var authService = HttpContext.RequestServices.GetService<IAuthService<ApplicationUser, AmfTokenModel>>();
                     return Ok(await authService.AuthenticateAsync(model.Username, model.Password));
                 }
                 catch (Exception e)

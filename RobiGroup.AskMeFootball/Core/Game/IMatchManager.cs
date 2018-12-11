@@ -7,6 +7,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
     {
         Task<MatchSearchResultModel> SearchMatch(string gamerId, int cardId);
 
+        Task<MatchSearchResultModel> RequestMatch(string gamerId, string rivalId, int cardId);
+
         Task<ConfirmResponseModel> Confirm(string gamerId, int matchId);
     }
 }

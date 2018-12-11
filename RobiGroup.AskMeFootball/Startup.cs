@@ -157,6 +157,7 @@ namespace RobiGroup.AskMeFootball
                 //    .Build();
                 //o.Filters.Add(new AuthorizeFilter(policy));
             })
+            .AddControllersAsServices()
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
             .AddDataAnnotationsLocalization();

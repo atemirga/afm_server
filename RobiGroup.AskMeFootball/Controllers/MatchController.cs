@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -68,6 +69,34 @@ namespace RobiGroup.AskMeFootball.Controllers
                     GamerName = ru.NickName,
                     IsWon = g.IsWinner
                 }).ToList());
+        }
+
+        /// <summary>
+        /// Запрос на матч
+        /// </summary>
+        /// <param name="id">ID карты</param>
+        /// <param name="gamerId">ID игрока</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("{id}/request/{gamerId}")]
+        [ProducesResponseType(typeof(MatchSearchResultModel), 200)]
+        public async Task<IActionResult> Search([FromRoute]int id, [FromRoute]string gamerId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var match = await _matchManager.RequestMatch(User.GetUserId(), gamerId, id);
+
+                    return Ok(match);
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError(string.Empty, e.Message);
+                }
+            }
+
+            return BadRequest(ModelState);
         }
 
         /// <summary>
@@ -150,7 +179,14 @@ namespace RobiGroup.AskMeFootball.Controllers
         {
             if (ModelState.IsValid)
             {
-                return Ok(await _matchManager.Confirm(User.GetUserId(), id));
+                try
+                {
+                    return Ok(await _matchManager.Confirm(User.GetUserId(), id));
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError(string.Empty, e.Message);
+                }
             }
 
             return BadRequest(ModelState);
@@ -187,19 +223,6 @@ namespace RobiGroup.AskMeFootball.Controllers
                             }
 
                             tran.Commit();
-
-                            var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == id);
-                            _logger.LogInformation(string.Join(',', matchParticipants.Select(p => p.GamerId + ':' + p.Ready)));
-                            if (matchParticipants.All(p => p.Ready))
-                            {
-                                var participants = matchParticipants.Select(p => p.GamerId).ToList();
-
-                                foreach (var participant in participants)
-                                {
-                                    await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchStarted", new{id});
-                                    _logger.LogInformation($"matchStarted for {participant}");
-                                }
-                            }
                         }
                     }
                     catch (Exception e)
@@ -208,6 +231,24 @@ namespace RobiGroup.AskMeFootball.Controllers
                         tran.Rollback(); 
                     }
                 }
+
+                var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == id).ToList();
+                _logger.LogInformation(string.Join(',', matchParticipants.Select(p => p.GamerId + ':' + p.Ready)));
+                if (matchParticipants.All(p => p.Ready))
+                {
+                    foreach (var participant in matchParticipants)
+                    {
+                        participant.IsPlay = true;
+                    }
+                    await _dbContext.SaveChangesAsync();
+
+                    foreach (var participant in matchParticipants)
+                    {
+                        await _gamersHandler.InvokeClientMethodToGroupAsync(participant.GamerId, "matchStarted", new { id });
+                        _logger.LogInformation($"matchStarted for {participant}");
+                    }
+                }
+
                 return Ok();
             }
 
@@ -234,6 +275,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 if (matchParticipant != null && !matchParticipant.Cancelled)
                 {
                     _logger.LogInformation($"Match {id} canceled from {userId}");
+                    matchParticipant.IsPlay = false;
                     matchParticipant.Cancelled = true;
 
                     var matchGamers = _dbContext.MatchGamers
@@ -243,6 +285,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     {
                         foreach (var matchGamer in matchGamers)
                         {
+                            matchParticipant.IsPlay = false;
                             matchGamer.Cancelled = true;
                         }
                     }
@@ -309,11 +352,11 @@ namespace RobiGroup.AskMeFootball.Controllers
         [Route("{id}/answers")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> AnswerToQuestions([FromRoute]int id, [FromBody]MatchQuestionAnswerModel answer)
+        public async Task<IActionResult> AnswerToQuestions([FromRoute]int id, [FromBody]MatchQuestionAnswerModel answer, [BindNever]string gamerId = null)
         {
             if (ModelState.IsValid)
             {
-                string userId = User.GetUserId();
+                string userId = gamerId ?? User.GetUserId();
                 var matchGamer = _dbContext.MatchGamers.Single(g => g.MatchId == id && g.GamerId == userId);
 
                 if (matchGamer.Cancelled)
@@ -328,12 +371,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 {
                     var match = _dbContext.Matches.Find(id);
                     var matchQuestions = match.Questions.SplitToIntArray();
-
-                    if (answer.QuestionId == 0)
-                    {
-                        _dbContext.MatchAnswers.Where(a => a.MatchGamerId == matchGamer.Id)
-                    }
-
+                    
                     if (matchQuestions.Contains(answer.QuestionId))
                     {
                         var correctAnswerId = _dbContext.Questions.Where(q => q.Id == answer.QuestionId)
@@ -351,30 +389,29 @@ namespace RobiGroup.AskMeFootball.Controllers
                         _dbContext.SaveChanges();
 
                         _logger.LogInformation($"Question answer from {userId}. Question: {answer.QuestionId}, answer: {answer.AnswerId}.");
+                    }
 
-                        var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id && !p.Cancelled);
+                    var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id && !p.Cancelled);
 
-                        var answers = (from a in _dbContext.MatchAnswers
-                                       join g in _dbContext.MatchGamers on a.MatchGamerId equals g.Id
-                                       where g.MatchId == id && a.QuestionId == answer.QuestionId && !g.Cancelled
-                                       select new MatchQuestionAnswerResponse
-                                       {
-                                           GamerId = g.GamerId,
-                                           IsCorrect = a.IsCorrectAnswer,
-                                           QuestionId = a.QuestionId,
-                                           AnswerId = a.AnswerId ?? 0
-                                       }).ToList();
-
-                        if (matchParticipants == answers.Count())
+                    var answers = (from a in _dbContext.MatchAnswers
+                        join g in _dbContext.MatchGamers on a.MatchGamerId equals g.Id
+                        where g.MatchId == id && a.QuestionId == answer.QuestionId && !g.Cancelled
+                        select new MatchQuestionAnswerResponse
                         {
-                            foreach (var answerReponse in answers)
-                            {
-                                await _gamersHandler.InvokeClientMethodToGroupAsync(answerReponse.GamerId, "questionAnswersResult", answers);
-                                _logger.LogInformation($"questionAnswersResult for {answerReponse.GamerId}");
-                            }
-                        }
+                            GamerId = g.GamerId,
+                            IsCorrect = a.IsCorrectAnswer,
+                            QuestionId = a.QuestionId,
+                            AnswerId = a.AnswerId ?? 0
+                        }).ToList();
 
-                        return Ok();
+                    if (matchParticipants == answers.Count())
+                    {
+                        foreach (var answerReponse in answers)
+                        {
+                            await _gamersHandler.InvokeClientMethodToGroupAsync(answerReponse.GamerId,
+                                "questionAnswersResult", answers);
+                            _logger.LogInformation($"questionAnswersResult for {answerReponse.GamerId}");
+                        }
                     }
 
                     return Ok();

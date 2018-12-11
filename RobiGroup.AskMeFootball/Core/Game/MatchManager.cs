@@ -36,7 +36,17 @@ namespace RobiGroup.AskMeFootball.Core.Game
             _serviceProvider = serviceProvider;
         }
 
+        public async Task<MatchSearchResultModel> RequestMatch(string gamerId, string rivalId, int cardId)
+        {
+            return await RequestMatch(gamerId, cardId, rivalId);
+        }
+
         public async Task<MatchSearchResultModel> SearchMatch(string gamerId, int cardId)
+        {
+            return await RequestMatch(gamerId, cardId);
+        }
+
+        public async Task<MatchSearchResultModel> RequestMatch(string gamerId, int cardId, string rivalId = null)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -50,7 +60,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     if ((card.ResetTime - DateTime.Now) > TimeSpan.FromMinutes(10))
                     {
                         var enemyCandidates = _gamersHandler.WebSocketConnectionManager.Connections.Values
-                            .Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId)
+                            .Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId && (string.IsNullOrEmpty(rivalId) || c.UserId == rivalId))
                             .OrderByDescending(c => c.ConnectedTime)
                             .ToList();
 
@@ -104,6 +114,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest",
                                 rivalMatchModel);
 
+
                             model.Match = new MatchModel(match.Id, _dbContext.Users.Find(enemy.UserId));
                             model.Found = true;
 
@@ -150,11 +161,15 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
                         if (matchParticipant != null)
                         {
+                            if (matchParticipant.Cancelled)
+                            {
+                                throw new Exception("Матч отменен!");
+                            }
+
                             if (!matchParticipant.Confirmed)
                             {
                                 matchParticipant.Confirmed = true;
                                 matchParticipant.JoinTime = DateTime.Now;
-                                matchParticipant.IsPlay = true;
 
                                 _dbContext.SaveChanges();
 
@@ -193,6 +208,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     {
                         _logger.LogError(e, $"Error {gamerId}");
                         tran.Rollback();
+                        throw e;
                     }
                 }
 

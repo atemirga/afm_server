@@ -54,8 +54,6 @@ namespace RobiGroup.AskMeFootball.Core.Game
             {
                 using (var scope = _scopeFactory.CreateScope())
                 {
-                    //ResetCurrentMatches(scope.ServiceProvider).Wait();
-
                     _gamersHandler.ResumeMatchForAll().Wait();
 
                     ResetCardGamers(scope.ServiceProvider);
@@ -66,32 +64,6 @@ namespace RobiGroup.AskMeFootball.Core.Game
             catch (Exception e)
             {
                 _logger.LogError(e, "ERROR");
-            }
-        }
-
-        private async Task ResetCurrentMatches(IServiceProvider serviceProvider)
-        {
-            if (firstRun)
-            {
-                firstRun = false;
-
-                var dbContext = serviceProvider.GetService<ApplicationDbContext>();
-
-                var matchGamers = dbContext.MatchGamers.Where(g => g.IsPlay);
-                foreach (var matchGamer in matchGamers)
-                {
-                    matchGamer.IsPlay = false;
-                    matchGamer.Cancelled = true;
-                    _logger.LogWarning("Match {0} cancelled for game {1} by server.", matchGamer.MatchId, matchGamer.GamerId);
-                }
-
-                dbContext.SaveChanges();
-
-                foreach (var gamer in matchGamers)
-                {
-                    await _gamersHandler.InvokeClientMethodToGroupAsync(gamer.GamerId, "matchStoped", new { id = gamer.MatchId, gamer.GamerId });
-                }
-                // dbContext.MatchGamers.Whe
             }
         }
 
