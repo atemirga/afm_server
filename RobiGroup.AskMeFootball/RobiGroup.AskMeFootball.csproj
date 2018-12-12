@@ -19,12 +19,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Logs\**" />
     <Compile Remove="wwwroot\css\**" />
     <Compile Remove="wwwroot\lib\**" />
+    <Content Remove="Logs\**" />
     <Content Remove="wwwroot\css\**" />
     <Content Remove="wwwroot\lib\**" />
+    <EmbeddedResource Remove="Logs\**" />
     <EmbeddedResource Remove="wwwroot\css\**" />
     <EmbeddedResource Remove="wwwroot\lib\**" />
+    <None Remove="Logs\**" />
     <None Remove="wwwroot\css\**" />
     <None Remove="wwwroot\lib\**" />
   </ItemGroup>
@@ -40,6 +44,8 @@
     <Compile Remove="Data\Migrations\20181103144308_AddMatchTables.Designer.cs" />
     <Compile Remove="Data\Migrations\20181108091755_AddAdditionalTables.cs" />
     <Compile Remove="Data\Migrations\20181108091755_AddAdditionalTables.Designer.cs" />
+    <Compile Remove="Data\Migrations\20181212054849_AddBots.cs" />
+    <Compile Remove="Data\Migrations\20181212054849_AddBots.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

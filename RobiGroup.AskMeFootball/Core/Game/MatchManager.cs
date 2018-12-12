@@ -46,7 +46,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
             return await RequestMatch(gamerId, cardId);
         }
 
-        public async Task<MatchSearchResultModel> RequestMatch(string gamerId, int cardId, string rivalId = null)
+        public async Task<MatchSearchResultModel> RequestMatch(string gamerId, int cardId, string rivalCandidateId = null)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -59,23 +59,33 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     var card = _dbContext.Cards.Find(cardId);
                     if ((card.ResetTime - DateTime.Now) > TimeSpan.FromMinutes(10))
                     {
-                        var enemyCandidates = _gamersHandler.WebSocketConnectionManager.Connections.Values
-                            .Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId && (string.IsNullOrEmpty(rivalId) || c.UserId == rivalId))
+                        var rivalCandidates = _gamersHandler.WebSocketConnectionManager.Connections.Values
+                            .Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId && (string.IsNullOrEmpty(rivalCandidateId) || c.UserId == rivalCandidateId))
                             .OrderByDescending(c => c.ConnectedTime)
                             .ToList();
 
-                        CommonWebSocketConnection enemy = null;
+                        CommonWebSocketConnection rival = null;
 
-                        foreach (var candidate in enemyCandidates)
+                        foreach (var candidate in rivalCandidates)
                         {
                             if (!_dbContext.MatchGamers.Any(g => g.GamerId == candidate.UserId && (g.IsPlay)))
                             {
-                                enemy = candidate;
+                                rival = candidate;
                                 break;
                             }
                         }
 
-                        if (enemy != null && !enemy.IsBusy)
+                        bool isBot = false;
+                        var rivalId = rival?.UserId;
+                        if (rival == null)
+                        {
+                            rivalId = (from u in _dbContext.Users
+                                where u.Bot > 0 && !_dbContext.MatchGamers.Any(g => g.GamerId == u.Id && g.IsPlay)
+                                select u.Id).Distinct().OrderBy(u => Guid.NewGuid()).FirstOrDefault();
+                            isBot = true;
+                        }
+
+                        if (!string.IsNullOrEmpty(rivalId))
                         {
                             var match = new Match()
                             {
@@ -90,44 +100,56 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                 MatchId = match.Id,
                                 GamerId = gamerId
                             });
-                            _dbContext.MatchGamers.Add(new MatchGamer
+                            var entity = new MatchGamer
                             {
                                 MatchId = match.Id,
-                                GamerId = enemy.UserId
-                            });
+                                GamerId = rivalId
+                            };
+
+                            if (isBot)
+                            {
+                                entity.JoinTime = DateTime.Now;
+                                entity.Ready = true;
+                                entity.Confirmed = true;
+                            }
+
+                            _dbContext.MatchGamers.Add(entity);
                             _dbContext.SaveChanges();
 
                             var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
 
-                            var rivalMatchModel = new MatchModel(match.Id, _dbContext.Users.Find(gamerId));
-                            rivalMatchModel.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
-                            rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
+                            if (!isBot)
+                            {
+                                var rivalMatchModel = new MatchModel(match.Id, _dbContext.Users.Find(gamerId));
+                                rivalMatchModel.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
+                                rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
 
-                            var gamerCardScore = _dbContext.GamerCards
-                                .Where(gc => gc.CardId == cardId && gc.GamerId == gamerId).Select(gc => gc.Score)
-                                .SingleOrDefault();
-                            rivalMatchModel.GamerRaiting =
-                                _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId)
-                                    .Count(gr => gr.Score > gamerCardScore) + 1;
-                            rivalMatchModel.GamerCardScore = gamerCardScore;
+                                var gamerCardScore = _dbContext.GamerCards
+                                    .Where(gc => gc.CardId == cardId && gc.GamerId == gamerId).Select(gc => gc.Score)
+                                    .SingleOrDefault();
+                                rivalMatchModel.GamerRaiting =
+                                    _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId)
+                                        .Count(gr => gr.Score > gamerCardScore) + 1;
+                                rivalMatchModel.GamerCardScore = gamerCardScore;
+                                await _gamersHandler.InvokeClientMethodToGroupAsync(rivalId, "matchRequest",
+                                    rivalMatchModel);
+                            }
 
-                            await _gamersHandler.InvokeClientMethodToGroupAsync(enemy.UserId, "matchRequest",
-                                rivalMatchModel);
-
-
-                            model.Match = new MatchModel(match.Id, _dbContext.Users.Find(enemy.UserId));
+                            model.Match = new MatchModel(match.Id, _dbContext.Users.Find(rivalId));
                             model.Found = true;
 
                             model.Match.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
                             model.Match.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
 
                             var rivaCardScore = _dbContext.GamerCards
-                                .Where(gc => gc.CardId == cardId && gc.GamerId == enemy.UserId).Select(gc => gc.Score)
+                                .Where(gc => gc.CardId == cardId && gc.GamerId == rivalId).Select(gc => gc.Score)
                                 .SingleOrDefault();
                             model.Match.GamerRaiting =
                                 _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId)
                                     .Count(gr => gr.Score > rivaCardScore) + 1;
                             model.Match.GamerCardScore = rivaCardScore;
+
+                            model.Match.IsBot = isBot;
                         }
                         else
                         {

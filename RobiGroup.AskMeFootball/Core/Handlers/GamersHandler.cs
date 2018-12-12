@@ -82,14 +82,13 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                 {
                     var resumeMatch = DateTime.Now - pausedMatch.PausedTime < _matchOptions.MatchPauseDuration;
 
-                    var gamers = dbContext.MatchGamers.Where(g => !g.Cancelled && g.IsPlay).ToList();
+                    var gamers = dbContext.MatchGamers.Include(g => g.Gamer).Where(g => g.MatchId == pausedMatch.MatchId && !g.Cancelled && g.IsPlay).ToList();
 
                     foreach (var gamer in gamers)
                     {
                         if (resumeMatch)
                         {
-
-                            _logger.LogWarning($"matchResumed for: {gamer.GamerId}, match: {pausedMatch.MatchId}");
+                            _logger.LogWarning($"matchResumed for: {gamer.GamerId}, match: {gamer.MatchId}");
                             await InvokeClientMethodToGroupAsync(gamer.GamerId, "matchResumed",
                                 new {id = gamer.MatchId, gamerId});
                         }
@@ -103,17 +102,26 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                                     where g.MatchId == gamer.MatchId
                                     orderby a.CreatedAt descending 
                                     select a.QuestionId).FirstOrDefault();
-                                await matchController.AnswerToQuestions(gamer.MatchId, new MatchQuestionAnswerModel()
-                                    {
-                                        QuestionId = lastQuestionId
-                                    },
-                                    gamer.GamerId);
+
+                                if (!dbContext.MatchAnswers.Any(a => a.MatchGamerId == gamer.Id && a.QuestionId == lastQuestionId))
+                                {
+                                    await matchController.AnswerToQuestions(gamer.MatchId, new MatchQuestionAnswerModel()
+                                        {
+                                            QuestionId = lastQuestionId
+                                        },
+                                        gamer.GamerId);
+                                }
 
                                 gamer.IsPlay = false;
                                 gamer.Cancelled = true;
                             }
+                            else if (gamer.Gamer.Bot > 0)
+                            {
+                                gamer.IsPlay = false;
+                                gamer.Cancelled = true;
+                            }
 
-                            _logger.LogWarning($"matchStoped for: {gamer.GamerId}, match: {pausedMatch.MatchId}");
+                            _logger.LogWarning($"matchStoped for: {gamer.GamerId}, match: {gamer.MatchId}");
                             await InvokeClientMethodToGroupAsync(gamer.GamerId, "matchStoped",
                                 new {id = gamer.MatchId, gamerId});
                         }
@@ -124,23 +132,49 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                         dbContext.SaveChanges();
                     }
                 }
-                else if (fromDb && (DateTime.Now - _handlerCreatedTime) < _matchOptions.MatchPauseDuration)
+                else if (fromDb)
                 {
-                    var matchGamers = dbContext.MatchGamers.Where(g => g.GamerId == gamerId && g.IsPlay);
-                    foreach (var matchGamer in matchGamers)
-                    {
-                        matchGamer.IsPlay = false;
-                        matchGamer.Cancelled = true;
-                        _logger.LogWarning("Match {0} cancelled for game {1} by server.", matchGamer.MatchId, matchGamer.GamerId);
-                    }
+                    var isStopMatch = (DateTime.Now - _handlerCreatedTime) > _matchOptions.MatchPauseDuration;
+                    var matchGamers = dbContext.MatchGamers.Where(g => g.GamerId == gamerId && g.IsPlay).ToList();
 
-                    dbContext.SaveChanges();
+                    if (isStopMatch)
+                    {
+                        foreach (var matchGamer in matchGamers)
+                        {
+                            var matchBots = (from mg in dbContext.MatchGamers
+                                join u in dbContext.Users on mg.GamerId equals u.Id
+                                where mg.MatchId == matchGamer.MatchId && u.Bot > 0
+                                select mg).ToList();
+                            foreach (var matchBot in matchBots)
+                            {
+                                matchBot.IsPlay = false;
+                                matchBot.Cancelled = true;
+                            }
+
+                            matchGamer.IsPlay = false;
+                            matchGamer.Cancelled = true;
+
+                            _logger.LogWarning("Match {0} cancelled for game {1} by server.", matchGamer.MatchId,
+                                matchGamer.GamerId);
+                        }
+
+                        dbContext.SaveChanges();
+                    }
 
                     foreach (var gamer in matchGamers)
                     {
-                        await matchController.AnswerToQuestions(gamer.MatchId, new MatchQuestionAnswerModel(), gamer.GamerId);
-                        _logger.LogWarning($"matchStoped for: {gamer.GamerId}, match: {pausedMatch.MatchId}");
-                        await InvokeClientMethodToGroupAsync(gamer.GamerId, "matchStoped", new { id = gamer.MatchId, gamer.GamerId });
+                        if (isStopMatch)
+                        {
+                            _logger.LogWarning($"matchStoped for: {gamer.GamerId}, match: {gamer.MatchId}");
+                            await InvokeClientMethodToGroupAsync(gamer.GamerId, "matchStoped",
+                                new {id = gamer.MatchId, gamer.GamerId});
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"matchResumed for: {gamer.GamerId}, match: {gamer.MatchId}");
+                            await InvokeClientMethodToGroupAsync(gamer.GamerId, "matchResumed",
+                                new { id = gamer.MatchId, gamerId });
+                        }
                     }
                 }
             }

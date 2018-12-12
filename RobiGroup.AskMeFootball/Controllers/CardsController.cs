@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Cards;
 using RobiGroup.AskMeFootball.Models.Leaderboard;
@@ -21,10 +22,12 @@ namespace RobiGroup.AskMeFootball.Controllers
     public class CardsController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly GamersHandler _gamersHandler;
 
-        public CardsController(ApplicationDbContext dbContext)
+        public CardsController(ApplicationDbContext dbContext, GamersHandler gamersHandler)
         {
             _dbContext = dbContext;
+            _gamersHandler = gamersHandler;
         }
 
         /// <summary>
@@ -62,10 +65,12 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// Leaderboard
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="page">Страница</param>
+        /// <param name="count">Количество записей на странице</param>
         /// <returns></returns>
         [HttpGet("{id}/leaderboard")]
         [ProducesResponseType(typeof(List<LeaderboardCardGamerModel>), 200)]
-        public IActionResult GetLeaderboard(int id)
+        public IActionResult GetLeaderboard(int id, int page = 1, int count = 10)
         {
            var gamers = (from gc in _dbContext.GamerCards
                 join u in _dbContext.Users on gc.GamerId equals u.Id
@@ -79,7 +84,12 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
                     Raiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == id).Count(gr => gr.Score > gc.Score) + 1,
-                });
+                }).Skip((page - 1) * count).Take(count).ToList();
+
+            foreach (var gamer in gamers)
+            {
+                gamer.IsOnline = _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
+            }
 
             return Ok(gamers);
         }

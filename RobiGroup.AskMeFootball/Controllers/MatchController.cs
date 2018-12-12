@@ -47,10 +47,11 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// <summary>
         /// История игр
         /// </summary>
-        /// <param name="page"></param>
+        /// <param name="page">Страница</param>
+        /// <param name="count">Количество записей на странице</param>
         /// <returns></returns>
         [HttpGet("history")]
-        public IActionResult History(int page)
+        public IActionResult History(int page, int count = 10)
         {
             string gamerId = User.GetUserId();
 
@@ -67,8 +68,9 @@ namespace RobiGroup.AskMeFootball.Controllers
                     Score = g.Score,
                     PhotoUrl = ru.PhotoUrl,
                     GamerName = ru.NickName,
-                    IsWon = g.IsWinner
-                }).ToList());
+                    IsWon = g.IsWinner,
+                    Time = g.JoinTime.Value
+                }).Skip((page - 1)*count).Take(count).ToList());
         }
 
         /// <summary>
@@ -278,14 +280,15 @@ namespace RobiGroup.AskMeFootball.Controllers
                     matchParticipant.IsPlay = false;
                     matchParticipant.Cancelled = true;
 
-                    var matchGamers = _dbContext.MatchGamers
+                    var matchGamers = _dbContext.MatchGamers.Include(g => g.Gamer)
                         .Where(p => p.MatchId == id && p.GamerId != userId);
 
-                    if (!matchParticipant.Ready)
+                    
+                    foreach (var matchGamer in matchGamers)
                     {
-                        foreach (var matchGamer in matchGamers)
+                        if (!matchParticipant.Ready || matchGamer.Gamer.Bot > 0)
                         {
-                            matchParticipant.IsPlay = false;
+                            matchGamer.IsPlay = false;
                             matchGamer.Cancelled = true;
                         }
                     }
@@ -372,10 +375,10 @@ namespace RobiGroup.AskMeFootball.Controllers
                     var match = _dbContext.Matches.Find(id);
                     var matchQuestions = match.Questions.SplitToIntArray();
                     
+                    var correctAnswerId = _dbContext.Questions.Where(q => q.Id == answer.QuestionId)
+                                                                    .Select(q => q.CorrectAnswerId).Single();
                     if (matchQuestions.Contains(answer.QuestionId))
                     {
-                        var correctAnswerId = _dbContext.Questions.Where(q => q.Id == answer.QuestionId)
-                                                                    .Select(q => q.CorrectAnswerId).Single();
                         var isCorrectAnswer = correctAnswerId == answer.AnswerId;
                         _dbContext.MatchAnswers.Add(new MatchAnswer
                         {
@@ -386,10 +389,35 @@ namespace RobiGroup.AskMeFootball.Controllers
                             IsCorrectAnswer = isCorrectAnswer
                         });
 
-                        _dbContext.SaveChanges();
-
                         _logger.LogInformation($"Question answer from {userId}. Question: {answer.QuestionId}, answer: {answer.AnswerId}.");
                     }
+
+                    var matchBots = (from mg in _dbContext.MatchGamers
+                        join u in _dbContext.Users on mg.GamerId equals u.Id
+                        where mg.MatchId == id && u.Bot > 0
+                        select new {mg.Id, u.Bot}).ToList();
+
+                    if (matchBots.Any())
+                    {
+                        var random = new Random();
+                        foreach (var botGamer in matchBots)
+                        {
+                            var botRand = random.Next(10);
+
+                            bool isCorrectAnswer = botRand <= botGamer.Bot;
+
+                            _dbContext.MatchAnswers.Add(new MatchAnswer
+                            {
+                                QuestionId = answer.QuestionId,
+                                AnswerId = isCorrectAnswer ? correctAnswerId : (int?)null,
+                                CreatedAt = DateTime.Now,
+                                MatchGamerId = botGamer.Id,
+                                IsCorrectAnswer = isCorrectAnswer
+                            });
+                        }
+                    }
+
+                    _dbContext.SaveChanges();
 
                     var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id && !p.Cancelled);
 
@@ -408,6 +436,10 @@ namespace RobiGroup.AskMeFootball.Controllers
                     {
                         foreach (var answerReponse in answers)
                         {
+                            if (answerReponse.GamerId != userId)
+                            {
+                                answerReponse.AnswerId = 0;
+                            }
                             await _gamersHandler.InvokeClientMethodToGroupAsync(answerReponse.GamerId,
                                 "questionAnswersResult", answers);
                             _logger.LogInformation($"questionAnswersResult for {answerReponse.GamerId}");
@@ -481,7 +513,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                             gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
 
-                            gamer.Score -= Math.Abs(matchGamer.Score); // Отнимаем из текущих очков у игрока
+                            gamer.Score += matchGamer.Score; // Прибавляем текущие очки игроку
 
                             if (matchGamer.Score > winnerScore)
                             {

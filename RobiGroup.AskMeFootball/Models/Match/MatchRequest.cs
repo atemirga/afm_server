@@ -30,5 +30,7 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public int CorrectAnswerScore { get; set; }
 
         public int IncorrectAnswerScore { get; set; }
+
+        public bool IsBot { get; set; }
     }
 }

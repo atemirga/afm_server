@@ -213,11 +213,19 @@
                     $('#btn-cancel').show();
                     match = response.match;
                     $('#enemy').text(match.gamerName);
+
+                    if (match.isBot) {
+                        wsconnection.methods.matchAccepted();
+                    }
+
                 } else {
                     $('#title').text('Match not found!');
                 }
                 
-            }).always(function() {
+                }).fail(function (response) {
+                    $('#title').text(response.responseJSON[""][0]);
+                })
+            .always(function () {
                 $('#btn-seacrh').prop("disabled", false);
             });
         });

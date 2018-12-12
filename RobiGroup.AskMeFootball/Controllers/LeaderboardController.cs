@@ -30,10 +30,12 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// <summary>
         /// Глобальный
         /// </summary>
+        /// <param name="page">Страница</param>
+        /// <param name="count">Количество записей на странице</param>
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(List<LeaderboardGamerModel>), 200)]
-        public IActionResult GetGlobal()
+        public IActionResult GetGlobal(int page = 1, int count = 10)
         {
             var gamers = (from u in _dbContext.Users
                 select new LeaderboardGamerModel
@@ -44,7 +46,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
-                }).ToList();
+                }).Skip((page - 1) * count).Take(count).ToList();
 
             foreach (var gamer in gamers)
             {
@@ -72,7 +74,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
-                });
+                }).ToList();
 
             foreach (var gamer in gamers)
             {

@@ -27,5 +27,7 @@ namespace RobiGroup.AskMeFootball.Data
         public int? RankId { get; set; }
 
         public GamerRank Rank { get; set; }
+
+        public int Bot { get; set; }
     }
 }

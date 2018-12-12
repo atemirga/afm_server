@@ -230,6 +230,8 @@ namespace RobiGroup.AskMeFootball
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseDatabaseErrorPage();
+            app.UseDeveloperExceptionPage();
             //app.UseCookiePolicy();
 
 
@@ -296,6 +298,38 @@ namespace RobiGroup.AskMeFootball
                 if (result.Succeeded)
                 {
                     userManager.AddToRoleAsync(user, ApplicationRoles.Admin).Wait();
+                }
+            }
+
+            if (dbContext.Users.All(u => u.Bot == 0))
+            {
+                for (int i = 1; i <= 10; i++)
+                {
+                    int botLevel = 5;
+                    if (i <= 4)
+                    {
+                        botLevel = 10 - i;
+                    }
+
+                    var user = new ApplicationUser
+                    {
+                        UserName = "bot" + i,
+                        NickName = "bot " + i,
+                        Email = $"bot{i}@amf.com",
+                        FirstName = $"Bot {i}",
+                        LastName = $"Bot",
+                        Bot = botLevel,
+                        PhoneNumber = $"bot{i}"
+                    };
+
+                    var resultTask = userManager.CreateAsync(user);
+                    resultTask.Wait();
+                    IdentityResult result = resultTask.Result;
+
+                    if (result.Succeeded)
+                    {
+                        userManager.AddToRoleAsync(user, ApplicationRoles.Gamer).Wait();
+                    }
                 }
             }
 

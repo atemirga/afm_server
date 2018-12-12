@@ -1,4 +1,6 @@
-﻿namespace RobiGroup.AskMeFootball.Models.Match
+﻿using System;
+
+namespace RobiGroup.AskMeFootball.Models.Match
 {
     public class MatchHistoryModel
     {
@@ -13,5 +15,7 @@
         public int Score { get; set; }
 
         public bool IsWon { get; set; }
+
+        public DateTime Time { get; set; }
     }
 }
