@@ -9,6 +9,8 @@ namespace RobiGroup.AskMeFootball.Data
 
         public int MatchId { get; set; }
 
+        public int GamerCardId { get; set; }
+
         public string GamerId { get; set; }
 
         public bool Confirmed { get; set; }
@@ -28,6 +30,8 @@ namespace RobiGroup.AskMeFootball.Data
         public ApplicationUser Gamer { get; set; }
 
         public Match Match { get; set; }
+
+        public GamerCard GamerCard { get; set; }
 
         public List<MatchAnswer> Answers { get; set; }
     }

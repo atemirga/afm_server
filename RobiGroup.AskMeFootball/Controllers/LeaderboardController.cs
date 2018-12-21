@@ -45,12 +45,13 @@ namespace RobiGroup.AskMeFootball.Controllers
                     Nickname = u.NickName,
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
+                    IsBot = u.Bot > 0,
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 }).Skip((page - 1) * count).Take(count).ToList();
 
             foreach (var gamer in gamers)
             {
-                gamer.IsOnline = _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
+                gamer.IsOnline = gamer.IsBot || _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
             }
 
             return Ok(gamers);
@@ -73,12 +74,13 @@ namespace RobiGroup.AskMeFootball.Controllers
                     Nickname = u.NickName,
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
+                    IsBot = u.Bot > 0,
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 }).ToList();
 
             foreach (var gamer in gamers)
             {
-                gamer.IsOnline = _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
+                gamer.IsOnline = gamer.IsBot || _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
             }
 
             return Ok(gamers);

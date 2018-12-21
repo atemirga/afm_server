@@ -21,7 +21,7 @@ var WebSocketManager = (function () {
         var Message = function (messageType, data) {
             this.$type = 'WebSocketManager.Common.Message';
             this.MessageType = messageType;
-            this.Data = data;
+            this.data = data;
         };
         /** Text message (constant: 0). */
         Message.Text = 0;
@@ -43,14 +43,8 @@ var WebSocketManager = (function () {
         var InvocationDescriptor = function (methodName, args, identifier) {
             //this.$type = 'WebSocketManager.Common.InvocationDescriptor';
             this.methodName = methodName;
-            this.arguments = {
-                //$type: 'System.Object[]',
-                $values: args
-            };
-            this.identifier = {
-                //$type: "System.Guid",
-                $value: identifier
-            };
+            this.arguments = args;
+            this.identifier = identifier;
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////

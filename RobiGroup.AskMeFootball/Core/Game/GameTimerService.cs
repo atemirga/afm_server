@@ -105,7 +105,22 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             foreach (var gamerCard in dbContext.GamerCards.Include(c => c.Gamer).Where(g => g.CardId == card.Id))
                             {
                                 gamerCard.Gamer.TotalScore += gamerCard.Score; // Добавляем текушие очки игрока к итоговому
-                                gamerCard.Score = 0; // Обнуляем очки игрока в карточке
+
+                                gamerCard.EndTime = DateTime.Now;
+                                gamerCard.IsActive = false;// Обнуляем очки игрока в карточке
+                            }
+
+                            dbContext.SaveChanges();
+
+                            foreach (var bot in dbContext.Users.Where(u => u.Bot > 0).ToList())
+                            {
+                                dbContext.GamerCards.Add(new GamerCard
+                                {
+                                    CardId = card.Id,
+                                    GamerId = bot.Id,
+                                    StartTime = DateTime.Now,
+                                    IsActive = true
+                                });
                             }
 
                             dbContext.SaveChanges();

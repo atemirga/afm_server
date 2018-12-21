@@ -74,7 +74,7 @@ namespace RobiGroup.AskMeFootball.Controllers
         {
            var gamers = (from gc in _dbContext.GamerCards
                 join u in _dbContext.Users on gc.GamerId equals u.Id
-                where gc.CardId == id
+                where gc.CardId == id && gc.IsActive
                 select new LeaderboardCardGamerModel
                 {
                     Id = u.Id,
@@ -83,12 +83,13 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CardScore = gc.Score,
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
-                    Raiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == id).Count(gr => gr.Score > gc.Score) + 1,
+                    IsBot = u.Bot > 0,
+                    Raiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == id && gcr.IsActive).Count(gr => gr.Score > gc.Score) + 1,
                 }).Skip((page - 1) * count).Take(count).ToList();
 
             foreach (var gamer in gamers)
             {
-                gamer.IsOnline = _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
+                gamer.IsOnline = gamer.IsBot || _gamersHandler.WebSocketConnectionManager.Groups.Keys.Contains(gamer.Id);
             }
 
             return Ok(gamers);

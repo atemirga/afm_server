@@ -43,8 +43,6 @@ namespace RobiGroup.AskMeFootball.Data
                 e.Property(u => u.PhoneNumber).IsRequired(); 
             });
                 
-            builder.Entity<GamerCard>().HasAlternateKey(gc => new {gc.CardId, gc.GamerId});
-
             builder.Entity<CardType>().HasData(
                 new CardType {Id = 10, Name = "Ежедневный", Code = Data.CardTypes.Daily.ToString() },
                 new CardType {Id = 20, Name = "Еженедельный", Code = Data.CardTypes.Weekly.ToString() },

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -471,7 +472,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                 MatchGamer currentMatchGamer = null;
                 ApplicationUser currentGamer = null;
 
-                using (var transaction = _dbContext.Database.BeginTransaction())
+                using (var transaction = new CommittableTransaction(
+                    new TransactionOptions { IsolationLevel = IsolationLevel.Serializable }))
                 {
                     var match = _dbContext.Matches.Find(id);
                     var matchGamers = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Where(g => g.MatchId == id);
@@ -496,19 +498,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                             matchGamer.Score = pointsForMacth;
                             matchGamer.IsPlay = false;
 
-                            var gamerCard = _dbContext.GamerCards.SingleOrDefault(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == matchGamer.GamerId);
-                            if (gamerCard == null)
-                            {
-                                // Создаем новую карточку для игрока
-                                gamerCard = new GamerCard
-                                {
-                                    CardId = matchGamer.Match.CardId,
-                                    GamerId = matchGamer.GamerId,
-                                    StartTime = DateTime.Now,
-                                };
-                                _dbContext.GamerCards.Add(gamerCard);
-                            }
-
+                            var gamerCard = _dbContext.GamerCards.Single(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == matchGamer.GamerId && gc.IsActive);
+                            
                             matchGamerBonuses.Add(new Tuple<MatchGamer, GamerCard, int>(matchGamer, gamerCard, answersCount * matchOptions.Value.BonusForAnswer));
 
                             gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
@@ -557,7 +548,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                     transaction.Commit();
 
-                    resultModel.CardScore = _dbContext.GamerCards.Where(gc => gc.CardId == currentMatchGamer.Match.CardId && gc.GamerId == userId).Select(c => c.Score).FirstOrDefault();
+                    resultModel.CardScore = _dbContext.GamerCards.Where(gc => gc.CardId == currentMatchGamer.Match.CardId && gc.GamerId == userId && gc.IsActive).Select(c => c.Score).FirstOrDefault();
                     resultModel.MatchScore = currentMatchGamer.Score;
                     resultModel.IsWinner = currentMatchGamer.IsWinner;
                     resultModel.CurrentGamerScore = currentGamer.Score;

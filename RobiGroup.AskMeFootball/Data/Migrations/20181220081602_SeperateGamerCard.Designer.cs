@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RobiGroup.AskMeFootball.Data;
 
 namespace RobiGroup.AskMeFootball.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181220081602_SeperateGamerCard")]
+    partial class SeperateGamerCard
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -356,8 +358,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<bool>("Confirmed");
 
-                    b.Property<int>("GamerCardId");
-
                     b.Property<string>("GamerId");
 
                     b.Property<bool>("IsPlay");
@@ -373,8 +373,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.Property<int>("Score");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GamerCardId");
 
                     b.HasIndex("GamerId");
 
@@ -524,11 +522,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MatchGamer", b =>
                 {
-                    b.HasOne("RobiGroup.AskMeFootball.Data.GamerCard", "GamerCard")
-                        .WithMany()
-                        .HasForeignKey("GamerCardId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("RobiGroup.AskMeFootball.Data.ApplicationUser", "Gamer")
                         .WithMany()
                         .HasForeignKey("GamerId");

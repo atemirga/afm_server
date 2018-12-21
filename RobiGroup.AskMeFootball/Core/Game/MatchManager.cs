@@ -60,7 +60,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     if ((card.ResetTime - DateTime.Now) > TimeSpan.FromMinutes(10))
                     {
                         var rivalCandidates = _gamersHandler.WebSocketConnectionManager.Connections.Values
-                            .Where(c => !c.Away && !c.IsBusy && c.UserId != gamerId && (string.IsNullOrEmpty(rivalCandidateId) || c.UserId == rivalCandidateId))
+                            .Where(c => !c.Away && c.UserId != gamerId && (string.IsNullOrEmpty(rivalCandidateId) || c.UserId == rivalCandidateId))
                             .OrderByDescending(c => c.ConnectedTime)
                             .ToList();
 
@@ -95,15 +95,23 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             _dbContext.Matches.Add(match);
                             _dbContext.SaveChanges();
 
+                            var gamerCard = GetOrAddGamerCard(gamerId, cardId, _dbContext);
+
                             _dbContext.MatchGamers.Add(new MatchGamer
                             {
                                 MatchId = match.Id,
-                                GamerId = gamerId
+                                GamerId = gamerId,
+                                GamerCardId = gamerCard.Id
                             });
+                            _dbContext.SaveChanges();
+
+                            var rivalCard = GetOrAddGamerCard(rivalId, cardId, _dbContext);
+
                             var entity = new MatchGamer
                             {
                                 MatchId = match.Id,
-                                GamerId = rivalId
+                                GamerId = rivalId,
+                                GamerCardId = rivalCard.Id
                             };
 
                             if (isBot)
@@ -125,10 +133,10 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                 rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
 
                                 var gamerCardScore = _dbContext.GamerCards
-                                    .Where(gc => gc.CardId == cardId && gc.GamerId == gamerId).Select(gc => gc.Score)
+                                    .Where(gc => gc.CardId == cardId && gc.GamerId == gamerId && gc.IsActive).Select(gc => gc.Score)
                                     .SingleOrDefault();
                                 rivalMatchModel.GamerRaiting =
-                                    _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId)
+                                    _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId && gcr.IsActive)
                                         .Count(gr => gr.Score > gamerCardScore) + 1;
                                 rivalMatchModel.GamerCardScore = gamerCardScore;
                                 await _gamersHandler.InvokeClientMethodToGroupAsync(rivalId, "matchRequest",
@@ -142,10 +150,10 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             model.Match.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
 
                             var rivaCardScore = _dbContext.GamerCards
-                                .Where(gc => gc.CardId == cardId && gc.GamerId == rivalId).Select(gc => gc.Score)
+                                .Where(gc => gc.CardId == cardId && gc.GamerId == rivalId && gc.IsActive).Select(gc => gc.Score)
                                 .SingleOrDefault();
                             model.Match.GamerRaiting =
-                                _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId)
+                                _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId && gcr.IsActive)
                                     .Count(gr => gr.Score > rivaCardScore) + 1;
                             model.Match.GamerCardScore = rivaCardScore;
 
@@ -164,6 +172,26 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
                 return model;
             }
+        }
+
+        private static GamerCard GetOrAddGamerCard(string gamerId, int cardId, ApplicationDbContext _dbContext)
+        {
+            var gamerCard =
+                _dbContext.GamerCards.SingleOrDefault(gc => gc.CardId == cardId && gc.GamerId == gamerId && gc.IsActive);
+            if (gamerCard == null)
+            {
+                // Создаем новую карточку для игрока
+                gamerCard = new GamerCard
+                {
+                    CardId = cardId,
+                    GamerId = gamerId,
+                    StartTime = DateTime.Now,
+                    IsActive = true
+                };
+                _dbContext.GamerCards.Add(gamerCard);
+                _dbContext.SaveChanges();
+            }
+            return gamerCard;
         }
 
         public async Task<ConfirmResponseModel> Confirm(string gamerId, int matchId)

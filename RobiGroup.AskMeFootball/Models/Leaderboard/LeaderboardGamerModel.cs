@@ -36,5 +36,10 @@
         /// Онлайн
         /// </summary>
         public bool IsOnline { get; set; }
+
+        /// <summary>
+        /// Бот
+        /// </summary>
+        public bool IsBot { get; set; }
     }
 }
