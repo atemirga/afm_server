@@ -437,10 +437,6 @@ namespace RobiGroup.AskMeFootball.Controllers
                     {
                         foreach (var answerReponse in answers)
                         {
-                            if (answerReponse.GamerId != userId)
-                            {
-                                answerReponse.AnswerId = 0;
-                            }
                             await _gamersHandler.InvokeClientMethodToGroupAsync(answerReponse.GamerId,
                                 "questionAnswersResult", answers);
                             _logger.LogInformation($"questionAnswersResult for {answerReponse.GamerId}");
@@ -532,7 +528,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                         int bonus = gamerBonus.Item1.IsWinner ? +gamerBonus.Item3 : -gamerBonus.Item3;
                         gamerBonus.Item1.Score += bonus;
-                        gamerBonus.Item2.Score -= bonus;
+                        gamerBonus.Item2.Score += bonus;
 
                         if (gamerBonus.Item1 != currentMatchGamer)
                         {

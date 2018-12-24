@@ -10,6 +10,7 @@ using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Cards;
 using RobiGroup.AskMeFootball.Models.Leaderboard;
+using RobiGroup.AskMeFootball.Services;
 
 namespace RobiGroup.AskMeFootball.Controllers
 {
@@ -23,11 +24,13 @@ namespace RobiGroup.AskMeFootball.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly GamersHandler _gamersHandler;
+        private readonly ICardService _cardService;
 
-        public CardsController(ApplicationDbContext dbContext, GamersHandler gamersHandler)
+        public CardsController(ApplicationDbContext dbContext, GamersHandler gamersHandler, ICardService cardService)
         {
             _dbContext = dbContext;
             _gamersHandler = gamersHandler;
+            _cardService = cardService;
         }
 
         /// <summary>
@@ -64,7 +67,7 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// <summary>
         /// Leaderboard
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">ID карты</param>
         /// <param name="page">Страница</param>
         /// <param name="count">Количество записей на странице</param>
         /// <returns></returns>
@@ -72,20 +75,7 @@ namespace RobiGroup.AskMeFootball.Controllers
         [ProducesResponseType(typeof(List<LeaderboardCardGamerModel>), 200)]
         public IActionResult GetLeaderboard(int id, int page = 1, int count = 10)
         {
-           var gamers = (from gc in _dbContext.GamerCards
-                join u in _dbContext.Users on gc.GamerId equals u.Id
-                where gc.CardId == id && gc.IsActive
-                select new LeaderboardCardGamerModel
-                {
-                    Id = u.Id,
-                    PhotoUrl = u.PhotoUrl,
-                    Nickname = u.NickName,
-                    CardScore = gc.Score,
-                    CurrentScore = u.Score,
-                    TotalScore = u.TotalScore,
-                    IsBot = u.Bot > 0,
-                    Raiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == id && gcr.IsActive).Count(gr => gr.Score > gc.Score) + 1,
-                }).Skip((page - 1) * count).Take(count).ToList();
+           var gamers = _cardService.GetLeaderboard(id).Skip((page - 1) * count).Take(count).ToList();
 
             foreach (var gamer in gamers)
             {
@@ -95,5 +85,36 @@ namespace RobiGroup.AskMeFootball.Controllers
             return Ok(gamers);
         }
 
+        /// <summary>
+        /// Победители
+        /// </summary>
+        /// <param name="id">ID карты</param>
+        /// <param name="page">Страница</param>
+        /// <param name="count">Количество записей на странице</param>
+        /// <returns></returns>
+        [HttpGet("{id}/winners")]
+        [ProducesResponseType(typeof(List<LeaderboardCardGamerModel>), 200)]
+        public IActionResult GetWinners(int id, int page = 1, int count = 10)
+        {
+            var gamers = _cardService.GetWinners(id).Skip((page - 1) * count).Take(count).ToList();
+
+            return Ok(gamers);
+        }
+
+
+        /// <summary>
+        /// Последние победители
+        /// </summary>
+        /// <param name="id">ID карты</param>
+        /// <returns></returns>
+        [HttpGet("{id}/winners/last")]
+        [ProducesResponseType(typeof(List<LeaderboardCardGamerModel>), 200)]
+        public IActionResult GetLastWinners(int id)
+        {
+            var cardResetTime = _dbContext.CardWinners.Where(w => w.CardId == id).OrderByDescending(w => w.CardEndTime).Select(w => w.CardEndTime).FirstOrDefault();
+            var gamers = _cardService.GetWinners(id).Where(w => w.CardEndTime == cardResetTime);
+
+            return Ok(gamers);
+        }
     }
 }

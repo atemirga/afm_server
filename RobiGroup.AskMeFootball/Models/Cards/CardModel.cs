@@ -28,4 +28,21 @@ namespace RobiGroup.AskMeFootball.Models.Cards
 
         public TimeSpan RemainingTime { get; set; }
     }
+
+    public class CardWinnerModel
+    {
+        public int Id { get; set; }
+
+        public string Prize { get; set; }
+
+        public string GamerId { get; set; }
+
+        public string GamerNickName { get; set; }
+
+        public int GamerCardScore { get; set; }
+
+        public DateTime CardStartTime { get; set; }
+
+        public DateTime CardEndTime { get; set; }
+    }
 }

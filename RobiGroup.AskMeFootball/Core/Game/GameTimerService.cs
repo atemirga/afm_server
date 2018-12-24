@@ -12,6 +12,7 @@ using RobiGroup.AskMeFootball.Common.Options;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.AskMeFootball.Data;
+using RobiGroup.AskMeFootball.Services;
 
 namespace RobiGroup.AskMeFootball.Core.Game
 {
@@ -91,12 +92,16 @@ namespace RobiGroup.AskMeFootball.Core.Game
                 {
                     var dbContext = services.GetService<ApplicationDbContext>();
 
+                    var cardService = services.GetService<ICardService>();
+
                     var cards = dbContext.Cards.Include(c => c.Type).Where(c => c.ResetTime < DateTime.Now).ToList();
 
                     foreach (var card in cards)
                     {
                         using (var tran = dbContext.Database.BeginTransaction())
                         {
+                            var cardEndTime = DateTime.Now;
+                            var cardLastResetTime = card.ResetTime;
                             if (card.Type.Code == CardTypes.Daily.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod);
                             else if (card.Type.Code == CardTypes.Weekly.ToString()) card.ResetTime = card.ResetTime.AddDays(card.ResetPeriod * 7);
                             else if (card.Type.Code == CardTypes.Monthly.ToString()) card.ResetTime = card.ResetTime.AddMonths(card.ResetPeriod);
@@ -106,7 +111,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             {
                                 gamerCard.Gamer.TotalScore += gamerCard.Score; // Добавляем текушие очки игрока к итоговому
 
-                                gamerCard.EndTime = DateTime.Now;
+                                gamerCard.EndTime = cardEndTime;
                                 gamerCard.IsActive = false;// Обнуляем очки игрока в карточке
                             }
 
@@ -124,6 +129,27 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             }
 
                             dbContext.SaveChanges();
+
+                            var winners = cardService.GetLeaderboard(card.Id).Where(w => w.Raiting == 1).ToList();
+
+                            if (winners.Any())
+                            {
+
+                                foreach (var winner in winners)
+                                {
+                                    dbContext.CardWinners.Add(new CardWinner
+                                    {
+                                        GamerId = winner.Id,
+                                        CardId = card.Id,
+                                        Prize = card.Prize,
+                                        CardEndTime = cardEndTime,
+                                        CardStartTime = cardLastResetTime,
+                                        GamerCardScore = winner.CardScore,
+                                    });
+                                }
+
+                                dbContext.SaveChanges();
+                            }
 
                             tran.Commit();
 

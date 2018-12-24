@@ -31,6 +31,7 @@ using RobiGroup.AskMeFootball.Core.Game;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Core.Identity;
 using RobiGroup.AskMeFootball.Models.Account;
+using RobiGroup.AskMeFootball.Services;
 using RobiGroup.Web.Common;
 using RobiGroup.Web.Common.Binders;
 using RobiGroup.Web.Common.Configuration;
@@ -103,6 +104,7 @@ namespace RobiGroup.AskMeFootball
             services.AddSingleton<IStringLocalizerFactory, ApplicationStringLocalizerFactory<Resources>>();
 
             services.AddSingleton<IMatchManager, MatchManager>();
+            services.AddSingleton<ICardService, CardService>();
 
             services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, AmfClaimsPrincipalFactory>();
 

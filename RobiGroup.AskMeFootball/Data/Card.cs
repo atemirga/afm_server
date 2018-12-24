@@ -30,4 +30,25 @@ namespace RobiGroup.AskMeFootball.Data
 
         public List<GamerCard> GamerCards { get; set; }
     }
+
+    public class CardWinner
+    {
+        public int Id { get; set; }
+
+        public string Prize { get; set; }
+
+        public DateTime CardStartTime { get; set; }
+
+        public DateTime CardEndTime { get; set; }
+
+        public int GamerCardScore { get; set; }
+
+        public int CardId { get; set; }
+
+        public string GamerId { get; set; }
+
+        public Card Card { get; set; }
+
+        public ApplicationUser Gamer { get; set; }
+    }
 }
