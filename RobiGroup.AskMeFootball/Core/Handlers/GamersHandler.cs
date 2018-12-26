@@ -51,11 +51,15 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
 
         public async Task PauseMatch(WebSocket socket, int id)
         {
+            var userId =  WebSocketConnectionManager.GetSocketGroup(WebSocketConnectionManager.GetId(socket));
+            _logger.LogWarning($"PauseMatch called by {userId} for match {id}");
             await PauseResumeMatch(socket, id, true);
         }
 
         public async Task ResumeMatch(WebSocket socket, int id)
         {
+            var userId = WebSocketConnectionManager.GetSocketGroup(WebSocketConnectionManager.GetId(socket));
+            _logger.LogWarning($"ResumeMatch called by {userId} for match {id}");
             await PauseResumeMatch(socket, id, false);
         }
 

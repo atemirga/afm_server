@@ -47,7 +47,10 @@ namespace RobiGroup.AskMeFootball.Controllers
                     TotalScore = u.TotalScore,
                     IsBot = u.Bot > 0,
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
-                }).Skip((page - 1) * count).Take(count).ToList();
+                })
+                .OrderBy(r => r.Raiting)
+                .Skip((page - 1) * count)
+                .Take(count).ToList();
 
             foreach (var gamer in gamers)
             {
@@ -76,7 +79,9 @@ namespace RobiGroup.AskMeFootball.Controllers
                     TotalScore = u.TotalScore,
                     IsBot = u.Bot > 0,
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
-                }).ToList();
+                })
+                .OrderBy(r => r.Raiting)
+                .ToList();
 
             foreach (var gamer in gamers)
             {

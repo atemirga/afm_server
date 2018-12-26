@@ -19,7 +19,7 @@ var WebSocketManager = (function () {
          * Create a new networking message.
          */
         var Message = function (messageType, data) {
-            this.$type = 'WebSocketManager.Common.Message';
+            //this.$type = 'WebSocketManager.Common.Message';
             this.MessageType = messageType;
             this.data = data;
         };

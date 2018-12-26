@@ -52,7 +52,7 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// <param name="count">Количество записей на странице</param>
         /// <returns></returns>
         [HttpGet("history")]
-        public IActionResult History(int page, int count = 10)
+        public IActionResult History(int page = 1, int count = 10)
         {
             string gamerId = User.GetUserId();
 
@@ -62,6 +62,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 join rg in _dbContext.MatchGamers on m.Id equals rg.MatchId
                 join ru in _dbContext.Users on rg.GamerId equals ru.Id
                 where g.JoinTime.HasValue && !g.IsPlay && g.GamerId == gamerId && rg.GamerId != gamerId
+                orderby g.JoinTime descending 
                 select new MatchHistoryModel
                 {
                     Id = m.Id,
