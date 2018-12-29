@@ -2,7 +2,7 @@
 
 namespace RobiGroup.AskMeFootball.Models.Match
 {
-    public class MatchHistoryModel
+    public class MatchModel
     {
         public int Id { get; set; }
 
@@ -11,7 +11,10 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public string GamerName { get; set; }
 
         public string PhotoUrl { get; set; }
+    }
 
+    public class MatchHistoryModel : MatchModel
+    {
         public int Score { get; set; }
 
         public bool IsWon { get; set; }

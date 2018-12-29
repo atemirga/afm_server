@@ -38,7 +38,7 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
             IOptions<MatchOptions> matchOptions,
             ILogger<GamersHandler> logger,
             IServiceProvider serviceProvider)
-            : base(webSocketConnectionManager, new ControllerMethodInvocationStrategy())
+            : base(webSocketConnectionManager, new ControllerMethodInvocationStrategy(), logger)
         {
             _pausedMatches = new ConcurrentDictionary<string, PausedMatch>();
             _httpContextAccessor = httpContextAccessor;
@@ -204,14 +204,14 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                 {
                     var isStopMatch = (DateTime.Now - _handlerCreatedTime) > _matchOptions.MatchPauseDuration;
                     var matchGamers = dbContext.MatchGamers.Where(g => g.GamerId == gamerId && g.IsPlay).ToList();
-
-                    if (isStopMatch)
+                    
+                    foreach (var gamer in matchGamers)
                     {
-                        foreach (var matchGamer in matchGamers)
+                        if (isStopMatch)
                         {
                             var matchBots = (from mg in dbContext.MatchGamers
                                 join u in dbContext.Users on mg.GamerId equals u.Id
-                                where mg.MatchId == matchGamer.MatchId && u.Bot > 0
+                                where mg.MatchId == gamer.MatchId && u.Bot > 0
                                 select mg).ToList();
                             foreach (var matchBot in matchBots)
                             {
@@ -219,21 +219,13 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                                 matchBot.Cancelled = true;
                             }
 
-                            matchGamer.IsPlay = false;
-                            matchGamer.Cancelled = true;
+                            gamer.IsPlay = false;
+                            gamer.Cancelled = true;
 
-                            _logger.LogWarning("Match {0} cancelled for game {1} by server.", matchGamer.MatchId,
-                                matchGamer.GamerId);
-                        }
-
-                        dbContext.SaveChanges();
-                    }
-
-                    foreach (var gamer in matchGamers)
-                    {
-                        if (isStopMatch)
-                        {
+                            _logger.LogWarning("Match {0} cancelled for game {1} by server.", gamer.MatchId,
+                                gamer.GamerId);
                             _logger.LogWarning($"matchStoped for: {gamer.GamerId}, match: {gamer.MatchId}");
+
                             await InvokeClientMethodToGroupAsync(gamer.GamerId, "matchStoped",
                                 new {id = gamer.MatchId, gamer.GamerId});
                         }
@@ -244,6 +236,8 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                                 new { id = gamer.MatchId, gamerId });
                         }
                     }
+
+                    dbContext.SaveChanges();
                 }
             }
         }
@@ -251,11 +245,14 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
         public override async Task OnDisconnected(WebSocket socket)
         {
             var socketId = WebSocketConnectionManager.GetId(socket);
-            string gamerId = WebSocketConnectionManager.GetSocketGroup(socketId);
+            if (!string.IsNullOrEmpty(socketId))
+            {
+                string gamerId = WebSocketConnectionManager.GetSocketGroup(socketId);
 
-            await base.OnDisconnected(socket);
+                await base.OnDisconnected(socket);
 
-            await PauseMatchIfExists(gamerId);
+                await PauseMatchIfExists(gamerId);
+            }
         }
 
         private async Task PauseMatchIfExists(string gamerId)

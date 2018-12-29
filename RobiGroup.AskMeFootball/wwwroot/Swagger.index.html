@@ -82,9 +82,11 @@
                     <div style="height: auto; border: none; margin: 0px; padding: 0px;"><!-- react-text: 481 --> <!-- /react-text -->
                         <div class="block-desktop col-6-desktop">
                             <button id="btn-seacrh" type="button" class="btn hidden">Search</button>
-                            <button id="btn-confirm" type="button" class="btn execute">Confirm</button>
-                            <button id="btn-accept" type="button" class="btn execute">Accept</button>
-                            <button id="btn-cancel" type="button" class="btn cancel">Cancel</button>
+                            <button id="btn-confirm" type="button" class="btn execute hidden">Confirm</button>
+                            <button id="btn-accept" type="button" class="btn execute hidden">Accept</button>
+                            <button id="btn-delay" type="button" class="btn execute hidden">Delay</button>
+                            <button id="btn-cancel" type="button" class="btn cancel hidden">Cancel</button>
+                            <button id="btn-delayed" type="button" class="btn execute hidden" style="float: right;">Delayed games</button>
                         </div>
                         <div id="question" class="block col-6">
                         </div>
@@ -198,7 +200,7 @@
             }
         });
 
-        $('#btn-accept, #btn-seacrh, #btn-confirm, #btn-cancel').hide();
+        $('#btn-accept, #btn-delay, #btn-seacrh, #btn-confirm, #btn-cancel').hide();
 
 
         $('#btn-seacrh').click(function() {
@@ -231,7 +233,7 @@
         });
 
         $('#btn-accept').click(function() {
-            $('#btn-accept').hide();
+            $('#btn-accept, #btn-delay').hide();
             $('#btn-confirm').show();
             $('#title').text('Match accepted!');
             $.ajax({
@@ -240,8 +242,48 @@
             });
         });
 
+        $('#btn-delay').click(function () {
+            $('#btn-accept, #btn-delay, #btn-cancel').hide();
+            $('#btn-seacrh').show();
+            $('#title').text('Match Delayed!');
+            $.ajax({
+                url: '/api/match/' + match.matchId + '/delay',
+                method: 'POST'
+            });
+        });
+
+        $('#btn-delayed').click(function () {
+            $.ajax({
+                url: '/api/match/delayed',
+                method: 'GET'
+            }).done(function (response) {
+                if (response) {
+                    var m = '';
+                    response.forEach(function (item, i) {
+                        m += item.id + '. ' + item.cardName + ': ' + item.gamerName + '\n';
+                    });
+
+                    var id = prompt(m);
+
+                    $.ajax({
+                        url: '/api/match/' + id + '/confirm',
+                        method: 'POST'
+                    }).done(function (response) {
+                        match = {
+                            confirmed: response.confirmed,
+                            matchId: response.matchId
+                        };
+                        if (response.confirmed) {
+                            loadQuestions();
+                        }
+                    });
+                }
+
+            });
+        });
+
         $('#btn-cancel').click(function () {
-            $('#btn-cancel, #btn-accept, #btn-confirm').hide();
+            $('#btn-cancel, #btn-accept, #btn-delay, #btn-confirm').hide();
             $('#title').text('Match cancelled!');
             $.ajax({
                 url: '/api/match/' + match.matchId + '/cancel',
@@ -367,6 +409,7 @@
             $('#enemy').text(match.gamerName);
             $('#btn-seacrh').hide();
             $('#btn-accept').show();
+            $('#btn-delay').show();
             $('#btn-cancel').show();
         };
 
@@ -395,6 +438,14 @@
             }
         };
 
+        wsconnection.methods.matchDelayed = function (response) {
+            if (match.gamerId == response.gamerId) {
+                $('#title').text('Match delayed for rival! ');
+                $('#btn-confirm').show();
+                match.accepted = true;
+            }
+        };
+
         wsconnection.methods.matchStoped = function (response) {
             if (match.gamerId == response.gamerId) {
                 $('#title').text('Match stoped for rival! ');
@@ -405,7 +456,7 @@
             $('#title').text('Match CANCELLED by ' + response.gamerId);
             if (!match.started) {
                 $('#btn-seacrh').show().prop('disabled', false);
-                $('#btn-accept, #btn-confirm, #btn-cancel').hide();
+                $('#btn-accept, #btn-delay, #btn-confirm, #btn-cancel').hide();
             }
         };
 

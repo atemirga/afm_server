@@ -41,5 +41,10 @@ namespace RobiGroup.AskMeFootball.Models.Friends
         /// Рейтинг
         /// </summary>
         public int Raiting { get; set; }
+
+        /// <summary>
+        ///  Играет в игру
+        /// </summary>
+        public bool IsPlaying { get; set; }
     }
 }

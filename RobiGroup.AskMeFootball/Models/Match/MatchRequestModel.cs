@@ -2,9 +2,9 @@
 
 namespace RobiGroup.AskMeFootball.Models.Match
 {
-    public class MatchModel
+    public class MatchRequestModel
     {
-        public MatchModel(int matchId, ApplicationUser gamer)
+        public MatchRequestModel(int matchId, ApplicationUser gamer)
         {
             MatchId = matchId;
             GamerFullName = gamer.FullName;

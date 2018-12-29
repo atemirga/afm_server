@@ -46,6 +46,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
                     IsBot = u.Bot > 0,
+                    IsPlaying = _dbContext.MatchGamers.Any(mg => mg.GamerId == u.Id && mg.IsPlay),
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 })
                 .OrderBy(r => r.Raiting)
@@ -78,6 +79,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
                     IsBot = u.Bot > 0,
+                    IsPlaying = _dbContext.MatchGamers.Any(mg => mg.GamerId == u.Id && mg.IsPlay),
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 })
                 .OrderBy(r => r.Raiting)

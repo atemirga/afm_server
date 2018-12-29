@@ -41,5 +41,10 @@
         /// Бот
         /// </summary>
         public bool IsBot { get; set; }
+
+        /// <summary>
+        ///  Играет в игру
+        /// </summary>
+        public bool IsPlaying { get; set; }
     }
 }

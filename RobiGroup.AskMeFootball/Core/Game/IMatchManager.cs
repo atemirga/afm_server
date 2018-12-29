@@ -10,5 +10,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
         Task<MatchSearchResultModel> RequestMatch(string gamerId, string rivalId, int cardId);
 
         Task<ConfirmResponseModel> Confirm(string gamerId, int matchId);
+        
+        Task<MatchResultModel> GetMatchResult(int id, string userId);
     }
 }

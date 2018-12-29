@@ -19,6 +19,8 @@ namespace RobiGroup.AskMeFootball.Data
 
         public bool Cancelled { get; set; }
 
+        public bool Delayed { get; set; }
+
         public DateTime? JoinTime { get; set; }
 
         public int Score { get; set; }
@@ -34,5 +36,7 @@ namespace RobiGroup.AskMeFootball.Data
         public GamerCard GamerCard { get; set; }
 
         public List<MatchAnswer> Answers { get; set; }
+
+        public int Bonus { get; set; }
     }
 }

@@ -45,6 +45,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 PhoneNumber = u.PhoneNumber,
                 TotalScore = u.TotalScore,
                 PhotoUrl = u.PhotoUrl,
+                IsPlaying = _dbContext.MatchGamers.Any(mg => mg.GamerId == u.Id && mg.IsPlay),
                 Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
             }).ToList();
 

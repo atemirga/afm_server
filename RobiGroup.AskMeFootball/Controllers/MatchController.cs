@@ -61,7 +61,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 join c in _dbContext.Cards on m.CardId equals c.Id
                 join rg in _dbContext.MatchGamers on m.Id equals rg.MatchId
                 join ru in _dbContext.Users on rg.GamerId equals ru.Id
-                where g.JoinTime.HasValue && !g.IsPlay && g.GamerId == gamerId && rg.GamerId != gamerId
+                where g.JoinTime.HasValue && !g.IsPlay && !g.Cancelled && g.GamerId == gamerId && rg.GamerId != gamerId
                 orderby g.JoinTime descending 
                 select new MatchHistoryModel
                 {
@@ -73,6 +73,33 @@ namespace RobiGroup.AskMeFootball.Controllers
                     IsWon = g.IsWinner,
                     Time = g.JoinTime.Value
                 }).Skip((page - 1)*count).Take(count).ToList());
+        }
+
+        /// <summary>
+        /// Отложенные игры
+        /// </summary>
+        /// <param name="page">Страница</param>
+        /// <param name="count">Количество записей на странице</param>
+        /// <returns></returns>
+        [HttpGet("delayed")]
+        private IActionResult Delayed(int page = 1, int count = 10)
+        {
+            string gamerId = User.GetUserId();
+
+            return Ok((from g in _dbContext.MatchGamers
+                join m in _dbContext.Matches on g.MatchId equals m.Id
+                join c in _dbContext.Cards on m.CardId equals c.Id
+                join rg in _dbContext.MatchGamers on m.Id equals rg.MatchId
+                join ru in _dbContext.Users on rg.GamerId equals ru.Id
+                where !g.JoinTime.HasValue && !g.IsPlay && !g.Cancelled && g.Delayed && g.GamerId == gamerId && rg.GamerId != gamerId
+                orderby g.JoinTime descending
+                select new MatchModel
+                {
+                    Id = m.Id,
+                    CardName = c.Name,
+                    PhotoUrl = ru.PhotoUrl,
+                    GamerName = ru.NickName,
+                }).Skip((page - 1) * count).Take(count).ToList());
         }
 
         /// <summary>
@@ -171,6 +198,47 @@ namespace RobiGroup.AskMeFootball.Controllers
         }
 
         /// <summary>
+        /// Отложить матч
+        /// </summary>
+        /// <param name="id">ID матча</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("{id}/delay")]
+        [ProducesResponseType(typeof(ConfirmResponseModel), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Delay(int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var userId = User.GetUserId();
+                var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                    m.GamerId == userId && m.MatchId == id);
+
+                if (matchParticipant != null
+                    && !matchParticipant.Cancelled
+                    && !matchParticipant.Confirmed)
+                {
+                    matchParticipant.Delayed = true;
+                    _dbContext.SaveChanges();
+
+                    var matchParticipants = _dbContext.MatchGamers
+                        .Where(p => p.MatchId == id)
+                        .Select(p => p.GamerId).ToList();
+
+                    foreach (var participant in matchParticipants)
+                    {
+                        await _gamersHandler.InvokeClientMethodToGroupAsync(participant, "matchDelayed", new { id, gamerId = userId });
+                        _logger.LogInformation($"matchDelayed {id} by {userId} for {participant}");
+                    }
+
+                    return Ok();
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        /// <summary>
         /// Потвердить матч
         /// </summary>
         /// <param name="id">ID матча</param>
@@ -210,6 +278,7 @@ namespace RobiGroup.AskMeFootball.Controllers
             if (ModelState.IsValid)
             {
                 string gamerId = User.GetUserId();
+                bool isMatchDelayed = false;
                 using (var tran = _dbContext.Database.BeginTransaction())
                 {
                     try
@@ -220,6 +289,15 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                         if (matchParticipant != null)
                         {
+                            isMatchDelayed = matchParticipant.Delayed;
+
+                            if (!matchParticipant.Confirmed)
+                            {
+                                tran.Rollback();
+                                ModelState.AddModelError(String.Empty, "Матч не подтвержден!");
+                                return BadRequest(ModelState);
+                            }
+
                             if (!matchParticipant.Ready)
                             {
                                 matchParticipant.Ready = true;
@@ -236,7 +314,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     }
                 }
 
-                var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == id).ToList();
+                var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == id && (!p.Delayed || isMatchDelayed)).ToList();
                 _logger.LogInformation(string.Join(',', matchParticipants.Select(p => p.GamerId + ':' + p.Ready)));
                 if (matchParticipants.All(p => p.Ready))
                 {
@@ -421,7 +499,7 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                     _dbContext.SaveChanges();
 
-                    var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id && !p.Cancelled);
+                    var matchParticipants = _dbContext.MatchGamers.Count(p => p.MatchId == id && !p.Cancelled && (!p.Delayed || matchGamer.Delayed));
 
                     var answers = (from a in _dbContext.MatchAnswers
                         join g in _dbContext.MatchGamers on a.MatchGamerId equals g.Id
@@ -444,6 +522,11 @@ namespace RobiGroup.AskMeFootball.Controllers
                         }
                     }
 
+                    if (matchQuestions[matchQuestions.Length - 1] == answer.QuestionId)
+                    {
+                        
+                    }
+
                     return Ok();
                 }
             }
@@ -459,99 +542,13 @@ namespace RobiGroup.AskMeFootball.Controllers
         [HttpGet]
         [Route("{id}/result")]
         [ProducesResponseType(typeof(MatchResultModel), 200)]
-        public IActionResult GetMatchResult([FromRoute]int id)
+        public async Task<IActionResult> GetMatchResult([FromRoute]int id)
         {
             if (ModelState.IsValid)
             {
                 string userId = User.GetUserId();
-                var matchOptions = HttpContext.RequestServices.GetService<IOptions<MatchOptions>>();
 
-                MatchGamer currentMatchGamer = null;
-                ApplicationUser currentGamer = null;
-
-                using (var transaction = new CommittableTransaction(
-                    new TransactionOptions { IsolationLevel = IsolationLevel.Serializable }))
-                {
-                    var match = _dbContext.Matches.Find(id);
-                    var matchGamers = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Where(g => g.MatchId == id);
-
-                    var resultModel = new MatchResultModel();
-
-                    int winnerScore = 0;
-
-                    var matchGamerBonuses = new List<Tuple<MatchGamer, GamerCard, int>>();
-
-                    foreach (var matchGamer in matchGamers)
-                    {
-                        var gamer = _dbContext.Users.Find(matchGamer.GamerId);
-                        if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
-                        {
-                            var questionsCount = match.Questions.SplitToIntArray().Length;
-                            var answersCount = matchGamer.Answers.Count();
-                            var correctAnswersCount = matchGamer.Answers.Count(a => a.IsCorrectAnswer);
-                            var incorrectAnswersCount = questionsCount - correctAnswersCount;
-
-                            var pointsForMacth = correctAnswersCount * matchOptions.Value.CorrectAnswerScore + incorrectAnswersCount * matchOptions.Value.IncorrectAnswerScore;
-                            matchGamer.Score = pointsForMacth;
-                            matchGamer.IsPlay = false;
-
-                            var gamerCard = _dbContext.GamerCards.Single(gc => gc.CardId == matchGamer.Match.CardId && gc.GamerId == matchGamer.GamerId && gc.IsActive);
-                            
-                            matchGamerBonuses.Add(new Tuple<MatchGamer, GamerCard, int>(matchGamer, gamerCard, answersCount * matchOptions.Value.BonusForAnswer));
-
-                            gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
-
-                            gamer.Score += matchGamer.Score; // Прибавляем текущие очки игроку
-
-                            if (matchGamer.Score > winnerScore)
-                            {
-                                winnerScore = matchGamer.Score;
-                            }
-                        }
-
-                        if (matchGamer.GamerId == userId)
-                        {
-                            currentMatchGamer = matchGamer;
-                            currentGamer = gamer;
-                        }
-                        else
-                        {
-                            resultModel.RivalMatchScore = matchGamer.Score;
-                        }
-                    }
-
-                    foreach (var gamerBonus in matchGamerBonuses)
-                    {
-                        if (gamerBonus.Item1.Score == winnerScore)
-                        {
-                            gamerBonus.Item1.IsWinner = true;
-                        }
-
-                        int bonus = gamerBonus.Item1.IsWinner ? +gamerBonus.Item3 : -gamerBonus.Item3;
-                        gamerBonus.Item1.Score += bonus;
-                        gamerBonus.Item2.Score += bonus;
-
-                        if (gamerBonus.Item1 != currentMatchGamer)
-                        {
-                            resultModel.RivalMatchScore = gamerBonus.Item1.Score;
-                        }
-                        else
-                        {
-                            resultModel.MatchBonus = bonus;
-                        }
-                    }
-
-                    _dbContext.SaveChanges();
-
-                    transaction.Commit();
-
-                    resultModel.CardScore = _dbContext.GamerCards.Where(gc => gc.CardId == currentMatchGamer.Match.CardId && gc.GamerId == userId && gc.IsActive).Select(c => c.Score).FirstOrDefault();
-                    resultModel.MatchScore = currentMatchGamer.Score;
-                    resultModel.IsWinner = currentMatchGamer.IsWinner;
-                    resultModel.CurrentGamerScore = currentGamer.Score;
-
-                    return Ok(resultModel);
-                }
+                return Ok(await _matchManager.GetMatchResult(id, userId));
             }
 
             return BadRequest(ModelState);

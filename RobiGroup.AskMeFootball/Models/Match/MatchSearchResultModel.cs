@@ -4,6 +4,6 @@
     {
         public bool Found { get; set; }
 
-        public MatchModel Match { get; set; }
+        public MatchRequestModel Match { get; set; }
     }
 }

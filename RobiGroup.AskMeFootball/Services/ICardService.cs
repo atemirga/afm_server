@@ -36,6 +36,7 @@ namespace RobiGroup.AskMeFootball.Services
                     CurrentScore = u.Score,
                     TotalScore = u.TotalScore,
                     IsBot = u.Bot > 0,
+                    IsPlaying = _dbContext.MatchGamers.Any(mg => mg.GamerId == gc.GamerId && mg.IsPlay),
                     Raiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId && gcr.IsActive)
                                   .Count(gr => gr.Score > gc.Score) + 1,
                 }).OrderBy(r => r.Raiting);
