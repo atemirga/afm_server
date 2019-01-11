@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -418,12 +419,35 @@ namespace RobiGroup.AskMeFootball.Controllers
                             Id = a.Id,
                             Text = a.Text
                         }).ToList()
-                    });
+                    }).ToList().OrderBy(q => matchQuestions.IndexOf(q.Id));
 
                 return Ok(questions);
             }
 
             return BadRequest(ModelState);
+        }
+
+        /// <summary>
+        /// Получить статус ответа на вопрос
+        /// </summary>
+        /// <param name="id">ID матча</param>
+        /// <param name="questionId">ID вопроса</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("{id}/answers/status")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetQuestionAnswerStatus([FromRoute]int id, [FromQuery]int questionId)
+        {
+            string userId = User.GetUserId();
+            
+            if(!await _matchManager.GetQuestionAnswerStatus(id, userId, questionId))
+            {
+                ModelState.AddModelError("", "Матч окночен, либо не пришло время для ответа.");
+                return BadRequest(ModelState);
+            }
+
+            return Ok();
         }
 
         /// <summary>
@@ -520,11 +544,6 @@ namespace RobiGroup.AskMeFootball.Controllers
                                 "questionAnswersResult", answers);
                             _logger.LogInformation($"questionAnswersResult for {answerReponse.GamerId}");
                         }
-                    }
-
-                    if (matchQuestions[matchQuestions.Length - 1] == answer.QuestionId)
-                    {
-                        
                     }
 
                     return Ok();

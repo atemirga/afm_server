@@ -13,7 +13,7 @@ namespace RobiGroup.AskMeFootball.Common.Options
         public TimeSpan MatchPauseDuration { get; set; }
 
         public TimeSpan TimeForOneQuestion { get; set; }
-        
 
+        public int MissedQuestionsCount { get; set; }
     }
 }

@@ -12,5 +12,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
         Task<ConfirmResponseModel> Confirm(string gamerId, int matchId);
         
         Task<MatchResultModel> GetMatchResult(int id, string userId);
+
+        Task<bool> GetQuestionAnswerStatus(int id, string userId, int questionId);
     }
 }

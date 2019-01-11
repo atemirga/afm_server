@@ -86,7 +86,7 @@
                             <button id="btn-accept" type="button" class="btn execute hidden">Accept</button>
                             <button id="btn-delay" type="button" class="btn execute hidden">Delay</button>
                             <button id="btn-cancel" type="button" class="btn cancel hidden">Cancel</button>
-                            <button id="btn-delayed" type="button" class="btn execute hidden" style="float: right;">Delayed games</button>
+                            <button id="timer" type="button" class="btn execute hidden" style="float: right;"> </button>
                         </div>
                         <div id="question" class="block col-6">
                         </div>
@@ -138,7 +138,8 @@
                 '77070000000':
                     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZkYTQ0NDRiLWM1ODMtNDA2Mi04NDVlLTFiNGVkNjAwNDY0OSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIyIiwiaHR0cDovL3JvYmkuZ3JvdXAvY2xhaW1zL3Bob25lY29uZmlybWVkIjoiVHJ1ZSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9oYXNwYXNzd29yZCI6IlRydWUiLCJqdGkiOiJiYmY4NWZkMS0yMmRjLTRjOGYtOWVlYi01Mzc3OWQ0YmQzZTciLCJpYXQiOjE1NDE2NjYzMTEsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkdhbWVyIiwibmJmIjoxNTQxNjY2MzExLCJleHAiOjE1NTQ2MjYzMTEsImlzcyI6IkFza01lRm9vdGJhbGxJc3N1ZXIiLCJhdWQiOiJBc2tNZUZvb3RiYWxsQXVkaWVuY2UifQ.D3jFkU9KZF-YSwRPDFjMSoHiSp5P2-T013bVpbqfB84',
                 '77078193563':
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6Ijk3ZDU5OTE3LWI0YjktNDA1My1hMTQ2LTA1ZGQwYjY5MzA0ZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIxIiwiaHR0cDovL3JvYmkuZ3JvdXAvY2xhaW1zL3Bob25lY29uZmlybWVkIjoiVHJ1ZSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9oYXNwYXNzd29yZCI6IlRydWUiLCJqdGkiOiIwZjk4ZjJmNy01OGNmLTRlZDItOWY4ZC04OWRjMGMwYWIxYjIiLCJpYXQiOjE1NDE2NjY0NDIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkdhbWVyIiwibmJmIjoxNTQxNjY2NDQyLCJleHAiOjE1NTQ2MjY0NDIsImlzcyI6IkFza01lRm9vdGJhbGxJc3N1ZXIiLCJhdWQiOiJBc2tNZUZvb3RiYWxsQXVkaWVuY2UifQ.vsxnrB7IaeU1_HfDxFRwKpd1x4_F5vjr6P8ysPe_RwA'
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6Ijk3ZDU5OTE3LWI0YjktNDA1My1hMTQ2LTA1ZGQwYjY5MzA0ZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwbGF5ZXIxIiwiaHR0cDovL3JvYmkuZ3JvdXAvY2xhaW1zL3Bob25lY29uZmlybWVkIjoiVHJ1ZSIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9oYXNwYXNzd29yZCI6IlRydWUiLCJqdGkiOiIwZjk4ZjJmNy01OGNmLTRlZDItOWY4ZC04OWRjMGMwYWIxYjIiLCJpYXQiOjE1NDE2NjY0NDIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkdhbWVyIiwibmJmIjoxNTQxNjY2NDQyLCJleHAiOjE1NTQ2MjY0NDIsImlzcyI6IkFza01lRm9vdGJhbGxJc3N1ZXIiLCJhdWQiOiJBc2tNZUZvb3RiYWxsQXVkaWVuY2UifQ.vsxnrB7IaeU1_HfDxFRwKpd1x4_F5vjr6P8ysPe_RwA',
+                '77768193563': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjE3MDBiNTM1LTRiZWUtNDZkZS05MWU0LThlNjhhOTdiNDY5MSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiI3Nzc2ODE5MzU2MyIsImh0dHA6Ly9yb2JpLmdyb3VwL2NsYWltcy9waG9uZWNvbmZpcm1lZCI6IlRydWUiLCJodHRwOi8vcm9iaS5ncm91cC9jbGFpbXMvaGFzcGFzc3dvcmQiOiJGYWxzZSIsImp0aSI6IjBiYjBmNzg3LTZiMjctNDI4Mi1iYjliLWYyMGFlNDFjNjJkYSIsImlhdCI6MTU0NjkyMzA5MiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiR2FtZXIiLCJuYmYiOjE1NDY5MjMwOTIsImV4cCI6MTU1OTg4MzA5MiwiaXNzIjoiQXNrTWVGb290YmFsbElzc3VlciIsImF1ZCI6IkFza01lRm9vdGJhbGxBdWRpZW5jZSJ9.1PWza8zjHM-dZkCxuUedYEvSeYmSheCFrxgJDxPiYUI'
             }
         } else if (configObject.env == 'BEYBITWIN10') {
             _tokens = {
@@ -290,7 +291,9 @@
                 method: 'POST'
             }).always(function() {
                 $('#btn-seacrh').show();
-            });
+                });
+
+            stopCheckQuestionAnswerStatus();
         });
 
         $('#btn-confirm').click(function() {
@@ -327,7 +330,7 @@
     }
 
     function nextQuestion() {
-
+        questionAnswered = false;
         if (match.currentQuestion < match.questions.length) {
             var question = match.questions[match.currentQuestion];
 
@@ -345,16 +348,20 @@
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
                         data: JSON.stringify({
-                            "questionId": question.id,
-                            "answerId": answerId
-                        })
-                }).done(function(response) {
-                });
+                                "questionId": question.id,
+                                "answerId": answerId
+                            })
+                        }).done(function(response) {
+                        });
+                    questionAnswered = true;
                 });
                 $('#question').append($('<p/>').html($answer));
             });
 
             match.currentQuestion++;
+
+            checkQuestionAnswerStatus(question.id);
+
         } else {
             $('#title').text('END!');
 
@@ -373,7 +380,47 @@
                 $('#btn-seacrh').prop('disabled', false).show();
                 $('#btn-cancel').hide();
             });
+
+            stopCheckQuestionAnswerStatus();
         }
+    }
+
+    var checkQuestionStatusTimer;
+    var questionTime = 0;
+    var questionAnswered;
+
+    function checkQuestionAnswerStatus(questionId) {
+        
+        stopCheckQuestionAnswerStatus();
+
+        console.log('TIMER Started: ' + checkQuestionStatusTimer + ', question: ' + questionId);
+        questionTime = new Date().getTime();
+        $('#timer').text('0');
+        checkQuestionStatusTimer = setInterval(function () {
+
+            var now = new Date().getTime();
+            var elapsed = (now - questionTime) / 1000;
+
+            $('#timer').text(parseInt(elapsed));
+
+            if (elapsed >= 10) {
+                $.ajax({
+                    url: '/api/match/' + match.matchId + '/answers/status',
+                    method: 'GET',
+                    data: { questionId }
+                }).done(function (response) {
+                    nextQuestion();
+                });
+
+                stopCheckQuestionAnswerStatus();
+            }
+
+        }, 1000);
+    }
+
+    function stopCheckQuestionAnswerStatus() {
+        clearInterval(checkQuestionStatusTimer);
+        console.log('TIMER Stopped: ' + checkQuestionStatusTimer);
     }
 
     var match;
@@ -449,6 +496,8 @@
         wsconnection.methods.matchStoped = function (response) {
             if (match.gamerId == response.gamerId) {
                 $('#title').text('Match stoped for rival! ');
+            } else {
+                stopCheckQuestionAnswerStatus();
             }
         };
 
@@ -458,6 +507,7 @@
                 $('#btn-seacrh').show().prop('disabled', false);
                 $('#btn-accept, #btn-delay, #btn-confirm, #btn-cancel').hide();
             }
+            stopCheckQuestionAnswerStatus();
         };
 
         wsconnection.methods.matchStarted = function (request) {
