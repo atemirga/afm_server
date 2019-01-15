@@ -49,7 +49,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 Prize = c.Prize,
                 ImageUrl = c.ImageUrl,
                 ResetTime = c.ResetTime,
-                InterestedCount = c.GamerCards.Count()
+                InterestedCount = c.GamerCards.Count(gc => gc.IsActive)
             }).ToList();
 
             foreach (var card in cards)

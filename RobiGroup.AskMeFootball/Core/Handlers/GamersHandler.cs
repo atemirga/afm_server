@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,7 @@ using RobiGroup.AskMeFootball.Core.Game;
 using RobiGroup.AskMeFootball.Core.Handlers.Models;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Match;
+using RobiGroup.Web.Common;
 using RobiGroup.Web.Common.Identity;
 using WebSocketManager;
 using WebSocketManager.Common;
@@ -56,17 +58,21 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
             await PauseResumeMatch(socket, id, true);
         }
 
-        public async Task ResumeMatch(WebSocket socket, int id)
+        public async Task<ResumeMatchResultModel> ResumeMatch(WebSocket socket, int id)
         {
             var userId = WebSocketConnectionManager.GetSocketGroup(WebSocketConnectionManager.GetId(socket));
             _logger.LogWarning($"ResumeMatch called by {userId} for match {id}");
-            await PauseResumeMatch(socket, id, false);
+            return await PauseResumeMatch(socket, id, false);
+
+
         }
 
-        private async Task PauseResumeMatch(WebSocket socket, int id, bool pause)
+        private async Task<ResumeMatchResultModel> PauseResumeMatch(WebSocket socket, int id, bool pause)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
+                var result = new ResumeMatchResultModel();
+
                 var socketId = WebSocketConnectionManager.GetId(socket);
                 var gamerId = WebSocketConnectionManager.GetSocketGroup(socketId);
 
@@ -86,23 +92,14 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                         }
                         else if (_pausedMatches.TryRemove(gamerId, out var pausedMatch))
                         {
-                            if (DateTime.Now - pausedMatch.PausedTime > _matchOptions.MatchPauseDuration)
-                            {
-                                matchGamer.Cancelled = true;
-                                matchGamer.IsPlay = false;
-                                await dbContext.SaveChangesAsync();
+                            result.MissedQuestions = await scope.ServiceProvider.GetService<IMatchManager>()
+                                .GetMissedQuestionsForMatch(matchGamer.MatchId, matchGamer.GamerId);
 
-                                foreach (var game in gamers)
-                                {
-                                    await InvokeClientMethodToGroupAsync(game.GamerId, "matchStoped",
-                                        new { id = game.MatchId, gamerId });
-                                }
-                                return;
-                            }
+                            return result;
                         }
                         else
                         {
-                            return;
+                            return result;
                         }
 
                         foreach (var game in gamers)
@@ -112,6 +109,8 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                         }
                     }
                 }
+
+                return result;
             }
         }
 

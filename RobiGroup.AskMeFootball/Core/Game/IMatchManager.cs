@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using RobiGroup.AskMeFootball.Models.Match;
 
 namespace RobiGroup.AskMeFootball.Core.Game
@@ -14,5 +15,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
         Task<MatchResultModel> GetMatchResult(int id, string userId);
 
         Task<bool> GetQuestionAnswerStatus(int id, string userId, int questionId);
+
+        Task<List<int>> GetMissedQuestionsForMatch(int matchId, string gamerId);
     }
 }

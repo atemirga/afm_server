@@ -454,6 +454,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                 {
                                     QuestionId = questionId
                                 }, userId);
+
+                                await GetMissedQuestionsForMatch(match.Id, matchGamer.GamerId);
                             }
 
                             var matchGamers = _dbContext.MatchGamers.Where(g => g.MatchId == id && g.GamerId != userId)
@@ -467,6 +469,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                     {
                                         QuestionId = questionId
                                     }, gamer.GamerId);
+                                    await GetMissedQuestionsForMatch(match.Id, gamer.GamerId);
                                 }
                             }
                         }
@@ -482,6 +485,61 @@ namespace RobiGroup.AskMeFootball.Core.Game
                 _semaphoreSlim.Release();
 
                 return result;
+            }
+        }
+
+        public async Task<List<int>> GetMissedQuestionsForMatch(int matchId, string gamerId)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
+                var match = dbContext.Matches.Find(matchId);
+                var matchQuestions = match.Questions.SplitToIntArray();
+
+                var matchAnswers = (from a in dbContext.MatchAnswers
+                    join g in dbContext.MatchGamers on a.MatchGamerId equals g.Id
+                    where g.MatchId == matchId && g.GamerId == gamerId
+                    orderby a.CreatedAt descending
+                    select a).ToList();
+
+                List<int> missedQuestions = new List<int>();
+                foreach (var answer in matchAnswers)
+                {
+                    if (!answer.AnswerId.HasValue)
+                    {
+                        missedQuestions.Add(answer.QuestionId);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                var nextQuestionIndex = 0;
+
+                if (missedQuestions.Any())
+                {
+                    nextQuestionIndex = matchQuestions.IndexOf(missedQuestions[0]) + 1;
+                }
+
+                missedQuestions.Insert(0, matchQuestions[nextQuestionIndex]);
+
+                if (missedQuestions.Count >= matchOptions.Value.MissedQuestionsCount)
+                {
+                    var gamers = dbContext.MatchGamers.Where(g => g.MatchId == matchId);
+                    foreach (var game in gamers)
+                    {
+                        game.Cancelled = true;
+                        game.IsPlay = false;
+
+                        await _gamersHandler.InvokeClientMethodToGroupAsync(game.GamerId, "matchStoped",
+                            new { id = game.MatchId, gamerId = game.GamerId, reason = "Матч был отменен. Соперник покинул игру." });
+                    }
+                    await dbContext.SaveChangesAsync();
+                }
+
+                return missedQuestions;
             }
         }
     }
