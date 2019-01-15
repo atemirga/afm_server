@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace RobiGroup.AskMeFootball.Models.Cards
@@ -13,6 +14,10 @@ namespace RobiGroup.AskMeFootball.Models.Cards
         public string Prize { get; set; }
 
         public string ImageUrl { get; set; }
+
+        public int InterestedCount { get; set; }
+
+        public string[] InterestedTopPhotoUrls { get; set; }
 
         public DateTime ResetTime
         {

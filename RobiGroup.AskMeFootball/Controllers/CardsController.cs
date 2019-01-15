@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
 using RobiGroup.AskMeFootball.Models.Cards;
@@ -41,17 +42,23 @@ namespace RobiGroup.AskMeFootball.Controllers
         [ProducesResponseType(typeof(List<CardModel>), 200)]
         public IActionResult GetAll()
         {
-            return Ok(_dbContext.Cards.Select(c => new CardModel
+            var cards = _dbContext.Cards.Include(c => c.GamerCards).Select(c => new CardModel
             {
                 Id = c.Id,
                 Name = c.Name,
                 Prize = c.Prize,
                 ImageUrl = c.ImageUrl,
-                ResetTime = c.ResetTime
-            }).ToList());
+                ResetTime = c.ResetTime,
+                InterestedCount = c.GamerCards.Count()
+            }).ToList();
+
+            foreach (var card in cards)
+            {
+                card.InterestedTopPhotoUrls = _cardService.GetLeaderboard(card.Id).Take(3).ToList().Select(m => m.PhotoUrl).ToArray();
+            }
+
+            return Ok(cards);
         }
-
-
 
         /// <summary>
         /// Получить карточку по ID
