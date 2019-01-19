@@ -358,9 +358,9 @@
                 $('#question').append($('<p/>').html($answer));
             });
 
-            match.currentQuestion++;
-
             checkQuestionAnswerStatus(question.id);
+
+            match.currentQuestion++;
 
         } else {
             $('#title').text('END!');
@@ -497,6 +497,7 @@
             if (match.gamerId == response.gamerId) {
                 $('#title').text('Match stoped for rival! ');
             } else {
+                $('#title').text('Match stoped!!! ');
                 stopCheckQuestionAnswerStatus();
             }
         };
@@ -537,10 +538,6 @@
                     $('button[data-id=' + item.answerId + ']').css('background', item.isCorrect ? '#49cc90' : '#f91100');
                 }
             });
-
-            setTimeout(function() {
-                nextQuestion();
-            }, 1500);
         };
         
         wsconnection.connect();

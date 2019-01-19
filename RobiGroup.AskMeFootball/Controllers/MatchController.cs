@@ -440,10 +440,14 @@ namespace RobiGroup.AskMeFootball.Controllers
         public async Task<IActionResult> GetQuestionAnswerStatus([FromRoute]int id, [FromQuery]int questionId)
         {
             string userId = User.GetUserId();
-            
-            if(!await _matchManager.GetQuestionAnswerStatus(id, userId, questionId))
+
+            try
             {
-                ModelState.AddModelError("", "Матч окночен, либо не пришло время для ответа.");
+                await _matchManager.GetQuestionAnswerStatus(id, userId, questionId);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(string.Empty, e.Message);
                 return BadRequest(ModelState);
             }
 

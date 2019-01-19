@@ -72,7 +72,6 @@ namespace RobiGroup.AskMeFootball.Core.Game
                         //CommonWebSocketConnection rival = null;
 
                         var rivalIds = rivalCandidates.Select(r => r.UserId).ToArray();
-                        _dbContext.MatchGamers.Where(g => rivalIds.Contains(g.GamerId) && !g.IsPlay).OrderBy(m => m.Id).Select(r => r.GamerId).Distinct();
 
                         /*var rivalGamer = (from g in _dbContext.MatchGamers
                                     join rg in _dbContext.MatchGamers on g.MatchId equals rg.MatchId
@@ -81,14 +80,34 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                     orderby rg.Id
                                     select rg).FirstOrDefault();*/
 
-                       var rivalGamer = (from g in _dbContext.Users
-                                        where rivalIds.Contains(g.Id) && !_dbContext.MatchGamers.Any(mg => mg.GamerId == g.Id && mg.IsPlay)
-                                        orderby (from cg in _dbContext.MatchGamers
-                                                 join rg in _dbContext.MatchGamers on cg.MatchId equals rg.MatchId
-                                                 where cg.GamerId == gamerId && rg.GamerId == g.Id
-                                                 orderby rg.Id descending 
-                                                 select rg.Id).FirstOrDefault()
-                                        select g.Id).FirstOrDefault();
+                        string rivalId;
+                        bool isBot = false;
+
+                        if (string.IsNullOrEmpty(rivalCandidateId))
+                        {
+                            rivalId = (from g in _dbContext.Users
+                                where (rivalIds.Contains(g.Id) || g.Bot > 0) &&
+                                      !_dbContext.MatchGamers.Any(mg => mg.GamerId == g.Id && mg.IsPlay)
+                                orderby (from cg in _dbContext.MatchGamers
+                                    join rg in _dbContext.MatchGamers on cg.MatchId equals rg.MatchId
+                                    join gc in _dbContext.GamerCards on cg.GamerCardId equals gc.Id
+                                    where cg.GamerId == gamerId && rg.GamerId == g.Id && gc.IsActive
+                                    orderby rg.Id descending
+                                    select rg.Id).FirstOrDefault(), g.Bot
+                                select g.Id).FirstOrDefault();
+
+                            if (string.IsNullOrEmpty(rivalId))
+                            {
+                                rivalId = (from u in _dbContext.Users
+                                    where u.Bot > 0 && !_dbContext.MatchGamers.Any(g => g.GamerId == u.Id && g.IsPlay)
+                                    select u.Id).Distinct().OrderBy(u => Guid.NewGuid()).FirstOrDefault();
+                                isBot = true;
+                            }
+                        }
+                        else
+                        {
+                            rivalId = rivalCandidateId;
+                        }
 
                         /*
                         Random rng = new Random();
@@ -111,16 +130,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             }
                         }
                         */
-                        bool isBot = false;
-                        var rivalId = rivalGamer;
-                        if (string.IsNullOrEmpty(rivalId))
-                        {
-                            rivalId = (from u in _dbContext.Users
-                                where u.Bot > 0 && !_dbContext.MatchGamers.Any(g => g.GamerId == u.Id && g.IsPlay)
-                                select u.Id).Distinct().OrderBy(u => Guid.NewGuid()).FirstOrDefault();
-                            isBot = true;
-                        }
-
+                        
                         if (!string.IsNullOrEmpty(rivalId))
                         {
                             var match = new Match()
@@ -417,37 +427,39 @@ namespace RobiGroup.AskMeFootball.Core.Game
                 var _dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
                 var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
 
-                await _semaphoreSlim.WaitAsync();
-
-                var matchGamer = _dbContext.MatchGamers.Single(g => g.MatchId == id && g.GamerId == userId);
-
-                var lastActiveTime = DateTime.Now - matchGamer.JoinTime;
-
-                var lastQuestionAnswer = _dbContext.MatchAnswers
-                    .Where(a => a.MatchGamerId == matchGamer.Id && a.QuestionId != questionId)
-                    .OrderByDescending(a => a.CreatedAt).FirstOrDefault();
-
-                if (lastQuestionAnswer != null)
+                try
                 {
-                    lastActiveTime = DateTime.Now - lastQuestionAnswer.CreatedAt;
-                }
+                    await _semaphoreSlim.WaitAsync();
 
-                if (!matchGamer.Cancelled && matchGamer.IsPlay
-                    && lastActiveTime > matchOptions.Value.TimeForOneQuestion)
-                {
-                    var match = _dbContext.Matches.Find(id);
-                    var matchQuestions = match.Questions.SplitToIntArray();
+                    var matchGamer = _dbContext.MatchGamers.Single(g => g.MatchId == id && g.GamerId == userId);
 
-                    var questionIndx = matchQuestions.IndexOf(questionId);
-                    if ((lastQuestionAnswer == null && questionIndx == 0) 
-                        || (lastQuestionAnswer != null && questionIndx - matchQuestions.IndexOf(lastQuestionAnswer.QuestionId) == 1))
+                    var lastActiveTime = DateTime.Now - matchGamer.JoinTime;
+
+                    var lastQuestionAnswer = _dbContext.MatchAnswers
+                        .Where(a => a.MatchGamerId == matchGamer.Id && a.QuestionId != questionId)
+                        .OrderByDescending(a => a.CreatedAt).FirstOrDefault();
+
+                    if (lastQuestionAnswer != null)
                     {
-                        var answer = _dbContext.MatchAnswers.FirstOrDefault(a =>
-                            a.QuestionId == questionId && a.MatchGamerId == matchGamer.Id);
+                        lastActiveTime = DateTime.Now - lastQuestionAnswer.CreatedAt;
+                    }
 
-                        try
+                    if (!matchGamer.Cancelled && matchGamer.IsPlay
+                        && lastActiveTime > matchOptions.Value.TimeForOneQuestion)
+                    {
+                        var match = _dbContext.Matches.Find(id);
+                        var matchQuestions = match.Questions.SplitToIntArray();
+
+                        var questionIndx = matchQuestions.IndexOf(questionId);
+                        if ((lastQuestionAnswer == null && questionIndx == 0)
+                            || (lastQuestionAnswer != null &&
+                                questionIndx - matchQuestions.IndexOf(lastQuestionAnswer.QuestionId) == 1))
                         {
-                            var matchController = scope.ServiceProvider.GetService<MatchController>(); ;
+                            var answer = _dbContext.MatchAnswers.FirstOrDefault(a =>
+                                a.QuestionId == questionId && a.MatchGamerId == matchGamer.Id);
+
+                            var matchController = scope.ServiceProvider.GetService<MatchController>();
+                            ;
                             if (answer == null)
                             {
                                 await matchController.AnswerToQuestions(id, new MatchQuestionAnswerModel()
@@ -472,17 +484,32 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                     await GetMissedQuestionsForMatch(match.Id, gamer.GamerId);
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
 
+                            result = true;
                         }
-
-                        result = true;
+                    }
+                    else
+                    {
+                        throw new Exception("Матч окночен, либо не пришло время для ответа.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Error while getting question status!");
+                    throw e;
+                }
+                finally
+                {
+                    try
+                    {
+                        _semaphoreSlim.Release();
+                    }
+                    catch (Exception e)
+                    {
+                       
                     }
                 }
 
-                _semaphoreSlim.Release();
 
                 return result;
             }
