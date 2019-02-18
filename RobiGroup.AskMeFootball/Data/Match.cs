@@ -5,6 +5,17 @@ namespace RobiGroup.AskMeFootball.Data
 {
     public class Match
     {
+        public enum MatchStatus : byte
+        {
+            Requested,
+            Confirmed,
+            Started,
+            Finished,
+            Cancelled,
+            CancelledAferStart,
+            Delayed
+        }
+
         public int Id { get; set; }
 
         public DateTime CreateTime { get; set; }
@@ -14,6 +25,8 @@ namespace RobiGroup.AskMeFootball.Data
         public DateTime? StartTime { get; set; }
 
         public int CardId { get; set; }
+
+        public MatchStatus Status { get; set; }
 
         public Card Card { get; set; }
 

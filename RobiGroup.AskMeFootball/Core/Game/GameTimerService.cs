@@ -78,7 +78,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
                 var userManager = services.GetService<UserManager<ApplicationUser>>();
                 foreach (var gamer in await userManager.GetUsersInRoleAsync(ApplicationRoles.Gamer))
                 {
-                    gamer.Score = gamerOptions.Value.DailyPoints;
+                    gamer.PointsToPlay = gamerOptions.Value.DailyPoints;
+                    gamer.Score = 0;
                     await userManager.UpdateAsync(gamer);
                 }
             }

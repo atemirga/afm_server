@@ -9,3 +9,12 @@
 /RobiGroup.AskMeFootball/Logs
 /RobiGroup.AskMeFootball/Properties/PublishProfiles
 /RobiGroup.AskMeFootball/wwwroot/files
+/JQuery.DataTables.Extensions/bin/
+/JQuery.DataTables.Extensions/obj/
+/RobiGroup.Web.Common/bin/
+/RobiGroup.Web.Common/obj/
+/WebSocketManager.Common/bin/
+/WebSocketManager.Common/obj/
+/WebSocketManager/bin/
+/WebSocketManager/obj/
+*.DS_Store

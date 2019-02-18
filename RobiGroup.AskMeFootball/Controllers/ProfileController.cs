@@ -51,6 +51,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 Nickname = user.NickName,
                 Rank = user.Rank?.Name,
                 Score = user.Score,
+                PointsToPlay = user.PointsToPlay,
                 TotalScore = user.TotalScore,
                 PhotoUrl = user.PhotoUrl,
                 Raiting = _dbContext.Users.Count(u => u.TotalScore > user.TotalScore) + 1,
@@ -111,7 +112,8 @@ namespace RobiGroup.AskMeFootball.Controllers
 
             var matches = (from m in _dbContext.Matches
                            join mg in _dbContext.MatchGamers on m.Id equals mg.MatchId
-                           where mg.GamerId == userId
+                           where mg.GamerId == userId && (m.Status == Match.MatchStatus.Finished
+                           /*|| m.Status == Match.MatchStatus.CancelledAfterStart*/)
                            select mg.IsWinner);
 
             return Ok(new ProfileStatisticsModel()

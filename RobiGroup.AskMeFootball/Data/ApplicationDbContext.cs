@@ -42,7 +42,7 @@ namespace RobiGroup.AskMeFootball.Data
                 e.Property(p => p.FullName)
                     .HasComputedColumnSql("[LastName] + ' ' + [FirstName]");
                 e.HasIndex(u => u.PhoneNumber).IsUnique();
-                e.Property(u => u.PhoneNumber).IsRequired(); 
+                e.Property(u => u.PhoneNumber).IsRequired();
             });
                 
             builder.Entity<CardType>().HasData(
@@ -51,6 +51,8 @@ namespace RobiGroup.AskMeFootball.Data
                 new CardType {Id = 30, Name = "Ежемесячный", Code = Data.CardTypes.Monthly.ToString() });
 
             builder.Entity<MatchAnswer>().HasAlternateKey(a => new { a.MatchGamerId, a.QuestionId });
+
+            builder.Entity<Match>().Property(m => m.Status).HasConversion<byte>();
 
         }
     }

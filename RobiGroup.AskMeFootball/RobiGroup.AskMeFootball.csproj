@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>\bin\Debug\netcoreapp2.1\RobiGroup.AskMeFootball.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netcoreapp2.1\bin\Debug\netcoreapp2.1\RobiGroup.AskMeFootball.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -780,12 +780,6 @@
     <PackageReference Include="NLog" Version="4.5.11" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.7.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\mastera24\RobiGroup.Mastera24\RobiGroup.Web.Common\RobiGroup.Web.Common.csproj" />
-    <ProjectReference Include="..\..\ututor\backend\JQuery.DataTables.Extensions\JQuery.DataTables.Extensions.csproj" />
-    <ProjectReference Include="..\..\ututor\backend\WebSocketManager\WebSocketManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -2080,4 +2074,9 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\JQuery.DataTables.Extensions\JQuery.DataTables.Extensions.csproj" />
+    <ProjectReference Include="..\RobiGroup.Web.Common\RobiGroup.Web.Common.csproj" />
+    <ProjectReference Include="..\WebSocketManager\WebSocketManager.csproj" />
+  </ItemGroup>
 </Project>

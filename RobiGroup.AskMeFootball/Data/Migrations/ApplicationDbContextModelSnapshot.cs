@@ -15,7 +15,7 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.3-rtm-32065")
+                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -179,6 +179,8 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<string>("PhotoUrl");
 
+                    b.Property<int>("PointsToPlay");
+
                     b.Property<int?>("RankId");
 
                     b.Property<int>("Score");
@@ -338,6 +340,8 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.Property<string>("Questions");
 
                     b.Property<DateTime?>("StartTime");
+
+                    b.Property<byte>("Status");
 
                     b.HasKey("Id");
 

@@ -19,6 +19,8 @@
 
         public string PhotoUrl { get; set; }
 
+        public int PointsToPlay { get; set; }
+
         /// <summary>
         /// Итоговые очки
         /// </summary>

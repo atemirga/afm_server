@@ -57,165 +57,147 @@ namespace RobiGroup.AskMeFootball.Core.Game
             {
                 var model = new MatchSearchResultModel();
                 var _dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
                 var gamer = _dbContext.Users.Find(gamerId);
 
-                if (gamer.Score > 100)
+                if (gamer.PointsToPlay < 0)
                 {
-                    var card = _dbContext.Cards.Find(cardId);
-                    if ((card.ResetTime - DateTime.Now) > TimeSpan.FromMinutes(10))
+                    throw new Exception($"Недостаточно мячей для игры. У вас {gamer.Score} очков.");
+                }
+
+                var card = _dbContext.Cards.Find(cardId);
+                if ((card.ResetTime - DateTime.Now) <= TimeSpan.FromMinutes(10))
+                {
+                    throw new Exception("Время карты истекло.");
+                }
+
+                // retrieve all users connected to web socket except of self
+                var rivalCandidates = _gamersHandler.WebSocketConnectionManager.Connections.Values
+                    .Where(c => !c.Away
+                        && c.UserId != gamerId
+                        && (string.IsNullOrEmpty(rivalCandidateId)
+                            || c.UserId == rivalCandidateId)
+                        )
+                    .OrderByDescending(c => c.ConnectedTime)
+                    .ToList();
+
+                var rivalIds = rivalCandidates.Select(r => r.UserId).ToArray();
+
+                string rivalId;
+                bool isBot = false;
+
+                if (string.IsNullOrEmpty(rivalCandidateId)) // if rival is not defined by request author
+                {
+                    var foundRival = (from g in _dbContext.Users
+                                      where (rivalIds.Contains(g.Id) || g.Bot > 0)
+                                          && !_dbContext.MatchGamers.Any(mg => mg.GamerId == g.Id && mg.IsPlay)
+                                      orderby (
+                                          from cg in _dbContext.MatchGamers
+                                          join rg in _dbContext.MatchGamers on cg.MatchId equals rg.MatchId
+                                          join gc in _dbContext.GamerCards on cg.GamerCardId equals gc.Id
+                                          where cg.GamerId == gamerId && rg.GamerId == g.Id && gc.IsActive
+                                          orderby rg.Id descending
+                                          select rg.Id
+                                      ).FirstOrDefault(), g.Bot
+                                      select g).FirstOrDefault();
+
+                    if (foundRival == null)
                     {
-                        var rivalCandidates = _gamersHandler.WebSocketConnectionManager.Connections.Values
-                            .Where(c => !c.Away && c.UserId != gamerId && (string.IsNullOrEmpty(rivalCandidateId) || c.UserId == rivalCandidateId))
-                            .OrderByDescending(c => c.ConnectedTime)
-                            .ToList();
-
-                        //CommonWebSocketConnection rival = null;
-
-                        var rivalIds = rivalCandidates.Select(r => r.UserId).ToArray();
-
-                        /*var rivalGamer = (from g in _dbContext.MatchGamers
-                                    join rg in _dbContext.MatchGamers on g.MatchId equals rg.MatchId
-                                    join r in _dbContext.Users on rg.GamerId equals r.Id
-                                    where g.GamerId == gamerId && rivalIds.Contains(rg.GamerId) && r.Bot == 0 && !rg.IsPlay  
-                                    orderby rg.Id
-                                    select rg).FirstOrDefault();*/
-
-                        string rivalId;
-                        bool isBot = false;
-
-                        if (string.IsNullOrEmpty(rivalCandidateId))
-                        {
-                            rivalId = (from g in _dbContext.Users
-                                where (rivalIds.Contains(g.Id) || g.Bot > 0) &&
-                                      !_dbContext.MatchGamers.Any(mg => mg.GamerId == g.Id && mg.IsPlay)
-                                orderby (from cg in _dbContext.MatchGamers
-                                    join rg in _dbContext.MatchGamers on cg.MatchId equals rg.MatchId
-                                    join gc in _dbContext.GamerCards on cg.GamerCardId equals gc.Id
-                                    where cg.GamerId == gamerId && rg.GamerId == g.Id && gc.IsActive
-                                    orderby rg.Id descending
-                                    select rg.Id).FirstOrDefault(), g.Bot
-                                select g.Id).FirstOrDefault();
-
-                            if (string.IsNullOrEmpty(rivalId))
-                            {
-                                rivalId = (from u in _dbContext.Users
-                                    where u.Bot > 0 && !_dbContext.MatchGamers.Any(g => g.GamerId == u.Id && g.IsPlay)
-                                    select u.Id).Distinct().OrderBy(u => Guid.NewGuid()).FirstOrDefault();
-                                isBot = true;
-                            }
-                        }
-                        else
-                        {
-                            rivalId = rivalCandidateId;
-                        }
-
-                        /*
-                        Random rng = new Random();
-                        int n = rivalCandidates.Count;
-                        while (n > 1)
-                        {
-                            n--;
-                            int k = rng.Next(n + 1);
-                            var value = rivalCandidates[k];
-                            rivalCandidates[k] = rivalCandidates[n];
-                            rivalCandidates[n] = value;
-                        }*/
-                        /*
-                        foreach (var candidate in rivalCandidates)
-                        {
-                            if (!_dbContext.MatchGamers.Any(g => g.GamerId == candidate.UserId && (g.IsPlay)))
-                            {
-                                rival = candidate;
-                                break;
-                            }
-                        }
-                        */
-                        
-                        if (!string.IsNullOrEmpty(rivalId))
-                        {
-                            var match = new Match()
-                            {
-                                CardId = cardId,
-                                CreateTime = DateTime.Now,
-                            };
-                            _dbContext.Matches.Add(match);
-                            _dbContext.SaveChanges();
-
-                            var gamerCard = GetOrAddGamerCard(gamerId, cardId, _dbContext);
-
-                            _dbContext.MatchGamers.Add(new MatchGamer
-                            {
-                                MatchId = match.Id,
-                                GamerId = gamerId,
-                                GamerCardId = gamerCard.Id
-                            });
-                            _dbContext.SaveChanges();
-
-                            var rivalCard = GetOrAddGamerCard(rivalId, cardId, _dbContext);
-
-                            var entity = new MatchGamer
-                            {
-                                MatchId = match.Id,
-                                GamerId = rivalId,
-                                GamerCardId = rivalCard.Id
-                            };
-
-                            if (isBot)
-                            {
-                                entity.JoinTime = DateTime.Now;
-                                entity.Ready = true;
-                                entity.Confirmed = true;
-                            }
-
-                            _dbContext.MatchGamers.Add(entity);
-                            _dbContext.SaveChanges();
-
-                            var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
-
-                            if (!isBot)
-                            {
-                                var rivalMatchModel = new MatchRequestModel(match.Id, _dbContext.Users.Find(gamerId));
-                                rivalMatchModel.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
-                                rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
-
-                                var gamerCardScore = _dbContext.GamerCards
-                                    .Where(gc => gc.CardId == cardId && gc.GamerId == gamerId && gc.IsActive).Select(gc => gc.Score)
-                                    .SingleOrDefault();
-                                rivalMatchModel.GamerRaiting =
-                                    _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId && gcr.IsActive)
-                                        .Count(gr => gr.Score > gamerCardScore) + 1;
-                                rivalMatchModel.GamerCardScore = gamerCardScore;
-                                await _gamersHandler.InvokeClientMethodToGroupAsync(rivalId, "matchRequest",
-                                    rivalMatchModel);
-                            }
-
-                            model.Match = new MatchRequestModel(match.Id, _dbContext.Users.Find(rivalId));
-                            model.Found = true;
-
-                            model.Match.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
-                            model.Match.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
-
-                            var rivaCardScore = _dbContext.GamerCards
-                                .Where(gc => gc.CardId == cardId && gc.GamerId == rivalId && gc.IsActive).Select(gc => gc.Score)
-                                .SingleOrDefault();
-                            model.Match.GamerRaiting =
-                                _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId && gcr.IsActive)
-                                    .Count(gr => gr.Score > rivaCardScore) + 1;
-                            model.Match.GamerCardScore = rivaCardScore;
-
-                            model.Match.IsBot = isBot;
-                        }
-                        else
-                        {
-                            throw new Exception("Никого не найдено!");
-                        }
+                        rivalId = (from u in _dbContext.Users
+                                   where u.Bot > 0 && !_dbContext.MatchGamers.Any(g => g.GamerId == u.Id && g.IsPlay)
+                                   select u.Id).Distinct().OrderBy(u => Guid.NewGuid()).FirstOrDefault();
+                        isBot = true;
+                    }
+                    else
+                    {
+                        rivalId = foundRival.Id;
+                        isBot = foundRival.Bot > 0;
                     }
                 }
-                else
+                else // user given rivalCandidateId
                 {
-                    throw new Exception($"Недостаточно очков для игры. У вас {gamer.Score} очков.");
+                    rivalId = rivalCandidateId;
                 }
 
+                if (string.IsNullOrEmpty(rivalId))
+                {
+                    throw new Exception("Никого не найдено!");
+                }
+                var match = new Match()
+                {
+                    CardId = cardId,
+                    CreateTime = DateTime.Now,
+                };
+                _dbContext.Matches.Add(match);
+                _dbContext.SaveChanges();
+
+                var gamerCard = GetOrAddGamerCard(gamerId, cardId, _dbContext);
+
+                _dbContext.MatchGamers.Add(new MatchGamer
+                {
+                    MatchId = match.Id,
+                    GamerId = gamerId,
+                    GamerCardId = gamerCard.Id
+                });
+                _dbContext.SaveChanges();
+
+                var rivalCard = GetOrAddGamerCard(rivalId, cardId, _dbContext);
+
+                var entity = new MatchGamer
+                {
+                    MatchId = match.Id,
+                    GamerId = rivalId,
+                    GamerCardId = rivalCard.Id
+                };
+
+                if (isBot)
+                {
+                    entity.JoinTime = DateTime.Now;
+                    entity.Ready = true;
+                    entity.Confirmed = true;
+                }
+
+                _dbContext.MatchGamers.Add(entity);
+                _dbContext.SaveChanges();
+
+                if (!isBot)
+                {
+                    var rivalMatchModel = new MatchRequestModel(match.Id, _dbContext.Users.Find(gamerId));
+                    rivalMatchModel.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
+                    rivalMatchModel.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
+
+                    var gamerCardScore = _dbContext.GamerCards
+                        .Where(gc => gc.CardId == cardId
+                            && gc.GamerId == gamerId
+                            && gc.IsActive)
+                        .Select(gc => gc.Score)
+                        .SingleOrDefault();
+                    rivalMatchModel.GamerRaiting = _dbContext.GamerCards
+                        .Where(gcr => gcr.CardId == cardId && gcr.IsActive)
+                        .Count(gr => gr.Score > gamerCardScore) + 1;
+                    rivalMatchModel.GamerCardScore = gamerCardScore;
+                    await _gamersHandler.InvokeClientMethodToGroupAsync(rivalId, "matchRequest", rivalMatchModel);
+                }
+
+                model.Match = new MatchRequestModel(match.Id, _dbContext.Users.Find(rivalId));
+                model.Found = true;
+
+                model.Match.CorrectAnswerScore = matchOptions.Value.CorrectAnswerScore;
+                model.Match.IncorrectAnswerScore = matchOptions.Value.IncorrectAnswerScore;
+
+                var rivalCardScore = _dbContext.GamerCards
+                    .Where(gc =>
+                        gc.CardId == cardId
+                        && gc.GamerId == rivalId
+                        && gc.IsActive)
+                    .Select(gc => gc.Score)
+                    .SingleOrDefault();
+                model.Match.GamerRaiting = _dbContext.GamerCards
+                    .Where(gcr => gcr.CardId == cardId && gcr.IsActive)
+                    .Count(gr => gr.Score > rivalCardScore) + 1;
+                model.Match.GamerCardScore = rivalCardScore;
+                model.Match.IsBot = isBot;
+                model.Match.MyCardScore = gamerCard.Score;
                 return model;
             }
         }
@@ -252,12 +234,15 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     try
                     {
                         _logger.LogInformation($"Match confirm from {gamerId}");
-                        var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
-                            m.GamerId == gamerId && m.MatchId == matchId && !m.JoinTime.HasValue);
+                        var matchParticipant = _dbContext.MatchGamers.Include(mg => mg.Match)
+                            .ThenInclude(m => m.Card)
+                            .ThenInclude(c => c.Questions)
+                            .FirstOrDefault(m => m.GamerId == gamerId && m.MatchId == matchId && !m.JoinTime.HasValue);
 
                         if (matchParticipant != null)
                         {
-                            if (matchParticipant.Cancelled)
+                            var match = matchParticipant.Match;
+                            if (match.Status == Match.MatchStatus.Cancelled)
                             {
                                 throw new Exception("Матч отменен!");
                             }
@@ -266,11 +251,12 @@ namespace RobiGroup.AskMeFootball.Core.Game
                             {
                                 matchParticipant.Confirmed = true;
                                 matchParticipant.JoinTime = DateTime.Now;
-
+                                if (!matchParticipant.Delayed && match.Status == Match.MatchStatus.Requested)
+                                {
+                                    match.Status = Match.MatchStatus.Confirmed;
+                                }
                                 _dbContext.SaveChanges();
                             }
-
-                            tran.Commit();
 
                             var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == matchId && !p.Delayed);
                             var confirm = new ConfirmResponseModel
@@ -279,11 +265,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                 Confirmed = matchParticipant.Delayed || matchParticipants.All(p => p.Confirmed)
                             };
 
-                            var participants = matchParticipants.Where(p => p.GamerId != gamerId).Select(p => p.GamerId)
-                                .ToList();
-
-                            var match = _dbContext.Matches.Include(m => m.Card).ThenInclude(c => c.Questions)
-                                    .Single(m => m.Id == matchId);
+                            var participants = matchParticipants.Where(p => p.GamerId != gamerId).Select(p => p.GamerId).ToList();
                             if (confirm.Confirmed && string.IsNullOrEmpty(match.Questions))
                             {
                                 match.StartTime = DateTime.Now;
@@ -302,7 +284,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                     _logger.LogInformation($"matchConfirmed for {participant}");
                                 }
                             }
-
+                            tran.Commit();
                             return confirm;
                         }
                     }
@@ -322,7 +304,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var _dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>(); var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
+                var _dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>(); 
+                var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
 
                 lock (_locker)
                 {
@@ -330,7 +313,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     ApplicationUser currentGamer = null;
 
                     var match = _dbContext.Matches.Find(id);
-                    var matchGamers = _dbContext.MatchGamers.Include(m => m.Match).Include(m => m.Answers).Where(g => g.MatchId == id);
+                    var matchGamers = _dbContext.MatchGamers.Include(m => m.Answers).Include(m => m.Gamer).Where(g => g.MatchId == id);
+                    var matchWinners = new List<MatchGamer>();
                     /*
                     if (matchGamers.Any(g => g.Delayed && (!g.Ready || g.IsPlay)))
                     {
@@ -346,65 +330,90 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
                     int winnerScore = 0;
 
-                    var matchGamerBonuses = new List<Tuple<MatchGamer, GamerCard, int>>();
-
-                    foreach (var matchGamer in matchGamers)
-                    {
-                        var gamer = _dbContext.Users.Find(matchGamer.GamerId);
-                        if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
+                    //var matchGamerBonuses = new List<Tuple<MatchGamer, GamerCard, int>>();
+                    if (match.Status == Match.MatchStatus.Started) {
+                        foreach (var matchGamer in matchGamers)
                         {
-                            var questionsCount = match.Questions.SplitToIntArray().Length;
-                            var answersCount = matchGamer.Answers.Count();
-                            var correctAnswersCount = matchGamer.Answers.Count(a => a.IsCorrectAnswer);
-                            var incorrectAnswersCount = questionsCount - correctAnswersCount;
-
-                            var pointsForMacth = correctAnswersCount * matchOptions.Value.CorrectAnswerScore +
-                                                 incorrectAnswersCount * matchOptions.Value.IncorrectAnswerScore;
-                            matchGamer.Score = pointsForMacth;
-                            matchGamer.IsPlay = false;
-
-                            var gamerCard = _dbContext.GamerCards.Single(gc =>
-                                gc.CardId == matchGamer.Match.CardId && gc.GamerId == matchGamer.GamerId &&
-                                gc.IsActive);
-
-                            matchGamerBonuses.Add(new Tuple<MatchGamer, GamerCard, int>(matchGamer, gamerCard,
-                                answersCount * matchOptions.Value.BonusForAnswer));
-
-                            gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
-
-                            gamer.Score += matchGamer.Score; // Прибавляем текущие очки игроку
-
-                            if (matchGamer.Score > winnerScore)
+                            var gamer = matchGamer.Gamer;
+                            if (matchGamer.IsPlay && matchGamer.JoinTime.HasValue)
                             {
-                                winnerScore = matchGamer.Score;
+                                var questionsCount = match.Questions.SplitToIntArray().Length;
+                                var answersCount = matchGamer.Answers.Count();
+                                var correctAnswersCount = matchGamer.Answers.Count(a => a.IsCorrectAnswer);
+                                var incorrectAnswersCount = questionsCount - correctAnswersCount;
+
+                                var pointsForMacth = correctAnswersCount * matchOptions.Value.CorrectAnswerScore +
+                                                     incorrectAnswersCount * matchOptions.Value.IncorrectAnswerScore;
+                                matchGamer.Score = pointsForMacth;
+                                matchGamer.IsPlay = false;
+
+                                var gamerCard = _dbContext.GamerCards.Single(gc =>
+                                    gc.CardId == match.CardId && gc.GamerId == matchGamer.GamerId &&
+                                    gc.IsActive);
+
+                                //matchGamerBonuses.Add(new Tuple<MatchGamer, GamerCard, int>(matchGamer, gamerCard,
+                                //answersCount * matchOptions.Value.BonusForAnswer));
+
+                                gamerCard.Score += matchGamer.Score; // Добавляем (или отнимаем) очки к карте игрока 
+                                gamer.Score += matchGamer.Score; // Прибавляем текущие очки игроку
+                                gamer.PointsToPlay--;
+                                if (matchGamer.Score > winnerScore)
+                                {
+                                    matchWinners.Clear();
+                                    winnerScore = matchGamer.Score;
+                                    matchWinners.Add(matchGamer);
+                                }
+                                else if (matchGamer.Score == winnerScore)
+                                {
+                                    matchWinners.Add(matchGamer);
+                                }
+                            }
+
+                            if (matchGamer.GamerId == userId)
+                            {
+                                currentMatchGamer = matchGamer;
+                                currentGamer = gamer;
+                            }
+                            else
+                            {
+                                resultModel.RivalMatchScore = matchGamer.Score;
                             }
                         }
 
-                        if (matchGamer.GamerId == userId)
+                        if (matchWinners.Count() == 1)
                         {
-                            currentMatchGamer = matchGamer;
-                            currentGamer = gamer;
+                            var winner = matchWinners.First();
+                            winner.IsWinner = true;
+                            winner.Bonus = matchOptions.Value.BonusForWin;
+                            winner.Score += matchOptions.Value.BonusForWin;
                         }
                         else
                         {
-                            resultModel.RivalMatchScore = matchGamer.Score;
+                            matchWinners.ForEach((MatchGamer obj) => { obj.IsWinner = false; });
                         }
+                        match.Status = Match.MatchStatus.Finished;
                     }
-
-                    foreach (var gamerBonus in matchGamerBonuses)
+                    else
                     {
-                        gamerBonus.Item1.IsWinner = gamerBonus.Item1.Score == winnerScore;
-
-                        int bonus = gamerBonus.Item1.IsWinner ? +gamerBonus.Item3 : -gamerBonus.Item3;
-                        gamerBonus.Item1.Score += bonus;
-                        gamerBonus.Item2.Score += bonus;
-
-                        if (gamerBonus.Item1 != currentMatchGamer)
-                        {
-                            resultModel.RivalMatchScore = gamerBonus.Item1.Score;
-                        }
-                        gamerBonus.Item1.Bonus = bonus;
+                        currentMatchGamer = matchGamers.First(mg => mg.GamerId == userId);
+                        currentGamer = currentMatchGamer.Gamer;
+                        resultModel.RivalMatchScore = matchGamers.First(mg => mg.GamerId != userId).Score;
                     }
+
+                    //foreach (var gamerBonus in matchGamerBonuses)
+                    //{
+                    //    gamerBonus.Item1.IsWinner = gamerBonus.Item1.Score == winnerScore;
+
+                    //    int bonus = gamerBonus.Item1.IsWinner ? +gamerBonus.Item3 : -gamerBonus.Item3;
+                    //    gamerBonus.Item1.Score += bonus;
+                    //    gamerBonus.Item2.Score += bonus;
+
+                    //    if (gamerBonus.Item1 != currentMatchGamer)
+                    //    {
+                    //        resultModel.RivalMatchScore = gamerBonus.Item1.Score;
+                    //    }
+                    //    gamerBonus.Item1.Bonus = bonus;
+                    //}
 
                     _dbContext.SaveChanges();
 
@@ -459,7 +468,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                 a.QuestionId == questionId && a.MatchGamerId == matchGamer.Id);
 
                             var matchController = scope.ServiceProvider.GetService<MatchController>();
-                            ;
+
                             if (answer == null)
                             {
                                 await matchController.AnswerToQuestions(id, new MatchQuestionAnswerModel()
@@ -484,7 +493,6 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                     await GetMissedQuestionsForMatch(match.Id, gamer.GamerId);
                                 }
                             }
-
                             result = true;
                         }
                     }
@@ -509,8 +517,6 @@ namespace RobiGroup.AskMeFootball.Core.Game
                        
                     }
                 }
-
-
                 return result;
             }
         }

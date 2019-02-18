@@ -39,7 +39,7 @@ namespace RobiGroup.AskMeFootball.Services
                     IsPlaying = _dbContext.MatchGamers.Any(mg => mg.GamerId == gc.GamerId && mg.IsPlay),
                     Raiting = _dbContext.GamerCards.Where(gcr => gcr.CardId == cardId && gcr.IsActive)
                                   .Count(gr => gr.Score > gc.Score) + 1,
-                }).OrderBy(r => r.Raiting);
+                }).OrderBy(r => r.Raiting).ThenBy(r => r.CurrentScore);
         }
 
         public IQueryable<CardWinnerModel> GetWinners(int cardId)

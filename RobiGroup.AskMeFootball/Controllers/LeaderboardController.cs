@@ -50,6 +50,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 })
                 .OrderBy(r => r.Raiting)
+                .ThenBy(r => r.TotalScore)
+                .ThenBy(r => r.CurrentScore)
                 .Skip((page - 1) * count)
                 .Take(count).ToList();
 
@@ -83,6 +85,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                     Raiting = _dbContext.Users.Count(ru => ru.TotalScore > u.TotalScore) + 1,
                 })
                 .OrderBy(r => r.Raiting)
+                .ThenBy(r => r.TotalScore)
+                .ThenBy(r => r.CurrentScore)
                 .ToList();
 
             foreach (var gamer in gamers)

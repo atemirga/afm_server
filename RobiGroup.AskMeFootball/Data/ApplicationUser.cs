@@ -15,6 +15,12 @@ namespace RobiGroup.AskMeFootball.Data
         public string PhotoUrl { get; set; }
 
         /// <summary>
+        /// Количество очков, которые можно использовать для поиска игры
+        /// </summary>
+        /// <value>The points to play.</value>
+        public int PointsToPlay { get; set; }
+
+        /// <summary>
         /// Итоговые очки
         /// </summary>
         public int TotalScore { get; set; }

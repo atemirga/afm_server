@@ -10,6 +10,8 @@ namespace RobiGroup.AskMeFootball.Common.Options
 
         public int BonusForAnswer { get; set; }
 
+        public int BonusForWin { get; set; }
+
         public TimeSpan MatchPauseDuration { get; set; }
 
         public TimeSpan TimeForOneQuestion { get; set; }

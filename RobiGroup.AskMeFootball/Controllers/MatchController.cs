@@ -212,7 +212,7 @@ namespace RobiGroup.AskMeFootball.Controllers
             if (ModelState.IsValid)
             {
                 var userId = User.GetUserId();
-                var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                var matchParticipant = _dbContext.MatchGamers.Include(mg => mg.Match).FirstOrDefault(m =>
                     m.GamerId == userId && m.MatchId == id);
 
                 if (matchParticipant != null
@@ -220,6 +220,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                     && !matchParticipant.Confirmed)
                 {
                     matchParticipant.Delayed = true;
+                    matchParticipant.Match.Status = Match.MatchStatus.Delayed;
                     _dbContext.SaveChanges();
 
                     var matchParticipants = _dbContext.MatchGamers
@@ -280,12 +281,13 @@ namespace RobiGroup.AskMeFootball.Controllers
             {
                 string gamerId = User.GetUserId();
                 bool isMatchDelayed = false;
+                List<MatchGamer> matchParticipants = null;
                 using (var tran = _dbContext.Database.BeginTransaction())
                 {
                     try
                     {
                         _logger.LogInformation($"Match ready from {gamerId}");
-                        var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                        var matchParticipant = _dbContext.MatchGamers.Include(mg => mg.Match).FirstOrDefault(m =>
                             m.GamerId == gamerId && m.MatchId == id);
 
                         if (matchParticipant != null)
@@ -302,9 +304,21 @@ namespace RobiGroup.AskMeFootball.Controllers
                             if (!matchParticipant.Ready)
                             {
                                 matchParticipant.Ready = true;
-                                _dbContext.SaveChanges();
+                                await _dbContext.SaveChangesAsync();
                             }
 
+                            matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == id && (!p.Delayed || isMatchDelayed)).ToList();
+                            _logger.LogInformation(string.Join(',', matchParticipants.Select(p => p.GamerId + ':' + p.Ready)));
+
+                            if (matchParticipants.All(p => p.Ready))
+                            {
+                                foreach (var participant in matchParticipants)
+                                {
+                                    participant.IsPlay = true;
+                                }
+                                matchParticipant.Match.Status = Match.MatchStatus.Started;
+                                await _dbContext.SaveChangesAsync();
+                            }
                             tran.Commit();
                         }
                     }
@@ -315,16 +329,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                     }
                 }
 
-                var matchParticipants = _dbContext.MatchGamers.Where(p => p.MatchId == id && (!p.Delayed || isMatchDelayed)).ToList();
-                _logger.LogInformation(string.Join(',', matchParticipants.Select(p => p.GamerId + ':' + p.Ready)));
-                if (matchParticipants.All(p => p.Ready))
+                if (matchParticipants != null)
                 {
-                    foreach (var participant in matchParticipants)
-                    {
-                        participant.IsPlay = true;
-                    }
-                    await _dbContext.SaveChangesAsync();
-
                     foreach (var participant in matchParticipants)
                     {
                         await _gamersHandler.InvokeClientMethodToGroupAsync(participant.GamerId, "matchStarted", new { id });
@@ -352,14 +358,23 @@ namespace RobiGroup.AskMeFootball.Controllers
             if (ModelState.IsValid)
             {
                 var userId = User.GetUserId();
-                var matchParticipant = _dbContext.MatchGamers.FirstOrDefault(m =>
+                var matchParticipant = _dbContext.MatchGamers.Include(mp => mp.Match).FirstOrDefault(m =>
                     m.GamerId == userId && m.MatchId == id);
 
-                if (matchParticipant != null && !matchParticipant.Cancelled)
+                if (matchParticipant != null && !matchParticipant.Cancelled && matchParticipant.Match.Status != Match.MatchStatus.Cancelled)
                 {
                     _logger.LogInformation($"Match {id} canceled from {userId}");
                     matchParticipant.IsPlay = false;
                     matchParticipant.Cancelled = true;
+                    switch (matchParticipant.Match.Status)
+                    {
+                        case Match.MatchStatus.Started:
+                            matchParticipant.Match.Status = Match.MatchStatus.CancelledAferStart;
+                            break;
+                        default:
+                            matchParticipant.Match.Status = Match.MatchStatus.Cancelled;
+                            break;
+                    }
 
                     var matchGamers = _dbContext.MatchGamers.Include(g => g.Gamer)
                         .Where(p => p.MatchId == id && p.GamerId != userId);
@@ -370,13 +385,11 @@ namespace RobiGroup.AskMeFootball.Controllers
                         if (!matchParticipant.Ready || matchGamer.Gamer.Bot > 0)
                         {
                             matchGamer.IsPlay = false;
-                            matchGamer.Cancelled = true;
                         }
                     }
                     _dbContext.SaveChanges();
 
-                    var matchParticipants = matchGamers
-                                                .Select(p => p.GamerId).ToList();
+                    var matchParticipants = matchGamers.Select(p => p.GamerId).ToList();
 
                     foreach (var participant in matchParticipants)
                     {
@@ -384,10 +397,8 @@ namespace RobiGroup.AskMeFootball.Controllers
                         _logger.LogInformation($"matchCanceled {id} by {userId} for {participant}");
                     }
                 }
-
                 return Ok();
             }
-
             return BadRequest(ModelState);
         }
 
