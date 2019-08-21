@@ -1,0 +1,111 @@
+﻿@using Admin.Models
+@using System.Web;
+@using Common.Localization
+@using JQuery.DataTables.Extensions
+@using RobiGroup.AskMeFootball.Areas.Admin.Models.Tickets
+
+@model IEnumerable<TicketViewModel>
+
+
+@{
+    ViewData["Title"] = "Тикеты";
+}
+
+<table id="rests" class="table">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>
+                Ник
+            </th>
+            <th>
+                Телефон
+            </th>
+            <th>Текст</th>
+            <th>Вложение</th>
+            <th>Функции</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NickName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Text)
+            </td>
+            <td>
+                @for (int i = 0; i < item.Attachment.Count; i++)
+                {
+                    <img src="/@Url.Content(item.Attachment[i])" height="100" width="100" />
+                    @*<a href="@Url.Link(item.Attachment[i], item.Attachment[i])" class="elements"><span>@Html.DisplayFor(modelItem => item.Attachment[i])</span></a>*@
+                    @*@Html.DisplayFor(modelItem => item.Attachment[i])*@
+                    <br />
+                }
+            </td>
+            <td>
+                @Html.ActionLink("Просмотр", "Show", "Tickets", new { id = item.Id }, null)
+            </td>
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+
+        </tr>
+    </tfoot>
+
+</table>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    @*<link rel="stylesheet" href="~/lib/datatables.net-bs/css/dataTables.bootstrap.min.css">*@
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" rel="stylesheet" />
+
+}
+
+@section Scripts {
+
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    @*<script src="~/lib/datatables.net/js/jquery.dataTables.min.js"></script>
+        <script src="~/lib/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>*@
+    <script src="~/lib/moment/min/moment.min.js"></script>
+    <script src="~/lib/moment/locale/ru.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/locales/bootstrap-datepicker.ru.min.js"></script>
+
+    <script type="text/javascript">
+        function filterDate() {
+
+            var startDate = document.getElementById('startDate');
+            var endDate = document.getElementById('endDate');
+            if (new Date(startDate) < new Date(endDate)) {
+                alert("Введенные даты неверны");
+            } else {
+                $.ajax({
+                            method: "GET",
+                            url: '@Url.Action("FilterDate", "Users", new { Area = "Admin" })',
+                            data: {
+                                id: id
+                            }
+                        })
+                        .done(function () {
+
+                        });
+            }
+        }
+    </script>
+}

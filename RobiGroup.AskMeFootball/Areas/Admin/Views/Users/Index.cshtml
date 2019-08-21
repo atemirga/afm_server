@@ -1,0 +1,297 @@
+﻿@using Admin.Models
+@using Common.Localization
+@using JQuery.DataTables.Extensions
+@using RobiGroup.AskMeFootball.Areas.Admin.Models.Users
+
+@model IEnumerable<UserViewModel>
+
+
+@{
+    ViewData["Title"] = "Пользователи";
+}
+
+<div class="row">
+    <div class="col-md-2">
+        <input type="date" id="startDate" value="2019-01-01"  min="2019-01-01"/>
+    </div>
+    <div class="col-md-2">
+        <input type="date" id="endDate" value="2019-01-01" min="2019-01-01"  onchange="filterDate()"/>
+    </div>
+</div>
+
+<table id="rests" class="table">
+    <thead>
+        <tr>
+            <th>
+                Ник
+            </th>
+            <th>
+                Телефон
+            </th>
+            <th>Общий рейтинг</th>
+            <th>Койнс-Сегодня</th>
+            <th>Койнс</th>
+            <th>Игры-Сегодня</th>
+            <th>Игры</th>
+            <th>Рандом</th>
+            <th>С другом</th>
+            <th>Пуш</th>
+            <th>Дата регистрации</th>
+            <th>Функции</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.NickName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalScore)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CoinsToday)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Coins)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PlaysToday)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Plays)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MatchWithRandom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MatchWithFriend)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsNotificationAllowed)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RegisteredDate)
+            </td>
+            <td>
+                @Html.ActionLink("Игры", "Index", "PlayHistories", new { id = item.Id }, null)
+                | @Html.ActionLink("Покупки", "Index", "PrizeHistories", new { id = item.Id }, null)
+                | @Html.ActionLink("Изменить", "Create", "Users", new { id = item.Id }, null)
+            </td>
+
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+
+</table>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    @*<link rel="stylesheet" href="~/lib/datatables.net-bs/css/dataTables.bootstrap.min.css">*@
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" rel="stylesheet" />
+    
+}
+
+@section Scripts {
+
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    @*<script src="~/lib/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>*@
+    <script src="~/lib/moment/min/moment.min.js"></script>
+    <script src="~/lib/moment/locale/ru.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/locales/bootstrap-datepicker.ru.min.js"></script>
+
+    <script type="text/javascript">
+        function filterDate() {
+
+            var startDate = document.getElementById('startDate');
+            var endDate = document.getElementById('endDate');
+            if (new Date(startDate) < new Date(endDate)) {
+                alert("Введенные даты неверны");
+            } else {
+                $.ajax({
+                            method: "GET",
+                            url: '@Url.Action("FilterDate", "Users", new { Area = "Admin" })',
+                            data: {
+                                id: id
+                            }
+                        })
+                        .done(function () {
+                            
+                        });
+            }
+        }
+    </script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#rests').DataTable({
+            "footerCallback": function ( row, data, start, end, display ) {
+            var api = this.api(), data;
+ 
+            // Remove the formatting to get integer data for summation
+            var intVal = function ( i ) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+ 
+            //COL 4
+            // Total over all pages
+            total = api
+                .column( 3 )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Total over this page
+            pageTotal = api
+                .column( 3, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Update footer
+            $( api.column( 3 ).footer() ).html(
+                pageTotal +' ('+ total +' total)'
+            );
+
+            //COL 4
+             // Total over all pages
+            total = api
+                .column( 4 )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Total over this page
+            pageTotal = api
+                .column( 4, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Update footer
+            $( api.column( 4 ).footer() ).html(
+                pageTotal +' ('+ total +' total)'
+            );
+
+        //COL 5
+             // Total over all pages
+            total = api
+                .column( 5 )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Total over this page
+            pageTotal = api
+                .column( 5, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Update footer
+            $( api.column( 5 ).footer() ).html(
+                pageTotal +' ('+ total +' total)'
+            );
+
+        //COL 6
+             // Total over all pages
+            total = api
+                .column( 6 )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Total over this page
+            pageTotal = api
+                .column( 6, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Update footer
+            $( api.column( 6 ).footer() ).html(
+                pageTotal +' ('+ total +' total)'
+            );
+
+        //COL 7
+             // Total over all pages
+            total = api
+                .column( 7 )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Total over this page
+            pageTotal = api
+                .column( 7, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Update footer
+            $( api.column( 7 ).footer() ).html(
+                pageTotal +' ('+ total +' total)'
+            );
+        //COL 8
+             // Total over all pages
+            total = api
+                .column( 8 )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Total over this page
+            pageTotal = api
+                .column( 8, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+ 
+            // Update footer
+            $( api.column( 8 ).footer() ).html(
+                pageTotal +' ('+ total +' total)'
+            );
+        }
+        });
+        });
+
+
+    </script>
+}

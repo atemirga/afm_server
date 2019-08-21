@@ -28,6 +28,50 @@ namespace RobiGroup.AskMeFootball.Data
 
         public DbSet<CardWinner> CardWinners { get; set; }
 
+        public DbSet<UserCoins> UserCoins { get; set; }
+
+        public DbSet<PointHistories> PointHistories { get; set; }
+
+        public DbSet<Prize> Prizes { get; set; }
+
+        public DbSet<PrizeBuyHistory> PrizeBuyHistories { get; set; }
+
+        public DbSet<GetContact> GetContacts { get; set; }
+
+        public DbSet<ReferralUser> ReferralUsers { get; set; }
+
+        public DbSet<Friend> Friends { get; set; } 
+
+        public DbSet<MatchBid> MatchBids { get; set; }
+
+        public DbSet<CardInfo> CardInfos { get; set; }
+
+        public DbSet<UserNotification> UserNotifications { get; set; }
+
+        public DbSet<Version> Versions { get; set; }
+
+        public DbSet<InfoCard> InfoCards { get; set; }
+
+        public DbSet<InfoCardImage> InfoCardImages { get; set; }
+
+        public DbSet<Ticket> Tickets { get; set; }
+
+        public DbSet<TicketCategory> TicketCategories { get; set; }
+
+        public DbSet<TicketAttachment> TicketAttachments { get; set; }
+
+        public DbSet<CardTeams> CardTeams { get; set; }
+
+        public DbSet<QuestionBox> QuestionBoxes { get; set; }
+
+        public DbSet<UserBalance> UserBalances { get; set; }
+
+        public DbSet<CashOutHistory> CashOutHistories { get; set; }
+
+        public DbSet<CardLimits> CardLimits { get; set; }
+
+        public DbSet<PackPrice> PackPrices { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -48,7 +92,9 @@ namespace RobiGroup.AskMeFootball.Data
             builder.Entity<CardType>().HasData(
                 new CardType {Id = 10, Name = "Ежедневный", Code = Data.CardTypes.Daily.ToString() },
                 new CardType {Id = 20, Name = "Еженедельный", Code = Data.CardTypes.Weekly.ToString() },
-                new CardType {Id = 30, Name = "Ежемесячный", Code = Data.CardTypes.Monthly.ToString() });
+                new CardType {Id = 30, Name = "Ежемесячный", Code = Data.CardTypes.Monthly.ToString() },
+                new CardType { Id = 40, Name = "Live", Code = "Live" },
+                new CardType { Id = 50, Name = "HalfTime", Code = "HalfTime"});
 
             builder.Entity<MatchAnswer>().HasAlternateKey(a => new { a.MatchGamerId, a.QuestionId });
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,6 +12,16 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Models.Questions
         [Required]
         [DisplayName("Вопрос")]
         public string Text { get; set; }
+
+        [DisplayName("Начало вопроса")]
+        public DateTime StartTime { get; set; }
+
+        [DisplayName("Длительность")]
+        public int ExpirationTime { get; set; }
+
+        
+        [DisplayName("Ожидание (секунд)")]
+        public int Delay { get; set; }
 
         [Required]
         public int CorrectAnswerId { get; set; }

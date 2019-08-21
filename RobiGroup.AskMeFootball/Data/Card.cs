@@ -12,7 +12,12 @@ namespace RobiGroup.AskMeFootball.Data
 
         public string Prize { get; set; }
 
-        public string ImageUrl { get; set; }
+        //public string ImageUrl { get; set; }
+        public string ImageUrlCard { get; set; }
+
+        public string ImageUrlDetail { get; set; }
+
+        public string ImageUrlSelect { get; set; }
 
         public int MatchQuestions { get; set; }
 
@@ -21,6 +26,16 @@ namespace RobiGroup.AskMeFootball.Data
         public DateTime ResetTime { get; set; }
 
         public int ResetPeriod { get; set; }
+
+        public int MaxBid { get; set; }
+
+        public int EntryPoint { get; set; }
+
+        public bool IsTwoH { get; set; }
+
+        public bool IsHalfH { get; set; }
+
+        public bool IsActive { get; set; }
 
         public List<Question> Questions { get; set; }
 
@@ -50,5 +65,29 @@ namespace RobiGroup.AskMeFootball.Data
         public Card Card { get; set; }
 
         public ApplicationUser Gamer { get; set; }
+    }
+
+    public class UserCoins
+    {
+        public int Id { get; set; }
+
+        public string GamerId { get; set; }
+
+        public int Coins { get; set; }
+
+        public DateTime LastUpdate { get; set; }
+
+        public ApplicationUser Gamer { get; set; }
+    }
+
+    public class PointHistories
+    {
+        public int Id { get; set; }
+
+        public string GamerId { get; set; }
+
+        public int Point { get; set; }
+
+        public DateTime TimeAdded { get; set; }
     }
 }

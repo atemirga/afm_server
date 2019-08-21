@@ -282,6 +282,28 @@ namespace RobiGroup.AskMeFootball
 
             dbContext.Database.Migrate();
 
+            if (!dbContext.TicketCategories.Any())
+            {
+                dbContext.Add(new TicketCategory {
+                    NameKz = "Сурак",
+                    NameRu = "Вопрос",
+                });
+
+                dbContext.Add(new TicketCategory
+                {
+                    NameKz = "Маселе",
+                    NameRu = "Проблема",
+                });
+
+                dbContext.Add(new TicketCategory
+                {
+                    NameKz = "Баска",
+                    NameRu = "Другое",
+                });
+
+                dbContext.SaveChanges();
+            }
+
             if (userManager.FindByNameAsync("admin").Result == null)
             {
                 var user = new ApplicationUser();
@@ -290,6 +312,7 @@ namespace RobiGroup.AskMeFootball
                 user.PhoneNumber = "77011234567";
                 user.FirstName = "";
                 user.LastName = "Администратор";
+                user.ResetTime = DateTime.Today.AddHours(21);
 
                 var resultTask = userManager.CreateAsync
                     (user, "Admin!2");
@@ -305,23 +328,36 @@ namespace RobiGroup.AskMeFootball
 
             if (dbContext.Users.All(u => u.Bot == 0))
             {
-                for (int i = 1; i <= 10; i++)
+                string[] names = { "Mahesh", "Jeff", "Айдын", "Болат",
+                                    "Monica", "Henry", "Кумар", "Аскар",
+                                    "Фил", "Ромыч","Жозе", "Карпат",
+                                    "Вижн", "Ванда", "Килмонгер", "Астролог",
+                                    "Стив", "Cap", "Bucky", "Hawkeye",
+                                    "Брюс", "Ли","Стэн", "Старк","Tony",
+                                    "Сакен", "Шокан","Абай", "Ахмет","Байтурсын",
+                                    "Rassel", "Мойша","Алпысбек", "Асылбек","Кунанбай",
+                                    "Ruslan", "Дин","2рас", "Тайлак","Рыспектай"};
+                
+                for (int i = 1; i <= 25; i++)
                 {
-                    int botLevel = 5;
+                    int botLevel = 6;
                     if (i <= 4)
                     {
-                        botLevel = 10 - i;
+                        botLevel = 8 - i;
                     }
 
+                    Random rand = new Random();
+                    int index = rand.Next(names.Length);
                     var user = new ApplicationUser
                     {
                         UserName = "bot" + i,
-                        NickName = "bot " + i,
+                        NickName = names[index],
                         Email = $"bot{i}@amf.com",
                         FirstName = $"Bot {i}",
                         LastName = $"Bot",
                         Bot = botLevel,
-                        PhoneNumber = $"bot{i}"
+                        PhoneNumber = $"bot{i}",
+                        ResetTime = DateTime.Today.AddHours(21)
                     };
 
                     var resultTask = userManager.CreateAsync(user);
@@ -355,7 +391,7 @@ namespace RobiGroup.AskMeFootball
                     var question = new Question
                     {
                         CardId = card.Id,
-                        Text = "Question " + (i + 1),
+                        TextRu = "Question " + (i + 1),
                     };
                     dbContext.Questions.Add(question);
                 }
@@ -368,7 +404,7 @@ namespace RobiGroup.AskMeFootball
                     {
                         dbContext.QuestionAnswers.Add(new QuestionAnswer
                         {
-                            Text = "Answer " + (i+1),
+                            TextRu = "Answer " + (i+1),
                             QuestionId = question.Id
                         });
                     }

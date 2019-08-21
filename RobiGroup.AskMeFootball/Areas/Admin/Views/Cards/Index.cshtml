@@ -48,7 +48,6 @@
                         for (var i = 0; i < formParams.length; i++) {
                             data[formParams[i].name] = formParams[i].value;
                         }
-
                         return data;
                     }
                 },
@@ -65,7 +64,9 @@
 
         function renderActions(data, type, row, meta) {
             return '<a href="/Admin/Questions/Index/' + row.id + '">@Localizer["Questions"] (' + row.questionsTotal + ')</a>'
-                   + ' | <a href="@Url.Action("Create")/' + row.id + '">@Localizer["Edit"]</a>';
+                   + ' | <a href="@Url.Action("Create")/' + row.id + '">@Localizer["Edit"]</a>' 
+                    + ' | <a href="/Admin/CardInfos/Index/' + row.id + '">Добавить инфо</a>'
+                     + ' | <a href="/Admin/CardTeams/Index/' + row.id + '">Добавить Комманды</a>';
         }
 
     </script>

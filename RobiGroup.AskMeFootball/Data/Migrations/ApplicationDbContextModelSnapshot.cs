@@ -15,7 +15,7 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.1.8-servicing-32085")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -156,7 +156,13 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasComputedColumnSql("[LastName] + ' ' + [FirstName]");
 
+                    b.Property<int>("Hints");
+
+                    b.Property<string>("Lang");
+
                     b.Property<string>("LastName");
+
+                    b.Property<int>("Lifes");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -169,6 +175,8 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
+
+                    b.Property<string>("OneSignalId");
 
                     b.Property<string>("PasswordHash");
 
@@ -183,9 +191,19 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<int?>("RankId");
 
+                    b.Property<string>("Referral");
+
+                    b.Property<bool>("ReferralUsed");
+
+                    b.Property<DateTime>("RegisteredDate");
+
+                    b.Property<DateTime>("ResetTime");
+
                     b.Property<int>("Score");
 
                     b.Property<string>("SecurityStamp");
+
+                    b.Property<bool>("Sync");
 
                     b.Property<int>("TotalScore");
 
@@ -218,9 +236,23 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ImageUrl");
+                    b.Property<int>("EntryPoint");
+
+                    b.Property<string>("ImageUrlCard");
+
+                    b.Property<string>("ImageUrlDetail");
+
+                    b.Property<string>("ImageUrlSelect");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsHalfH");
+
+                    b.Property<bool>("IsTwoH");
 
                     b.Property<int>("MatchQuestions");
+
+                    b.Property<int>("MaxBid");
 
                     b.Property<string>("Name");
 
@@ -237,6 +269,63 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.HasIndex("TypeId");
 
                     b.ToTable("Cards");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.CardInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CardId");
+
+                    b.Property<string>("Text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CardInfos");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.CardLimits", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CardId");
+
+                    b.Property<int>("Hints");
+
+                    b.Property<int>("Lifes");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CardLimits");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.CardTeams", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CardId");
+
+                    b.Property<string>("FirstTeam");
+
+                    b.Property<string>("FirstTeamLogo");
+
+                    b.Property<int>("FirstTeamScore");
+
+                    b.Property<string>("SecondTeam");
+
+                    b.Property<string>("SecondTeamLogo");
+
+                    b.Property<int>("SecondTeamScore");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CardTeams");
                 });
 
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.CardType", b =>
@@ -256,7 +345,9 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.HasData(
                         new { Id = 10, Code = "Daily", Name = "Ежедневный" },
                         new { Id = 20, Code = "Weekly", Name = "Еженедельный" },
-                        new { Id = 30, Code = "Monthly", Name = "Ежемесячный" }
+                        new { Id = 30, Code = "Monthly", Name = "Ежемесячный" },
+                        new { Id = 40, Code = "Live", Name = "Live" },
+                        new { Id = 50, Code = "HalfTime", Name = "HalfTime" }
                     );
                 });
 
@@ -285,6 +376,42 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.HasIndex("GamerId");
 
                     b.ToTable("CardWinners");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.CashOutHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double>("Cash");
+
+                    b.Property<DateTime>("OutDate");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CashOutHistories");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Friend", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("FriendId");
+
+                    b.Property<bool>("IsAccepted");
+
+                    b.Property<DateTime>("LoveStartedDate");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Friends");
                 });
 
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.GamerCard", b =>
@@ -325,6 +452,63 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("GamerRanks");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.GetContact", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("LastUpdate");
+
+                    b.Property<string>("Names");
+
+                    b.Property<string>("PhoneNumber");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GetContacts");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.InfoCard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ButtonTitle");
+
+                    b.Property<DateTime>("EndTime");
+
+                    b.Property<string>("ImageUrl");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("SubTitle");
+
+                    b.Property<string>("Title");
+
+                    b.Property<string>("VideoUrl");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InfoCards");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.InfoCardImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("InfoCardId");
+
+                    b.Property<string>("Url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InfoCardImages");
                 });
 
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Match", b =>
@@ -377,6 +561,25 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.ToTable("MatchAnswers");
                 });
 
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MatchBid", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Bid");
+
+                    b.Property<int>("MatchId");
+
+                    b.Property<bool>("Status");
+
+                    b.Property<string>("Winner");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MatchBids");
+                });
+
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MatchGamer", b =>
                 {
                     b.Property<int>("Id")
@@ -418,6 +621,106 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.ToTable("MatchGamers");
                 });
 
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.PackPrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Count");
+
+                    b.Property<double>("Price");
+
+                    b.Property<string>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PackPrices");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.PointHistories", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("GamerId");
+
+                    b.Property<int>("Point");
+
+                    b.Property<DateTime>("TimeAdded");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PointHistories");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Prize", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address");
+
+                    b.Property<int>("Code");
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<string>("Description");
+
+                    b.Property<string>("Facebook");
+
+                    b.Property<string>("FirstPhoneNumber");
+
+                    b.Property<string>("FirstPhotoUrl");
+
+                    b.Property<int>("InStock");
+
+                    b.Property<string>("Instagram");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("Price");
+
+                    b.Property<string>("SecondPhotoUrl");
+
+                    b.Property<string>("Site");
+
+                    b.Property<string>("ThirdPhotoUrl");
+
+                    b.Property<string>("Twitter");
+
+                    b.Property<string>("Vkontakte");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Prizes");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.PrizeBuyHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("BuyDate");
+
+                    b.Property<int>("Code");
+
+                    b.Property<string>("GamerId");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<int>("Price");
+
+                    b.Property<int>("PrizeId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PrizeBuyHistories");
+                });
+
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Question", b =>
                 {
                     b.Property<int>("Id")
@@ -428,9 +731,17 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<int>("CorrectAnswerId");
 
+                    b.Property<int>("Delay");
+
+                    b.Property<int>("ExpirationTime");
+
                     b.Property<bool>("IsDeleted");
 
-                    b.Property<string>("Text");
+                    b.Property<DateTime>("StartTime");
+
+                    b.Property<string>("TextKz");
+
+                    b.Property<string>("TextRu");
 
                     b.HasKey("Id");
 
@@ -451,13 +762,166 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
 
                     b.Property<int>("QuestionId");
 
-                    b.Property<string>("Text");
+                    b.Property<string>("TextKz");
+
+                    b.Property<string>("TextRu");
 
                     b.HasKey("Id");
 
                     b.HasIndex("QuestionId");
 
                     b.ToTable("QuestionAnswers");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.QuestionBox", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ImageUrl");
+
+                    b.Property<int>("QuestionId");
+
+                    b.Property<string>("Text");
+
+                    b.Property<string>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuestionBoxes");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.ReferralUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("ActivatedDate");
+
+                    b.Property<string>("PhoneNumber");
+
+                    b.Property<string>("Referral");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReferralUsers");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Ticket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CategoryId");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Text");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tickets");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.TicketAttachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("TicketId");
+
+                    b.Property<string>("Url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TicketAttachments");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.TicketCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("NameKz");
+
+                    b.Property<string>("NameRu");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TicketCategories");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.UserBalance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double>("Balance");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserBalances");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.UserCoins", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Coins");
+
+                    b.Property<string>("GamerId");
+
+                    b.Property<DateTime>("LastUpdate");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GamerId");
+
+                    b.ToTable("UserCoins");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.UserNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("GamerId");
+
+                    b.Property<bool>("IsNotificationAllowed");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserNotifications");
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.Version", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("LastUpdate");
+
+                    b.Property<string>("Vers");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Versions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -600,6 +1064,13 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                         .WithMany("Answers")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.UserCoins", b =>
+                {
+                    b.HasOne("RobiGroup.AskMeFootball.Data.ApplicationUser", "Gamer")
+                        .WithMany()
+                        .HasForeignKey("GamerId");
                 });
 #pragma warning restore 612, 618
         }

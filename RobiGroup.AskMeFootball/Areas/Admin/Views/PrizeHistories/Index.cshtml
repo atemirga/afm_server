@@ -1,0 +1,70 @@
+﻿@using Admin.Models
+@using Common.Localization
+@using JQuery.DataTables.Extensions
+@using RobiGroup.AskMeFootball.Areas.Admin.Models.Prizes
+
+@model IEnumerable<PrizeHistoryModel>
+
+@{
+    ViewData["Title"] = "История Покупок";
+}
+
+<table id="rests" class="table">
+    <thead>
+        <tr>
+            <th>
+                Ник
+            </th>
+            <th>
+                Приз
+            </th>
+            <th>Цена</th>
+            <th>Время</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NickName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Prize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BuyDate)
+                </td>
+
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/moment/min/moment.min.js"></script>
+    <script src="~/lib/moment/locale/ru.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/locales/bootstrap-datepicker.ru.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#rests').DataTable();
+        });
+
+
+    </script>
+}

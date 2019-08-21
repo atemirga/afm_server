@@ -15,5 +15,13 @@ namespace RobiGroup.AskMeFootball.Models.Account
         /// </summary>
         [Required]
         public string Code { get; set; }
+
+        /*
+        /// <summary>
+        /// One Signal ID
+        /// </summary>
+        [Required]
+        public string OneSignalId { get; set; }
+        */
     }
 }

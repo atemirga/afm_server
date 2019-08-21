@@ -46,5 +46,15 @@ namespace RobiGroup.AskMeFootball.Models.Friends
         ///  Играет в игру
         /// </summary>
         public bool IsPlaying { get; set; }
+
+        /// <summary>
+        ///  OneSignal
+        /// </summary>
+        public string OneSignalId { get; set; }
+
+        /// <summary>
+        ///  Coins
+        /// </summary>
+        public int Coins { get; set; }
     }
 }

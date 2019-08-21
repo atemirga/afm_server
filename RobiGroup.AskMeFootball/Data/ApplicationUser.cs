@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System;
 
 namespace RobiGroup.AskMeFootball.Data
 {
@@ -20,6 +21,19 @@ namespace RobiGroup.AskMeFootball.Data
         /// <value>The points to play.</value>
         public int PointsToPlay { get; set; }
 
+
+        /// <summary>
+        /// Жизни для Live игр
+        /// </summary>
+        /// <value>Lifes for Live Matches</value>
+        public int Lifes { get; set; }
+
+        /// <summary>
+        /// купленные подсказки
+        /// </summary>
+        /// <value>My Hints</value>
+        public int Hints { get; set; }
+
         /// <summary>
         /// Итоговые очки
         /// </summary>
@@ -35,5 +49,18 @@ namespace RobiGroup.AskMeFootball.Data
         public GamerRank Rank { get; set; }
 
         public int Bot { get; set; }
+
+        public string OneSignalId { get; set; }
+        public bool Sync { get; set; }
+
+        public DateTime RegisteredDate { get; set; }
+
+        public string Referral { get; set; }
+
+        public bool ReferralUsed { get; set; }
+
+        public string Lang { get; set; }
+
+        public DateTime ResetTime { get; set; }
     }
 }

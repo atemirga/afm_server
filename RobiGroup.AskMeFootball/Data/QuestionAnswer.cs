@@ -4,7 +4,9 @@
     {
         public int Id { get; set; }
 
-        public string Text { get; set; }
+        public string TextRu { get; set; }
+
+        public string TextKz { get; set; }
 
         public bool IsDeleted { get; set; }
 

@@ -46,5 +46,10 @@
         ///  Играет в игру
         /// </summary>
         public bool IsPlaying { get; set; }
+
+        /// <summary>
+        ///  Монеты 
+        /// </summary>
+        public int Coins { get; set; }
     }
 }

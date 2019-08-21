@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using RobiGroup.Web.Common;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -59,7 +60,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
 
             if (!string.IsNullOrEmpty(filter.Search))
             {
-                questions = questions.Where(q => q.Text.Contains(filter.Search));
+                questions = questions.Where(q => q.TextRu.Contains(filter.Search));
             }
 
             filter.Total = questions.Count();
@@ -69,12 +70,12 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                 .Select(r => new QuestionViewModel()
                 {
                     Id = r.Id,
-                    Text = r.Text,
+                    Text = r.TextRu,
                     AnswerId = r.CorrectAnswerId,
                     Answers = r.Answers.Select(a => new AnswerViewModel
                     {
                         Id = a.Id,
-                        Text = a.Text
+                        Text = a.TextRu
                     }).ToList()
                 });
         }
@@ -90,19 +91,19 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                 Answers = new List<string>() { "", "", ""}
             });
         }
-
+          
         [HttpPost]
         public IActionResult Create(QuestionCreateModel model)
         {
             var filledAnswersCount = model.Answers.Count(a => !string.IsNullOrEmpty(a));
             if (model.Answers == null || model.Answers.Count < 2 || filledAnswersCount < 2)
             {
-                ModelState.AddModelError(nameof(model.Answers), "Введите хотябы 2 варианта ответов на вопрос.");
+                ModelState.AddModelError(nameof(model.Answers), "Введите хотябы 2 варианта ответа на вопрос.");
             }
 
             if (model.CorrectAnswerId < 0 || model.CorrectAnswerId >= filledAnswersCount)
             {
-                ModelState.AddModelError(nameof(model.Answers), "Выберите правельный ответ.");
+                ModelState.AddModelError(nameof(model.Answers), "Выберите правильный ответ.");
             }
 
             if (!ModelState.IsValid)
@@ -112,12 +113,69 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
 
             var question = new Question
             {
-                Text = model.Text,
+                TextRu = model.Text,
+                TextKz = model.Text,
+                StartTime = model.StartTime,
+                ExpirationTime = model.ExpirationTime,
+                Delay = model.Delay,
                 CardId = model.CardId
             };
-            question.Answers = model.Answers.Where(a => !string.IsNullOrEmpty(a)).Select(a => new QuestionAnswer{ Text = a }).ToList();
+
+            
+            question.Answers = model.Answers.Where(a => !string.IsNullOrEmpty(a)).Select(a => new QuestionAnswer{ TextRu = a }).ToList();
             _dbContext.Questions.Add(question);
             _dbContext.SaveChanges();
+
+            var card = _dbContext.Cards.Find(model.CardId);
+            var cardType = _dbContext.CardTypes.FirstOrDefault(ct => ct.Id == _dbContext.Cards.FirstOrDefault(c => c.Id == model.CardId).TypeId);
+
+            if (cardType.Code == "HalfTime")
+            {
+                var match = _dbContext.Matches.LastOrDefault(m => m.CardId == model.CardId && m.Status == Match.MatchStatus.Requested);
+                var newQuestion = question.Id;
+                if (match.Questions == null)
+                {
+                    var addQuestions = new List<int>();
+                    addQuestions.Add(newQuestion);
+                    match.Questions = string.Join(',', addQuestions);
+                }
+                else {
+                    var matchQuestions = match.Questions.SplitToIntArray().ToList();
+                    matchQuestions.Add(newQuestion);
+                    match.Questions = string.Join(',', matchQuestions);
+                }
+                match.Status = Match.MatchStatus.Started;
+                card.IsActive = true;
+                _dbContext.SaveChanges();
+            }
+
+            if (cardType.Code == "Live")
+            {
+                var match = _dbContext.Matches.LastOrDefault(m => m.CardId == model.CardId && m.Status == Match.MatchStatus.Requested);
+               
+                var newQuestion = question.Id;
+                if (match.Questions == null)
+                {
+                    var addQuestions = new List<int>();
+                    addQuestions.Add(newQuestion);
+                    match.Questions = string.Join(',', addQuestions);
+                }
+                else
+                {
+                    var matchQuestions = match.Questions.SplitToIntArray().ToList();
+                    matchQuestions.Add(newQuestion);
+                    match.Questions = string.Join(',', matchQuestions);
+                }
+
+                if (match.Questions.SplitToIntArray().Count() == card.MatchQuestions)
+                {
+                    match.Status = Match.MatchStatus.Started;
+                    card.IsActive = true;
+                }
+
+                _dbContext.SaveChanges();
+            }
+
 
             question.CorrectAnswerId = question.Answers[model.CorrectAnswerId].Id;
             _dbContext.SaveChanges();
@@ -126,8 +184,8 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
         }
 
         public IActionResult Delete(int id)
-        {
-            var question = _dbContext.Questions.Find(id);
+            {
+                var question = _dbContext.Questions.Find(id);
             question.IsDeleted = true;
             _dbContext.SaveChanges();
 
@@ -183,14 +241,43 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
             int updatedQuestionCount = 0;
             int errorQuestionsCount = 0;
 
+            var last_id = 0;
+
+            var questionsExist = _dbContext.Questions.OrderByDescending(q => q.Id).FirstOrDefault();
+            if (questionsExist != null)
+            {
+                last_id = _dbContext.Questions.OrderByDescending(q => q.Id).FirstOrDefault().Id;
+            }
+
+
             if (rowCount.HasValue && colCount.HasValue)
             {
-                for (int row = 2; row <= rowCount.Value; row++)
+                //deleting old questions and answers
+                var oldQuestions = _dbContext.Questions.Where(q => q.CardId == cardId);
+                foreach (var oq in oldQuestions)
+                {
+                    var oldQuestionAnswers = _dbContext.QuestionAnswers.Where(qa => qa.QuestionId == oq.Id);
+                    foreach (var oqa in oldQuestionAnswers)
+                    {
+                        var matchQuestions = _dbContext.MatchAnswers.Where(ma => ma.QuestionId == oq.Id);
+                        _dbContext.RemoveRange(matchQuestions);
+                        var matchAnswers = _dbContext.MatchAnswers.Where(ma => ma.AnswerId == oqa.Id);
+                        _dbContext.RemoveRange(matchAnswers);
+                    }
+                    _dbContext.RemoveRange(oldQuestionAnswers);
+                    _dbContext.RemoveRange(oq);
+                }
+                _dbContext.SaveChanges();
+
+
+
+                for (int row = 1; row <= rowCount.Value; row++)
                 {
                     try
                     {
-                        var questionText = worksheet.Cells[row, 2].Value?.ToString();
-                        if (string.IsNullOrEmpty(questionText))
+                        var questionTextRu = worksheet.Cells[row, 2].Value?.ToString();
+                        var questionTextKz = worksheet.Cells[row, 3].Value?.ToString();
+                        if (string.IsNullOrEmpty(questionTextRu) && string.IsNullOrEmpty(questionTextKz))
                         {
                             break;
                         }
@@ -198,7 +285,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                         questionsCount++;
                         bool? insertUpdate = null;
 
-                        var id = int.Parse(worksheet.Cells[row, 1].Value.ToString());
+                        var id = last_id + int.Parse(worksheet.Cells[row, 1].Value.ToString());
 
                         Question question = _dbContext.Questions.SingleOrDefault(q => q.CardId == cardId && q.Id == id);
 
@@ -213,13 +300,14 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                             insertUpdate = true;
                         }
 
-                        if (question.Text != questionText)
+                        if (question.TextRu != questionTextRu && question.TextKz != questionTextKz)
                         {
-                            if (!string.IsNullOrEmpty(question.Text))
+                            if (!string.IsNullOrEmpty(question.TextRu) && !string.IsNullOrEmpty(question.TextKz))
                             {
                                 insertUpdate = false;
                             }
-                            question.Text = questionText;
+                            question.TextRu = questionTextRu;
+                            question.TextKz = questionTextKz;
 
                             _dbContext.Database.OpenConnection();
                             try
@@ -249,14 +337,16 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                             _dbContext.QuestionAnswers.Add(questionAnswerA);
                         }
 
-                        var questionAText = worksheet.Cells[row, 3].Value.ToString();
+                        var questionATextRu = worksheet.Cells[row, 4].Value.ToString();
+                        var questionATextKz = worksheet.Cells[row, 5].Value.ToString();
 
                         if ((insertUpdate == null || !insertUpdate.Value) 
-                            && questionAnswerA.Text != questionAText)
+                            && questionAnswerA.TextRu != questionATextRu && questionAnswerA.TextKz != questionATextKz)
                         {
                             insertUpdate = false;
                         }
-                        questionAnswerA.Text = questionAText;
+                        questionAnswerA.TextRu = questionATextRu;
+                        questionAnswerA.TextKz = questionATextKz;
 
                         QuestionAnswer questionAnswerB = questionAnswers.Skip(1).FirstOrDefault();
                         if (questionAnswerB == null)
@@ -268,13 +358,16 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                             _dbContext.QuestionAnswers.Add(questionAnswerB);
                         }
 
-                        var questionBText = worksheet.Cells[row, 4].Value.ToString();
+                        var questionBTextRu = worksheet.Cells[row, 6].Value.ToString();
+                        var questionBTextKz = worksheet.Cells[row, 7].Value.ToString();
+
                         if ((insertUpdate == null || !insertUpdate.Value)
-                            && questionAnswerB.Text != questionBText)
+                            && questionAnswerB.TextRu != questionBTextRu && questionAnswerB.TextKz != questionBTextKz)
                         {
                             insertUpdate = false;
                         }
-                        questionAnswerB.Text = questionBText;
+                        questionAnswerB.TextRu = questionBTextRu;
+                        questionAnswerB.TextKz = questionBTextKz;
 
                         QuestionAnswer questionAnswerC = questionAnswers.Skip(2).FirstOrDefault();
                         if (questionAnswerC == null)
@@ -286,14 +379,16 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                             _dbContext.QuestionAnswers.Add(questionAnswerC);
                         }
 
-                        var questionCText = worksheet.Cells[row, 5].Value.ToString();
+                        var questionCTextRu = worksheet.Cells[row, 8].Value.ToString();
+                        var questionCTextKz = worksheet.Cells[row, 9].Value.ToString();
 
                         if ((insertUpdate == null || !insertUpdate.Value)
-                            && questionAnswerC.Text != questionCText)
+                            && questionAnswerC.TextRu != questionCTextRu && questionAnswerC.TextKz != questionCTextKz)
                         {
                             insertUpdate = false;
                         }
-                        questionAnswerC.Text = questionCText;
+                        questionAnswerC.TextRu = questionCTextRu;
+                        questionAnswerC.TextKz = questionCTextKz;
 
                         if (insertUpdate.HasValue)
                         {
@@ -307,17 +402,17 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                                 updatedQuestionCount++;
                             }
 
-                            if (worksheet.Cells[row, 3].Style.Font.Bold)
+                            if (worksheet.Cells[row, 4].Style.Font.Bold)
                             {
                                 question.CorrectAnswerId = questionAnswerA.Id;
                             }
 
-                            if (worksheet.Cells[row, 4].Style.Font.Bold)
+                            if (worksheet.Cells[row, 6].Style.Font.Bold)
                             {
                                 question.CorrectAnswerId = questionAnswerB.Id;
                             }
 
-                            if (worksheet.Cells[row, 5].Style.Font.Bold)
+                            if (worksheet.Cells[row, 8].Style.Font.Bold)
                             {
                                 question.CorrectAnswerId = questionAnswerC.Id;
                             }

@@ -120,8 +120,17 @@
   <data name="Answers" xml:space="preserve">
     <value>Ответы</value>
   </data>
+  <data name="Buy_History" xml:space="preserve">
+    <value>История Покупок</value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>Редактировать</value>
+  </data>
+  <data name="Friends" xml:space="preserve">
+    <value>Друзья</value>
+  </data>
+  <data name="Play_History" xml:space="preserve">
+    <value>История Игр</value>
   </data>
   <data name="Questions" xml:space="preserve">
     <value>Вопросы</value>
@@ -134,5 +143,8 @@
   </data>
   <data name="Set_Password_Confirmation_Not_Matched" xml:space="preserve">
     <value>Пароль и подтверждение пароля не совпадают</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Статистика</value>
   </data>
 </root>

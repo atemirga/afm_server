@@ -126,6 +126,11 @@
             return '<a href="#" onclick="javascript:showAnswers(this)">' + row.answers.length +'</a>';
         }
 
+        function renderActions(data, type, row, meta) {
+            return '<a href="/Admin/QuestionBoxes/Index/' + row.id + '">Боксы</a>' + 
+                    '<a href="/Admin/Questions/Delete/' + row.id + '">Удалить</a>';
+        }
+
         function showAnswers(el) {
             var tr = $(el).closest('tr');
             var row = restsTable.row(tr);

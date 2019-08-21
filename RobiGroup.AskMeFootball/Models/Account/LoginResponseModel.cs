@@ -12,5 +12,6 @@ namespace RobiGroup.AskMeFootball.Models.Account
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public LoginAction Action { get; set; }
+        public bool IsRegistered { get; set; }
     }
 }

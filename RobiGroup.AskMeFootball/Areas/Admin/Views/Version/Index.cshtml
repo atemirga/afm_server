@@ -1,0 +1,87 @@
+﻿@using Admin.Models
+@using Common.Localization
+@using JQuery.DataTables.Extensions
+@using RobiGroup.AskMeFootball.Areas.Admin.Models.Version
+
+@model IEnumerable<VersionViewModel>
+
+
+@{
+    ViewData["Title"] = "Версия";
+}
+
+<table id="rests" class="table">
+    <thead>
+        <tr>
+            <th>
+                Версия
+            </th>
+            <th>
+                Дата обновления
+            </th>
+            <th>
+                Обновить
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.TextBox("version", item.Version, new { @class = "form-control" })
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastUpdate)
+            </td>
+            <td>
+                <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="updateVersion()">
+                     Обновить<a/>
+                </td>
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+
+</table>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    @*<link rel="stylesheet" href="~/lib/datatables.net-bs/css/dataTables.bootstrap.min.css">*@
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" rel="stylesheet" />
+    
+}
+
+@section Scripts {
+
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    @*<script src="~/lib/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>*@
+    <script src="~/lib/moment/min/moment.min.js"></script>
+    <script src="~/lib/moment/locale/ru.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/locales/bootstrap-datepicker.ru.min.js"></script>
+
+    <script>
+         function updateVersion() {
+             var version = document.getElementById('version').value; 
+             console.log(version);
+             $.ajax({
+                            method: "POST",
+                            url: '@Url.Action("Update", "Version", new { Area = "Admin" })',
+                            data: {
+                                version:version
+                            }
+                        })
+                        .done(function () {
+                            window.location = '@Url.Action("Index", "Version")'
+                        });
+        }
+    </script>
+}

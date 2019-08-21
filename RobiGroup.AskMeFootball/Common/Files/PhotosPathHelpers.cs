@@ -17,6 +17,36 @@ namespace RobiGroup.AskMeFootball.Common.Files
             return $"{hostingEnvironment.WebRootPath}/files/cards/{cardId}";
         }
 
+        public static string GetCardTeamLogosFolder(this IHostingEnvironment hostingEnvironment, int cardId)
+        {
+            return $"{hostingEnvironment.WebRootPath}/files/cards/{cardId}/logos";
+        }
+
+        public static string GetQuestionBoxFolder(this IHostingEnvironment hostingEnvironment, int questionId)
+        {
+            return $"{hostingEnvironment.WebRootPath}/files/box/{questionId}";
+        }
+
+        public static string GetInfoCardPhotosFolder(this IHostingEnvironment hostingEnvironment, int cardId)
+        {
+            return $"{hostingEnvironment.WebRootPath}/files/infocards/photos/{cardId}";
+        }
+
+        public static string GetInfoCardImagesFolder(this IHostingEnvironment hostingEnvironment, int cardId)
+        {
+            return $"{hostingEnvironment.WebRootPath}/files/infocards/images/{cardId}";
+        }
+
+        public static string GetInfoCardVideosFolder(this IHostingEnvironment hostingEnvironment, int cardId)
+        {
+            return $"{hostingEnvironment.WebRootPath}/files/infocards/videos/{cardId}";
+        }
+
+        public static string GetPrizePhotosFolder(this IHostingEnvironment hostingEnvironment, int prizeId)
+        {
+            return $"{hostingEnvironment.WebRootPath}/files/prizes/{prizeId}";
+        }
+
         public static List<string> GetRestaurantPhotos(this IHostingEnvironment hostingEnvironment, int cardId)
         {
             var photosFolder = hostingEnvironment.GetCardPhotosFolder(cardId);

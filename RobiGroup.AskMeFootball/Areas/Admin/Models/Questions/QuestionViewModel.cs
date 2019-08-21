@@ -19,5 +19,8 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Models.Questions
         [DataTableColumn(Render = "renderAnswers")]
         [DisplayName("Ответы")]
         public List<AnswerViewModel> Answers { get; set; }
+
+        [DataTableColumn(Render = "renderActions")]
+        public string Action { get; set; }
     }
 }

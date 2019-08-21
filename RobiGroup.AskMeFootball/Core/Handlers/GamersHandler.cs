@@ -127,6 +127,19 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
             await ResumeMatchIfExists(userId, true);
         }
 
+        public override async Task OnDisconnected(WebSocket socket)
+        {
+            var socketId = WebSocketConnectionManager.GetId(socket);
+            if (!string.IsNullOrEmpty(socketId))
+            {
+                string gamerId = WebSocketConnectionManager.GetSocketGroup(socketId);
+
+                await base.OnDisconnected(socket);
+
+                await PauseMatchIfExists(gamerId);
+            }
+        }
+
         public async Task ResumeMatchForAll()
         {
             foreach (var pausedMatch in _pausedMatches)
@@ -144,10 +157,11 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
             {
                 var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
                 var matchController = scope.ServiceProvider.GetService<MatchController>();
-
+                #region
+                
                 if (_pausedMatches.TryRemove(gamerId, out var pausedMatch))
                 {
-                    var resumeMatch = DateTime.Now - pausedMatch.PausedTime <= _matchOptions.MatchPauseDuration;
+                    var resumeMatch = true;//DateTime.Now - pausedMatch.PausedTime <= _matchOptions.MatchPauseDuration;
 
                     var gamers = dbContext.MatchGamers.Include(g => g.Gamer).Where(g => g.MatchId == pausedMatch.MatchId && !g.Cancelled && g.IsPlay).ToList();
 
@@ -201,7 +215,7 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                 }
                 else if (fromDb)
                 {
-                    var isStopMatch = (DateTime.Now - _handlerCreatedTime) > _matchOptions.MatchPauseDuration;
+                    var isStopMatch = false;//(DateTime.Now - _handlerCreatedTime) > _matchOptions.MatchPauseDuration;
                     var matchGamers = dbContext.MatchGamers.Where(g => g.GamerId == gamerId && g.IsPlay).ToList();
                     
                     foreach (var gamer in matchGamers)
@@ -238,19 +252,9 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
 
                     dbContext.SaveChanges();
                 }
-            }
-        }
+                
 
-        public override async Task OnDisconnected(WebSocket socket)
-        {
-            var socketId = WebSocketConnectionManager.GetId(socket);
-            if (!string.IsNullOrEmpty(socketId))
-            {
-                string gamerId = WebSocketConnectionManager.GetSocketGroup(socketId);
-
-                await base.OnDisconnected(socket);
-
-                await PauseMatchIfExists(gamerId);
+                #endregion
             }
         }
 
@@ -261,7 +265,7 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                 var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
                 var gamers = dbContext.MatchGamers.Where(g => g.GamerId != gamerId && !g.Cancelled && g.IsPlay).ToList();
-
+                /*
                 if (gamers.Any())
                 {
                     _pausedMatches[gamerId] =
@@ -273,6 +277,7 @@ namespace RobiGroup.AskMeFootball.Core.Handlers
                             new {id = game.MatchId, gamerId});
                     }
                 }
+                */
 
                 //matchManager.SearchMatch( )
             }

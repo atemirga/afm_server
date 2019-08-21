@@ -126,6 +126,10 @@ namespace WebSocketManager
                 {
                     await SendMessageAsync(webSocket.WebSocket, message).ConfigureAwait(false);
                 }
+                else
+                {
+                    await OnDisconnected(webSocket.WebSocket);
+                }
             }
             catch (WebSocketException e)
             {
@@ -144,6 +148,9 @@ namespace WebSocketManager
                 {
                     if (pair.Value.WebSocket.State == WebSocketState.Open)
                         await SendMessageAsync(pair.Value.WebSocket, message).ConfigureAwait(false);
+                    else
+                        await OnDisconnected(pair.Value.WebSocket);
+
                 }
                 catch (WebSocketException e)
                 {
@@ -166,6 +173,14 @@ namespace WebSocketManager
                     Arguments = arguments
                 }, _jsonSerializerSettings)
             };
+
+            foreach (var pair in WebSocketConnectionManager.GetAll())
+            {
+                if (pair.Value.WebSocket.State != WebSocketState.Open)
+                {
+                    await OnDisconnected(pair.Value.WebSocket);
+                }
+            }
 
             await SendMessageAsync(socketId, message).ConfigureAwait(false);
         }
@@ -219,7 +234,12 @@ namespace WebSocketManager
                 try
                 {
                     if (pair.Value.WebSocket.State == WebSocketState.Open)
-                        await InvokeClientMethodAsync(pair.Key, methodName, arguments).ConfigureAwait(false);
+                    { await InvokeClientMethodAsync(pair.Key, methodName, arguments).ConfigureAwait(false); }
+                    else
+                    {
+                        await OnDisconnected(pair.Value.WebSocket);
+                    }
+
                 }
                 catch (WebSocketException e)
                 {

@@ -16,5 +16,10 @@
         /// Выигрыши
         /// </summary>
         public int Wins { get; set; }
+
+        /// <summary>
+        /// Тотал
+        /// </summary>
+        public int Totals { get; set; }
     }
 }

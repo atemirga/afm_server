@@ -4,13 +4,14 @@ namespace RobiGroup.AskMeFootball.Models.Match
 {
     public class MatchRequestModel
     {
-        public MatchRequestModel(int matchId, ApplicationUser gamer)
+        public MatchRequestModel(int matchId, string cardName, ApplicationUser gamer)
         {
             MatchId = matchId;
             GamerFullName = gamer.FullName;
             GamerName = gamer.NickName;
             GamerPhotoUrl = gamer.PhotoUrl;
             GamerId = gamer.Id;
+            CardName = cardName;
         }
 
         public int MatchId { get; set; }
@@ -34,5 +35,11 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public int MyCardScore { get; set; }
 
         public bool IsBot { get; set; }
+        public string CardName { get; set; }
+
+        public int Bid { get; set; }
+
+        public int Coins { get; set; }
+        public int RivalCoins { get; set; }
     }
 }

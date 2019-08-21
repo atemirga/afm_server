@@ -11,6 +11,8 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public string GamerName { get; set; }
 
         public string PhotoUrl { get; set; }
+
+        public DateTime MatchStarted { get; set; }
     }
 
     public class MatchHistoryModel : MatchModel
@@ -20,5 +22,6 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public bool IsWon { get; set; }
 
         public DateTime Time { get; set; }
+        public bool RivalIsWon { get; set; }
     }
 }

@@ -1,0 +1,70 @@
+﻿@using Admin.Models
+@using Common.Localization
+@using JQuery.DataTables.Extensions
+@using RobiGroup.AskMeFootball.Areas.Admin.Models.InfoCards
+
+@{
+    ViewData["Title"] = "Карты";
+}
+<p>
+    <a asp-action="Create" asp-controller="InfoCards" asp-area="Admin">Создать новую карту</a>
+</p>
+<table id="rests" class="table table-striped"></table>
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/datatables.net-bs/css/dataTables.bootstrap.min.css">
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="~/lib/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <script src="~/lib/moment/min/moment.min.js"></script>
+    <script src="~/lib/moment/locale/ru.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/locales/bootstrap-datepicker.ru.min.js"></script>
+
+
+    <script type="text/javascript">
+        var restsTable;
+        $(function() {
+            restsTable = $('#rests').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "paging": true,
+                "filter": false,
+                dom: 'Bfrtip',
+                pageLength: 20,
+                "language": {
+                    "url": "/lib/datatables.net/Russian.json"
+                },
+                ajax: {
+                    url: "@Url.Action("_Filter", "InfoCards", new{area="Admin"})",
+                    type: 'POST',
+                    data: function(data) {
+
+                        var formParams = $('#search_form').serializeArray();
+
+                        for (var i = 0; i < formParams.length; i++) {
+                            data[formParams[i].name] = formParams[i].value;
+                        }
+                        return data;
+                    }
+                },
+                "columns": @(Html.DataTableColumns(typeof(InfoCardViewModel), Json, Localizer))
+            });
+
+            $('#search_form').submit(function(e) {
+
+                restsTable.ajax.reload();
+                e.preventDefault();
+            }).submit();
+
+        });
+
+        function renderActions(data, type, row, meta) {
+            return ' <a href="@Url.Action("Create")/' + row.id + '">@Localizer["Edit"]</a>' ;
+        }
+
+    </script>
+}
