@@ -72,6 +72,12 @@ namespace RobiGroup.AskMeFootball.Data
 
         public DbSet<PackPrice> PackPrices { get; set; }
 
+        public DbSet<CompetitiveInfo> CompetitiveInfos { get; set; }
+
+        public DbSet<MultiplierHistory> MultiplierHistories { get; set; }
+
+        public DbSet<HintHistory> HintHistories { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -94,7 +100,8 @@ namespace RobiGroup.AskMeFootball.Data
                 new CardType {Id = 20, Name = "Еженедельный", Code = Data.CardTypes.Weekly.ToString() },
                 new CardType {Id = 30, Name = "Ежемесячный", Code = Data.CardTypes.Monthly.ToString() },
                 new CardType { Id = 40, Name = "Live", Code = "Live" },
-                new CardType { Id = 50, Name = "HalfTime", Code = "HalfTime"});
+                new CardType { Id = 50, Name = "HalfTime", Code = "HalfTime"},
+                new CardType { Id = 60, Name = "Competitive", Code = "Competitive" });
 
             builder.Entity<MatchAnswer>().HasAlternateKey(a => new { a.MatchGamerId, a.QuestionId });
 

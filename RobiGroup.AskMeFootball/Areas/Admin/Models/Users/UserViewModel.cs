@@ -46,6 +46,15 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Models.Users
         public int PlaysToday { get; set; }
 
         [DataTableColumn(Visible = true)]
+        [DisplayName("Подсказки")]
+        public int Hints { get; set; }
+
+        [DataTableColumn(Visible = true)]
+        [DisplayName("Удвоители")]
+        public int Multipliers { get; set; }
+
+
+        [DataTableColumn(Visible = true)]
         [DisplayName("Рандом")]
         public int MatchWithRandom { get; set; }
 

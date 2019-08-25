@@ -57,6 +57,193 @@ namespace RobiGroup.AskMeFootball.Core.Game
             return await RequestMatch(gamerId, cardId, bid);
         }
 
+
+        public async Task<CompetitiveMatchModel> CompetitiveMatch(string gamerId, int cardId)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var model = new CompetitiveMatchModel();
+                var _dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
+                
+                var gamer = _dbContext.Users.Find(gamerId);
+                string rivalCandidateId = null;
+                var lang = gamer.Lang;
+                var card = _dbContext.Cards.Find(cardId);
+                var questions = _dbContext.Questions.Where(q => q.CardId == cardId);
+                var questionCount = _dbContext.Cards.FirstOrDefault(c => c.Id == cardId).MatchQuestions;
+
+                var alreadyInCard = _dbContext.GamerCards.Any(gc => gc.CardId == cardId && gc.GamerId == gamerId && gc.StartTime < DateTime.Today);
+                if (alreadyInCard)
+                {
+                    switch (lang)
+                    {
+                        case "en":
+                            throw new Exception("You already played match today");
+                        case "ru":
+                            throw new Exception("На сегодня вы уже играли");
+                        case "kz":
+                            throw new Exception("Бугындыкке ойнап койдыныз");
+                    }
+                }
+
+                var startTime = _dbContext.CompetitiveInfos.FirstOrDefault(ci => ci.CardId == cardId).StartTime;
+                var endTime = _dbContext.CompetitiveInfos.FirstOrDefault(ci => ci.CardId == cardId).EndTime;
+
+                if (DateTime.Now > endTime && DateTime.Now < startTime)
+                {
+                    switch (lang)
+                    {
+                        case "en":
+                            throw new Exception("Wrong time to play");
+                        case "ru":
+                            throw new Exception("В это время игра недоступна");
+                        case "kz":
+                            throw new Exception("Бул уакытта ойнау мумкин емес");
+                    }
+                }
+
+                var match = new Match()
+                {
+                    CardId = cardId,
+                    CreateTime = DateTime.Now,
+                    Status = Match.MatchStatus.Started,
+                    StartTime = DateTime.Now
+                };
+                _dbContext.Matches.Add(match);
+                _dbContext.SaveChanges();
+
+                var competitiveGamerCard = GetOrAddGamerCard(gamerId, cardId, _dbContext, rivalCandidateId);
+
+                _dbContext.MatchGamers.Add(new MatchGamer
+                {
+                    MatchId = match.Id,
+                    GamerId = gamerId,
+                    GamerCardId = competitiveGamerCard.Id,
+                    Confirmed = true,
+                    JoinTime = DateTime.Now
+                });
+                _dbContext.SaveChanges();
+
+
+                var teamAnswers = new List<GamerAnswers>();
+
+                var team = _dbContext.ReferralUsers.Where(ru => ru.UserId == gamerId);
+                foreach (var t in team)
+                {
+                    var member = _dbContext.Users.FirstOrDefault(u => u.PhoneNumber == t.PhoneNumber);
+                    var memberMatchGamers = _dbContext.MatchGamers.Where(mg => mg.GamerId == member.Id && mg.GamerCard.CardId == cardId);
+                    foreach (var memberMatchGamer in memberMatchGamers)
+                    {
+                        var memberMatchAnswers = _dbContext.MatchAnswers.Where(ma => ma.MatchGamerId == memberMatchGamer.Id);
+                        foreach (var memberMatchAnswer in memberMatchAnswers)
+                        {
+                            if (teamAnswers.Exists(ta => ta.QuestionId == memberMatchAnswer.QuestionId))
+                            {
+                                var index = teamAnswers.IndexOf(teamAnswers.FirstOrDefault(fga => fga.QuestionId == memberMatchAnswer.QuestionId));
+                                teamAnswers[index].Count += 1;
+                            }
+                            else
+                            {
+                                var _ga = new GamerAnswers();
+                                _ga.QuestionId = memberMatchAnswer.QuestionId;
+                                _ga.Count = 1;
+                                teamAnswers.Add(_ga);
+                            }
+                        }
+                    }
+                }
+
+               
+                var matchQuestions = new List<int>();
+
+                foreach (var question in questions)
+                {
+                    if (!teamAnswers.Exists(ga => ga.QuestionId == question.Id) && matchQuestions.Count < questionCount)
+                    {
+                        matchQuestions.Add(question.Id);
+                        if (matchQuestions.Count == questionCount)
+                            break;
+                    }
+                }
+
+                if (matchQuestions.Count < questionCount)
+                {
+                    foreach (var teamAnswer in teamAnswers.OrderBy(ta => ta.Count))
+                    {
+                        if (!matchQuestions.Contains(teamAnswer.QuestionId))
+                            matchQuestions.Add(teamAnswer.QuestionId);
+
+                        if (matchQuestions.Count == questionCount)
+                            break;
+                    }
+                }
+                //do {} while (matchQuestions.Count < questionCount);
+
+                match.Questions = string.Join(',', matchQuestions);
+
+                Random rnd = new Random();
+
+                switch (lang)
+                {
+                    case "ru":
+                        var questionsRu = _dbContext.QuestionAnswers
+                             .Where(a => matchQuestions.Contains(a.QuestionId))
+                             .GroupBy(a => a.Question)
+                            .Select(qa => new QuestionModel
+                            {
+                                Id = qa.Key.Id,
+                                Text = qa.Key.TextRu,
+                                Delay = qa.Key.Delay,
+                                Answers = qa.Select(a => new QuestionAnswerModel
+                                {
+                                    Id = a.Id,
+                                    Text = a.TextRu
+                                }).ToList()
+                            }).ToList();
+                        foreach (var qRu in questionsRu)
+                        {
+                            if (_dbContext.QuestionBoxes.Any(qb => qb.QuestionId == qRu.Id))
+                            {
+                                qRu.Box = _dbContext.QuestionBoxes.First(qb => qb.QuestionId == qRu.Id);
+                            }
+                        }
+                        model.Questions = questionsRu;
+                        break;
+                    case "kz":
+                        var questionsKz = _dbContext.QuestionAnswers
+                            .Where(a => matchQuestions.Contains(a.QuestionId))
+                            .GroupBy(a => a.Question)
+                           .Select(qa => new QuestionModel
+                           {
+                               Id = qa.Key.Id,
+                               Text = qa.Key.TextKz,
+                               Delay = qa.Key.Delay,
+                               Answers = qa.Select(a => new QuestionAnswerModel
+                               {
+                                   Id = a.Id,
+                                   Text = a.TextKz
+                               }).ToList()
+                           }).ToList();
+                        foreach (var qKz in questionsKz)
+                        {
+                            if (_dbContext.QuestionBoxes.Any(qb => qb.QuestionId == qKz.Id))
+                            {
+                                qKz.Box = _dbContext.QuestionBoxes.First(qb => qb.QuestionId == qKz.Id);
+                            }
+                        }
+                        model.Questions = questionsKz;
+                        break;
+                }
+
+                _dbContext.SaveChanges();
+
+                model.MatchId = match.Id;
+
+                return model;
+            }
+        }
+
         public async Task<HTMatchModel> HTMatch(string gamerId, int cardId)
         {
             using (var scope = _serviceProvider.CreateScope())

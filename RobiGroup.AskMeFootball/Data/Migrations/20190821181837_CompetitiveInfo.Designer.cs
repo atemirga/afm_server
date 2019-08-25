@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RobiGroup.AskMeFootball.Data;
 
 namespace RobiGroup.AskMeFootball.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190821181837_CompetitiveInfo")]
+    partial class CompetitiveInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,8 +169,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
-
-                    b.Property<int>("Multiplier");
 
                     b.Property<string>("NickName");
 
@@ -349,8 +349,7 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                         new { Id = 20, Code = "Weekly", Name = "Еженедельный" },
                         new { Id = 30, Code = "Monthly", Name = "Ежемесячный" },
                         new { Id = 40, Code = "Live", Name = "Live" },
-                        new { Id = 50, Code = "HalfTime", Name = "HalfTime" },
-                        new { Id = 60, Code = "Competitive", Name = "Competitive" }
+                        new { Id = 50, Code = "HalfTime", Name = "HalfTime" }
                     );
                 });
 
@@ -491,25 +490,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("GetContacts");
-                });
-
-            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.HintHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("GamerId");
-
-                    b.Property<int>("MatchId");
-
-                    b.Property<int>("QuestionId");
-
-                    b.Property<DateTime>("UsedAt");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("HintHistories");
                 });
 
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.InfoCard", b =>
@@ -660,27 +640,6 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.HasIndex("MatchId");
 
                     b.ToTable("MatchGamers");
-                });
-
-            modelBuilder.Entity("RobiGroup.AskMeFootball.Data.MultiplierHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("GamerId");
-
-                    b.Property<bool>("IsMultiplied");
-
-                    b.Property<int>("MatchId");
-
-                    b.Property<int>("QuestionId");
-
-                    b.Property<DateTime>("UsedAt");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MultiplierHistories");
                 });
 
             modelBuilder.Entity("RobiGroup.AskMeFootball.Data.PackPrice", b =>

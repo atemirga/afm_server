@@ -35,6 +35,12 @@ namespace RobiGroup.AskMeFootball.Data
         public int Hints { get; set; }
 
         /// <summary>
+        /// увеличивает баллы в двое
+        /// </summary>
+        /// <value>My Hints</value>
+        public int Multiplier { get; set; }
+
+        /// <summary>
         /// Итоговые очки
         /// </summary>
         public int TotalScore { get; set; }

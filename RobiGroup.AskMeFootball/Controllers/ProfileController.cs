@@ -346,6 +346,9 @@ namespace RobiGroup.AskMeFootball.Controllers
                             case "hint":
                                 user.Hints += pack.Count;
                                 break;
+                            case "multiplier":
+                                user.Multiplier += pack.Count;
+                                break;
                             case "balls":
                                 user.PointsToPlay += pack.Count;
                                 break;
@@ -368,6 +371,9 @@ namespace RobiGroup.AskMeFootball.Controllers
                     break;
                 case "hint":
                     user.Hints += pack.Count;
+                    break;
+                case "multiplier":
+                    user.Multiplier += pack.Count;
                     break;
                 case "balls":
                     user.PointsToPlay += pack.Count;

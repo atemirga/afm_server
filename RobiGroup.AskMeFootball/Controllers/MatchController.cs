@@ -249,6 +249,16 @@ namespace RobiGroup.AskMeFootball.Controllers
 
                 try
                 {
+                    if (type == "Competitive")
+                    {
+                        if (!card.IsActive)
+                        {
+                            ModelState.AddModelError("error", "Card is inactive");
+                            return BadRequest(ModelState);
+                        }
+                        var match = await _matchManager.CompetitiveMatch(User.GetUserId(), id);
+                        return Ok(match);
+                    }
 
                     if (type == "HalfTime")
                     {
@@ -1086,6 +1096,122 @@ namespace RobiGroup.AskMeFootball.Controllers
             return BadRequest(ModelState);
         }
 
+
+        /// <summary>
+        /// Ответить на вопрос Competitive
+        /// </summary>
+        /// <param name="id">ID матча</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("competitive/{id}/answers")]
+        [ProducesResponseType((typeof(IEnumerable<CompetitiveAnswerModel>)), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> AnswerToQuestionCompetitive([FromRoute]int id, [FromBody]MatchQuestionAnswerModel answer)
+        {
+            if (ModelState.IsValid)
+            {
+                string userId = User.GetUserId();
+                var user = _dbContext.Users.Find(userId);
+                var lang = user.Lang;
+                var matchGamer = _dbContext.MatchGamers.FirstOrDefault(g => g.MatchId == id && g.GamerId == userId);
+
+                var matchAnswer = _dbContext.MatchAnswers.Count(ma => ma.QuestionId == answer.QuestionId && ma.MatchGamerId == matchGamer.Id);
+
+                var incorrectAnswers = _dbContext.MatchAnswers.Count(ma => ma.MatchGamerId == matchGamer.Id && !ma.IsCorrectAnswer);
+
+                var correctAnswers = _dbContext.MatchAnswers.Count(ma => ma.MatchGamerId == matchGamer.Id && ma.IsCorrectAnswer);
+
+                var isCorrect = false;
+
+                if (matchAnswer == 0)
+                {
+                    var match = _dbContext.Matches.Find(id);
+                    var matchQuestions = match.Questions.SplitToIntArray();
+
+                    var correctAnswerId = _dbContext.Questions.Where(q => q.Id == answer.QuestionId)
+                                                                    .Select(q => q.CorrectAnswerId).Single();
+                    if (matchQuestions.Contains(answer.QuestionId))
+                    {
+                        var isCorrectAnswer = correctAnswerId == answer.AnswerId;
+                        isCorrect = isCorrectAnswer;
+                        _dbContext.MatchAnswers.Add(new MatchAnswer
+                        {
+                            QuestionId = answer.QuestionId,
+                            AnswerId = (answer.AnswerId ?? 0) > 0 ? answer.AnswerId : (int?)null,
+                            CreatedAt = DateTime.Now,
+                            MatchGamerId = matchGamer.Id,
+                            IsCorrectAnswer = isCorrectAnswer
+                        });
+                       
+
+                        _dbContext.SaveChanges();
+
+                        _logger.LogInformation($"Question answer from {userId}. Question: {answer.QuestionId}, answer: {answer.AnswerId}.");
+                    }
+
+                    return Ok(new CompetitiveAnswerModel
+                    {
+                        IsCorrectAnswer = isCorrect,
+                        CorrectAnswers = correctAnswers,
+                        IncorrectAnswers = incorrectAnswers,
+                        IsMultiplied = isCorrect
+                    });
+                }
+                ModelState.AddModelError("error", "You answered this question");
+                return BadRequest(ModelState);
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        /// <summary>
+        /// Возпользоваться бустером удвоить 2 раза баллы
+        /// </summary>
+        /// <param name="id">ID матча</param>
+        /// <param name="questionId">ID Вопроса</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("competitive/multiplier/{id}/{questionId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Multiplier([FromRoute]int id, [FromRoute]int questionId)
+        {
+            if (ModelState.IsValid)
+            {
+                string userId = User.GetUserId();
+                var user = _dbContext.Users.Find(userId);
+                var lang = _dbContext.Users.FirstOrDefault(u => u.Id == userId).Lang;
+                var match = _dbContext.Matches.Find(id);
+
+                var multiplier = user.Multiplier > 0 ? true : false;
+
+                if (!multiplier)
+                {
+                    switch (lang)
+                    {
+                        case "en":
+                            throw new Exception("You dont have multiplier");
+                        case "ru":
+                            throw new Exception("У Вас нет удвоителя баллов");
+                        case "kz":
+                            throw new Exception("Баллды еселендиретын жетиспейди");
+                    }
+                }
+
+                _dbContext.MultiplierHistories.Add(new MultiplierHistory {
+                    GamerId = userId,
+                    MatchId = id,
+                    QuestionId = questionId,
+                    UsedAt = DateTime.Now
+                });
+
+                _dbContext.SaveChanges();
+
+                return Ok();
+            }
+
+            return BadRequest(ModelState);
+        }
 
         /// <summary>
         /// Ответить на вопрос Лайв
