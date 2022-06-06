@@ -285,5 +285,14 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
         }
 
         #endregion
+
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            _dbContext.Prizes.Remove(_dbContext.Prizes.Find(id));
+            _dbContext.SaveChanges();
+            return RedirectToAction("Index");
+        }
     }
 }

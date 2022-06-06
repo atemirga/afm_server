@@ -47,5 +47,13 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Models.Competitives
         [Required]
         [DisplayName("Входная цена(мячи)")]
         public int EntryPoint { get; set; }
+
+        [Required]
+        [DisplayName("Лимит Удвоителей")]
+        public int Multipliers { get; set; }
+
+        [Required]
+        [DisplayName("Лимит Подсказок")]
+        public int Hints { get; set; }
     }
 }

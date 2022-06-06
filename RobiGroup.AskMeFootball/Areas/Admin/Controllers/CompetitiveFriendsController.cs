@@ -22,11 +22,11 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
 
     [Area("Admin")]
     [Authorize(Roles = ApplicationRoles.Admin)]
-    public class CompetitiveGamersController : BaseController
+    public class CompetitiveFriendsController : BaseController
     {
         private readonly IHostingEnvironment _hostingEnvironment;
 
-        public CompetitiveGamersController(ApplicationDbContext dbContext, IHostingEnvironment hostingEnvironment) : base(dbContext)
+        public CompetitiveFriendsController(ApplicationDbContext dbContext, IHostingEnvironment hostingEnvironment) : base(dbContext)
         {
             _hostingEnvironment = hostingEnvironment;
         }
@@ -34,18 +34,20 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
         #region Table
 
 
-        public IActionResult Index(int id)
+        public IActionResult Index( string userId, int cardId)
         {
-            LoadIndexViewData(id);
-            int cardId = id;
             var usersQuery = _dbContext.Users.Where(u => u.UserName != "admin" && u.Bot == 0).AsQueryable();
             var users = new List<UserViewModel>();
+
+            var phone = _dbContext.Users.Find(userId).PhoneNumber;
 
             foreach (var uq in usersQuery)
             {
                 var inCard = _dbContext.GamerCards.Any(gc => gc.CardId == cardId && gc.GamerId == uq.Id);
 
-                if (inCard)
+                var isFriend = _dbContext.ReferralUsers.Any(ru => ru.UserId == uq.Id && ru.PhoneNumber == phone);
+
+                if (inCard && isFriend)
                 {
                     var coins = 0;
                     if (_dbContext.UserCoins.Any(uc => uc.GamerId == uq.Id))
@@ -107,11 +109,6 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                 }
             }
             return View(users);
-        }
-
-        private void LoadIndexViewData(int id)
-        {
-            ViewBag.CardId = id;
         }
 
         #endregion

@@ -148,7 +148,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
             card.EntryPoint = model.EntryPoint;
             card.MaxBid = 0;
             card.IsTwoH = false;
-            card.Prize = model.Prize;
+            card.Prize = model.Prize + " KZT";
             card.MatchQuestions = model.MatchQuestions;
             card.IsActive = true;
             _dbContext.SaveChanges();
@@ -189,6 +189,39 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
                 _dbContext.SaveChanges();
             }
 
+
+            if (model.Id.HasValue)
+            {
+                var limit = _dbContext.CardLimits.FirstOrDefault(cl => cl.CardId == model.Id.Value);
+                if (limit != null)
+                {
+
+                    limit.Multiplier = model.Multipliers;
+                    limit.Hints = model.Hints;
+                    _dbContext.SaveChanges();
+                }
+                else
+                {
+                    _dbContext.CardLimits.Add(new CardLimits
+                    {
+                        CardId = model.Id.Value,
+                        Multiplier = model.Multipliers,
+                        Hints = model.Hints,
+                    });
+                }
+                _dbContext.SaveChanges();
+
+            }
+            else
+            {
+                _dbContext.CardLimits.Add(new CardLimits
+                {
+                    CardId = card.Id,
+                    Multiplier = model.Multipliers,
+                    Hints = model.Hints,
+                });
+                _dbContext.SaveChanges();
+            }
 
 
             if (!System.IO.File.Exists(Path.Combine(_hostingEnvironment.WebRootPath, model.ImageUrlCard)) ||

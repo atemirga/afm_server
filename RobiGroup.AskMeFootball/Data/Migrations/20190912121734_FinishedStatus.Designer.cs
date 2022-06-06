@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RobiGroup.AskMeFootball.Data;
 
 namespace RobiGroup.AskMeFootball.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190912121734_FinishedStatus")]
+    partial class FinishedStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -636,6 +638,8 @@ namespace RobiGroup.AskMeFootball.Data.Migrations
                     b.Property<bool>("Confirmed");
 
                     b.Property<bool>("Delayed");
+
+                    b.Property<bool>("Finished");
 
                     b.Property<int>("GamerCardId");
 

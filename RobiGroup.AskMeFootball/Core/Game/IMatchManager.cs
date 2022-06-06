@@ -22,6 +22,8 @@ namespace RobiGroup.AskMeFootball.Core.Game
 
         Task<LiveResultModel> LiveMatchResult(int id, string userId);
 
+        Task<CompetitiveResultModel> CompetitiveMatchResult(int id, string userId);
+
         Task<bool> GetQuestionAnswerStatus(int id, string userId, int questionId);
 
         Task<List<int>> GetMissedQuestionsForMatch(int matchId, string gamerId);

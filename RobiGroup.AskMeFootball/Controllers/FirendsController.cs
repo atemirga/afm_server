@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RobiGroup.AskMeFootball.Core.Handlers;
 using RobiGroup.AskMeFootball.Data;
+using RobiGroup.AskMeFootball.Models;
 using RobiGroup.AskMeFootball.Models.Cards;
 using RobiGroup.AskMeFootball.Models.Friends;
 using RobiGroup.AskMeFootball.Models.Leaderboard;
@@ -167,8 +168,8 @@ namespace RobiGroup.AskMeFootball.Controllers
 
             return Ok(friends);
         }
-        
-        
+
+
 
         /*    
             ////////////////////////////////////////////////////////////////////
@@ -293,7 +294,73 @@ namespace RobiGroup.AskMeFootball.Controllers
 
             return Ok(friends);
         }*/
-        
+
+
+
+        /// <summary>
+        /// Друзья по рефералке
+        /// </summary>
+        /// /// <param name="id">ID</param>
+        /// <returns></returns>
+        [HttpPost("referral")]
+        [ProducesResponseType(typeof(List<DaylyReferrals>), 200)]
+        public IActionResult FriendRequest()
+        {
+            var userId = User.GetUserId();
+            var phone = _dbContext.Users.Find(userId).PhoneNumber;
+
+            var year = DateTime.Now.Year;
+            var month = DateTime.Now.Month;
+
+            int days = DateTime.DaysInMonth(year, month);
+
+            int today = DateTime.Today.Day;
+
+            var _days = new List<DaylyReferrals>();
+
+            var referrals = _dbContext.ReferralUsers.Where(ru => ru.PhoneNumber == phone && ru.ActivatedDate.Month == month && ru.ActivatedDate.Year == year);
+
+            for (int j = 1; j <= days; j++)
+            {
+                if (j > today)
+                {
+                    break;
+                }
+
+                var friends = new List<FriendModel>();
+                var day = j;
+
+                foreach (var referral in referrals)
+                {
+                    var referralUser = _dbContext.Users.Find(referral.UserId);
+                    var friend = new FriendModel();
+                    friend.Id = referralUser.Id;
+                    friend.Coins = _dbContext.UserCoins.Any(uc => uc.GamerId == referralUser.Id) ?
+                       _dbContext.UserCoins.FirstOrDefault(uc => uc.GamerId == referralUser.Id).Coins : 0;
+                    friend.Nickname = referralUser.NickName;
+                    friend.PhotoUrl = referralUser.PhotoUrl;
+                    friend.TotalScore = referralUser.TotalScore;
+                    friend.TodayScore = _dbContext.GamerCards.Any(gc => gc.GamerId == referralUser.Id && gc.StartTime.Day == day
+                                                                  && gc.StartTime.Month == month && gc.StartTime.Year == year) ?
+                                        _dbContext.Users.First(u => u.Id == referralUser.Id).Score : 0;
+                        //_dbContext.GamerCards.Any(gc => gc.GamerId == referralUser.Id && gc.StartTime.Day == day
+                        //                                            && gc.StartTime.Month == month && gc.StartTime.Year == year)
+                        //                                        ? _dbContext.GamerCards.First(gc => gc.GamerId == referralUser.Id && gc.StartTime.Day == day &&
+                        //                                            gc.StartTime.Month == month && gc.StartTime.Year == year).Score : 0;
+                    friends.Add(friend);
+                }
+
+                var _thisDay = new DaylyReferrals();
+                _thisDay.friends = friends;
+                _thisDay.day = day;
+                _days.Add(_thisDay);
+
+            }
+
+            return Ok(_days);
+
+        }
+
 
         /// <summary>
         /// Запрос в друзья по ИД

@@ -68,6 +68,7 @@ namespace RobiGroup.AskMeFootball.Controllers
                 Coins = coins,
                 Hints = user.Hints,
                 Lifes = user.Lifes,
+                Multipliers = user.Multiplier,
                 Balance = _dbContext.UserBalances.Any(ub => ub.UserId == userId) ?
                         _dbContext.UserBalances.FirstOrDefault(ub => ub.UserId == userId).Balance : 0,
                 Referral = user.Referral,
@@ -248,59 +249,106 @@ namespace RobiGroup.AskMeFootball.Controllers
             var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
             var code = _dbContext.Users.FirstOrDefault(u => u.Referral == referral && u.Id != userId);
             usedReferrals = _dbContext.ReferralUsers.Where(ru => ru.Referral == referral).Count();
-            var endDate = DateTime.Now.Date;
-            var startDate = DateTime.Now.Date.AddDays(-7);
-            var referrals = _dbContext.ReferralUsers.Where(ru => ru.PhoneNumber == code.PhoneNumber 
-                                                            && ru.ActivatedDate > startDate && ru.ActivatedDate < endDate);
+            var month = DateTime.Now.Month;
+            //var endDate = DateTime.Now.Date;
+            //var startDate = DateTime.Now.Date.AddDays(-7);
+            var referrals = _dbContext.ReferralUsers.Where(ru => ru.PhoneNumber == code.PhoneNumber && ru.ActivatedDate.Month == month);
 
-            if (referrals.Count() == 3)
+            var isActivated = _dbContext.ReferralUsers.Any(ru => ru.UserId == userId && ru.Referral == referral && ru.ActivatedDate.Month == month);
+
+            if (isActivated)
             {
-                ModelState.AddModelError("Referral", "Этот код был уже использован 3 раза за неделю. Попробуйте позже! ");
+                ModelState.AddModelError("Referral", "Этот код был уже активирован за этот месяц. Возпользуйтесь другим или подождиде до следующего месяца!");
                 return BadRequest(ModelState);
             }
-            if (!user.ReferralUsed) 
+
+            if (referrals.Count() == 5)
             {
-                
-                if (code != null)
+                ModelState.AddModelError("Referral", "Этот код был уже использован 5 раз за месяц. Попробуйте позже! ");
+                return BadRequest(ModelState);
+            }
+            //if (!user.ReferralUsed) 
+            //{
+
+            //    if (code != null)
+            //    {
+            //        user.ReferralUsed = true;
+            //        balls = (usedReferrals * 5) + 5;
+            //        if (balls > 20)
+            //        { balls = 20; }
+            //        code.PointsToPlay += balls;
+
+            //        _dbContext.PointHistories.Add(new PointHistories {
+            //            GamerId = code.Id,
+            //            Point = balls,
+            //            TimeAdded = DateTime.Now,
+            //        });
+
+            //        _dbContext.ReferralUsers.Add(new ReferralUser
+            //        {
+            //            UserId = userId,
+            //            PhoneNumber = code.PhoneNumber,
+            //            Referral = referral,
+            //            ActivatedDate = DateTime.Now
+            //        });
+            //        var thisCoin = _dbContext.UserCoins.FirstOrDefault(uc => uc.GamerId == userId);
+            //        if (thisCoin == null)
+            //        {
+            //            _dbContext.UserCoins.AddAsync(new UserCoins
+            //            {
+            //                GamerId = userId,
+            //                Coins = 100,
+            //                LastUpdate = DateTime.Now
+            //            });
+            //        }
+            //        else { thisCoin.Coins += 100; }
+            //        _dbContext.SaveChanges();
+            //        return Ok();
+            //    }
+            //    ModelState.AddModelError("Referral", "Код неправильный или не существует!");
+            //    return BadRequest(ModelState);
+            //}
+
+            //ModelState.AddModelError("Referral", "Код уже использовался!");
+            //return BadRequest(ModelState);
+
+            if (code != null)
+            {
+                user.ReferralUsed = true;
+                balls = (usedReferrals * 5) + 5;
+                if (balls > 20)
+                { balls = 20; }
+                code.PointsToPlay += balls;
+
+                _dbContext.PointHistories.Add(new PointHistories
                 {
-                    user.ReferralUsed = true;
-                    balls = (usedReferrals * 5) + 5;
-                    if (balls > 20)
-                    { balls = 20; }
-                    code.PointsToPlay += balls;
+                    GamerId = code.Id,
+                    Point = balls,
+                    TimeAdded = DateTime.Now,
+                });
 
-                    _dbContext.PointHistories.Add(new PointHistories {
-                        GamerId = code.Id,
-                        Point = balls,
-                        TimeAdded = DateTime.Now,
-                    });
-
-                    _dbContext.ReferralUsers.Add(new ReferralUser
+                _dbContext.ReferralUsers.Add(new ReferralUser
+                {
+                    UserId = userId,
+                    PhoneNumber = code.PhoneNumber,
+                    Referral = referral,
+                    ActivatedDate = DateTime.Now
+                });
+                var thisCoin = _dbContext.UserCoins.FirstOrDefault(uc => uc.GamerId == userId);
+                if (thisCoin == null)
+                {
+                    _dbContext.UserCoins.AddAsync(new UserCoins
                     {
-                        UserId = userId,
-                        PhoneNumber = code.PhoneNumber,
-                        Referral = referral,
-                        ActivatedDate = DateTime.Now
+                        GamerId = userId,
+                        Coins = 100,
+                        LastUpdate = DateTime.Now
                     });
-                    var thisCoin = _dbContext.UserCoins.FirstOrDefault(uc => uc.GamerId == userId);
-                    if (thisCoin == null)
-                    {
-                        _dbContext.UserCoins.AddAsync(new UserCoins
-                        {
-                            GamerId = userId,
-                            Coins = 100,
-                            LastUpdate = DateTime.Now
-                        });
-                    }
-                    else { thisCoin.Coins += 100; }
-                    _dbContext.SaveChanges();
-                    return Ok();
                 }
-                ModelState.AddModelError("Referral", "Код неправильный или не существует!");
-                return BadRequest(ModelState);
+                else { thisCoin.Coins += 100; }
+                _dbContext.SaveChanges();
+                return Ok();
             }
-            
-            ModelState.AddModelError("Referral", "Код уже использовался!");
+            ModelState.AddModelError("Referral", "Код неправильный или не существует!");
             return BadRequest(ModelState);
         }
 

@@ -65,7 +65,8 @@
         function renderActions(data, type, row, meta) {
             return '<a href="/Admin/Questions/Index/' + row.id + '">@Localizer["Questions"] (' + row.questionsTotal + ')</a>'
                    + ' | <a href="@Url.Action("Create")/' + row.id + '">@Localizer["Edit"]</a>' 
-                    + ' | <a href="/Admin/CardInfos/Index/' + row.id + '">Добавить инфо</a>';
+                    + ' | <a href="/Admin/CardInfos/Index/' + row.id + '">Добавить инфо</a>'
+                     + ' | <a href="/Admin/CompetitiveGamers/Index/' + row.id + '">Игроки</a>';
         }
 
     </script>

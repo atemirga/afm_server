@@ -53,6 +53,11 @@ namespace RobiGroup.AskMeFootball.Models.Account.Profile
         public int Lifes { get; set; }
 
         /// <summary>
+        /// Multipliers
+        /// </summary>
+        public int Multipliers { get; set; }
+
+        /// <summary>
         /// Balance
         /// </summary>
         public double Balance { get; set; }

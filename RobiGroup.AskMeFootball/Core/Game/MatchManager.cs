@@ -73,7 +73,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                 var questions = _dbContext.Questions.Where(q => q.CardId == cardId);
                 var questionCount = _dbContext.Cards.FirstOrDefault(c => c.Id == cardId).MatchQuestions;
 
-                var alreadyInCard = _dbContext.GamerCards.Any(gc => gc.CardId == cardId && gc.GamerId == gamerId && gc.StartTime < DateTime.Today);
+                var alreadyInCard = _dbContext.GamerCards.Any(gc => gc.CardId == cardId && gc.GamerId == gamerId && gc.StartTime.Day == DateTime.Today.Day);
                 if (alreadyInCard)
                 {
                     switch (lang)
@@ -121,7 +121,9 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     GamerId = gamerId,
                     GamerCardId = competitiveGamerCard.Id,
                     Confirmed = true,
-                    JoinTime = DateTime.Now
+                    Ready = true,
+                    JoinTime = DateTime.Now,
+                    IsPlay = true
                 });
                 _dbContext.SaveChanges();
 
@@ -189,6 +191,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     case "ru":
                         var questionsRu = _dbContext.QuestionAnswers
                              .Where(a => matchQuestions.Contains(a.QuestionId))
+                              .OrderBy(qa => rnd.Next())
                              .GroupBy(a => a.Question)
                             .Select(qa => new QuestionModel
                             {
@@ -199,7 +202,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                 {
                                     Id = a.Id,
                                     Text = a.TextRu
-                                }).ToList()
+                                }).OrderBy(ans => rnd.Next()).ToList()
                             }).ToList();
                         foreach (var qRu in questionsRu)
                         {
@@ -213,6 +216,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     case "kz":
                         var questionsKz = _dbContext.QuestionAnswers
                             .Where(a => matchQuestions.Contains(a.QuestionId))
+                             .OrderBy(qa => rnd.Next())
                             .GroupBy(a => a.Question)
                            .Select(qa => new QuestionModel
                            {
@@ -223,7 +227,7 @@ namespace RobiGroup.AskMeFootball.Core.Game
                                {
                                    Id = a.Id,
                                    Text = a.TextKz
-                               }).ToList()
+                               }).OrderBy(ans => rnd.Next()).ToList()
                            }).ToList();
                         foreach (var qKz in questionsKz)
                         {
@@ -1724,6 +1728,95 @@ namespace RobiGroup.AskMeFootball.Core.Game
                     resultModel.Coins = matchCoins;
                     resultModel.Winners = matchWinners;
                     resultModel.WinnerPrize = prize / (matchWinners.Any() ? matchWinners.Count() : 1);
+
+                    return resultModel;
+                }
+            }
+        }
+
+        public async Task<CompetitiveResultModel> CompetitiveMatchResult(int id, string userId)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var _dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                var matchOptions = scope.ServiceProvider.GetService<IOptions<MatchOptions>>();
+
+                lock (_locker)
+                {
+                    var user = _dbContext.Users.Find(userId);
+                    var match = _dbContext.Matches.Find(id);
+                    var lang = user.Lang;
+                    var questionsCount = match.Questions.SplitToIntArray().Length;
+
+                    var matchGamer = _dbContext.MatchGamers.Include(m => m.Answers).Include(m => m.Gamer).First(g => g.MatchId == id && g.GamerId == userId);
+
+                    var userCoins = _dbContext.UserCoins.First(uc => uc.GamerId == userId);
+                    var entryPoint = _dbContext.Cards.First(c => c.Id == match.CardId).EntryPoint;
+
+                    user.PointsToPlay -= entryPoint;
+
+                    var matchCoins = 0;
+
+                    if(match.Status == Match.MatchStatus.Finished)
+                    {
+                        switch (lang)
+                        {
+                            case "en":
+                                throw new Exception("Result was triggered");
+                            case "ru":
+                                throw new Exception("Результат уже был запрошен, повторный запроос невозможен");
+                            case "kz":
+                                throw new Exception("Натиже келип койган, тагы сурау мумкин емес");
+                        }
+                    }
+
+                    var answersCount = matchGamer.Answers.Count();
+                    var correctAnswers = matchGamer.Answers.Where(a => a.IsCorrectAnswer);
+                    foreach (var correctAnswer in correctAnswers)
+                    {
+                        var isMultiplied = _dbContext.MultiplierHistories.Any(mh => mh.MatchId == id && mh.GamerId == userId && mh.QuestionId == correctAnswer.QuestionId);
+                        if (isMultiplied)
+                        {
+                            matchCoins += matchOptions.Value.CorrectAnswerScore * 2;
+                        }
+                        else {
+                            matchCoins += matchOptions.Value.CorrectAnswerScore;
+                        }
+                    }
+                    //var correctAnswersCount = matchGamer.Answers.Count(a => a.IsCorrectAnswer);
+                    //var incorrectAnswersCount = questionsCount - correctAnswersCount;
+                    //var pointsForMatch = correctAnswersCount * matchOptions.Value.CorrectAnswerScore +
+                    //                     incorrectAnswersCount * matchOptions.Value.IncorrectAnswerScore;
+
+                    var gamerCard = _dbContext.GamerCards.First(gc => gc.CardId == match.CardId && gc.GamerId == userId && gc.StartTime.Date == DateTime.Today.Date);
+                    gamerCard.Score += matchCoins;
+
+                    userCoins.Coins += matchCoins;
+                    matchGamer.Score = matchCoins;
+                    user.Score += matchCoins;
+                    user.TotalScore += matchCoins;
+
+                    var month = DateTime.Now.Month;
+
+                    var referrals = _dbContext.ReferralUsers.Where(ru => ru.UserId == userId && ru.ActivatedDate.Month == month);
+
+                    foreach (var r in referrals)
+                    {
+                        var friend = _dbContext.Users.First(u => u.PhoneNumber == r.PhoneNumber);
+                        friend.TotalScore += matchGamer.Score / 2;
+                        friend.Score += matchGamer.Score / 2;
+                        var friendCoins = _dbContext.UserCoins.First(uc => uc.GamerId == friend.Id);
+                        friendCoins.Coins += matchGamer.Score / 2;
+                       
+                    }
+                    matchGamer.IsPlay = false;
+                    match.Status = Match.MatchStatus.Finished;
+                    _dbContext.SaveChanges();
+
+                    var resultModel = new CompetitiveResultModel();
+                    resultModel.UserCoins = userCoins.Coins;
+                    resultModel.Coins = matchCoins;
+                    resultModel.Score = matchGamer.Score;
 
                     return resultModel;
                 }

@@ -33,6 +33,11 @@ namespace RobiGroup.AskMeFootball.Models.Friends
         public int TotalScore { get; set; }
 
         /// <summary>
+        /// Очки
+        /// </summary>
+        public int TodayScore { get; set; }
+
+        /// <summary>
         /// Онлайн
         /// </summary>
         public bool IsOnline { get; set; }

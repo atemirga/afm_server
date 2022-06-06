@@ -83,34 +83,53 @@ namespace RobiGroup.AskMeFootball.Controllers
                 var match = _dbContext.Matches.FirstOrDefault(m => m.Id == mm.MatchId && m.Status == Match.MatchStatus.Finished);//Match.MatchStatus.Delayed
                 if (match != null)
                 {
-                    var matchOpponent = _dbContext.MatchGamers.FirstOrDefault(mg => mg.MatchId == mm.MatchId && mg.GamerId != gamerId && mg.Ready);
-                    var gamerExist = _dbContext.Users.Any(u => u.Id == matchOpponent.GamerId);
-                    if (matchOpponent != null && gamerExist)
+                    var opponentExist = _dbContext.MatchGamers.Any(mg => mg.MatchId == mm.MatchId && mg.GamerId != gamerId && mg.Ready);
+                    if (opponentExist)
                     {
-                        if (matchOpponent.JoinTime.HasValue && matchOpponent.Confirmed)
+                        var matchOpponent = _dbContext.MatchGamers.FirstOrDefault(mg => mg.MatchId == mm.MatchId && mg.GamerId != gamerId && mg.Ready);
+                        var gamerExist = _dbContext.Users.Any(u => u.Id == matchOpponent.GamerId);
+                        if (matchOpponent != null && gamerExist)
                         {
-                            var opponentPhoto = String.Empty;
-                            var opponentNickName = String.Empty;
-                            var opponentUser = _dbContext.Users.FirstOrDefault(u => u.Id == matchOpponent.GamerId);
-                            if (opponentUser != null)
+                            if (matchOpponent.JoinTime.HasValue && matchOpponent.Confirmed)
                             {
-                                opponentPhoto = opponentUser.PhotoUrl;
-                                opponentNickName = opponentUser.NickName;
-                            }
+                                var opponentPhoto = String.Empty;
+                                var opponentNickName = String.Empty;
+                                var opponentUser = _dbContext.Users.FirstOrDefault(u => u.Id == matchOpponent.GamerId);
+                                if (opponentUser != null)
+                                {
+                                    opponentPhoto = opponentUser.PhotoUrl;
+                                    opponentNickName = opponentUser.NickName;
+                                }
 
-                            var card = _dbContext.Cards.First(c => c.Id == match.CardId);
-                            var h = new MatchHistoryModel();
-                            h.Id = mm.MatchId;
-                            h.CardName = card.Name;
-                            h.Score = mm.Score;
-                            h.PhotoUrl = opponentPhoto;
-                            h.GamerName = opponentNickName;//_dbContext.Users.FirstOrDefault(u => u.Id == matchOpponent.GamerId).NickName;//mm.Gamer.NickName;
-                            h.IsWon = mm.IsWinner;
-                            h.Time = mm.JoinTime.Value.AddHours(6);
-                            h.RivalIsWon = matchOpponent.IsWinner;
-                            history.Add(h);
+                                var card = _dbContext.Cards.First(c => c.Id == match.CardId);
+                                var h = new MatchHistoryModel();
+                                h.Id = mm.MatchId;
+                                h.CardName = card.Name;
+                                h.Score = mm.Score;
+                                h.PhotoUrl = opponentPhoto;
+                                h.GamerName = opponentNickName;//_dbContext.Users.FirstOrDefault(u => u.Id == matchOpponent.GamerId).NickName;//mm.Gamer.NickName;
+                                h.IsWon = mm.IsWinner;
+                                h.Time = mm.JoinTime.Value.AddHours(6);
+                                h.RivalIsWon = matchOpponent.IsWinner;
+                                history.Add(h);
+                            }
                         }
                     }
+                    else {
+                        var user = _dbContext.Users.Find(gamerId);
+                        var card = _dbContext.Cards.First(c => c.Id == match.CardId);
+                        var h = new MatchHistoryModel();
+                        h.Id = mm.MatchId;
+                        h.CardName = card.Name;
+                        h.Score = mm.Score;
+                        h.PhotoUrl = user.PhotoUrl;
+                        h.GamerName = user.NickName;//_dbContext.Users.FirstOrDefault(u => u.Id == matchOpponent.GamerId).NickName;//mm.Gamer.NickName;
+                        h.IsWon = mm.IsWinner;
+                        h.Time = mm.JoinTime.Value.AddHours(6);
+                        h.RivalIsWon = mm.IsWinner;
+                        history.Add(h);
+                    }
+                    
                 }
             }
             /*
@@ -1110,6 +1129,7 @@ namespace RobiGroup.AskMeFootball.Controllers
         {
             if (ModelState.IsValid)
             {
+                
                 string userId = User.GetUserId();
                 var user = _dbContext.Users.Find(userId);
                 var lang = user.Lang;
@@ -1149,12 +1169,17 @@ namespace RobiGroup.AskMeFootball.Controllers
                         _logger.LogInformation($"Question answer from {userId}. Question: {answer.QuestionId}, answer: {answer.AnswerId}.");
                     }
 
+                    var isMultiplied = _dbContext.MultiplierHistories.Any(mh => mh.MatchId == id && mh.GamerId == userId && mh.QuestionId == answer.QuestionId);
+
+                    var coin = 10;//matchOptions.Value.CorrectAnswerScore;
+
                     return Ok(new CompetitiveAnswerModel
                     {
                         IsCorrectAnswer = isCorrect,
                         CorrectAnswers = correctAnswers,
                         IncorrectAnswers = incorrectAnswers,
-                        IsMultiplied = isCorrect
+                        IsMultiplied = isMultiplied,
+                        Coins = isCorrect ? (isMultiplied ? coin * 2 : coin) : 0
                     });
                 }
                 ModelState.AddModelError("error", "You answered this question");
@@ -1169,12 +1194,13 @@ namespace RobiGroup.AskMeFootball.Controllers
         /// </summary>
         /// <param name="id">ID матча</param>
         /// <param name="questionId">ID Вопроса</param>
+        /// <param name="count">количество</param>
         /// <returns></returns>
         [HttpPost]
-        [Route("competitive/multiplier/{id}/{questionId}")]
+        [Route("competitive/multiplier/{id}/{questionId}/{count}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> Multiplier([FromRoute]int id, [FromRoute]int questionId)
+        public async Task<IActionResult> Multiplier([FromRoute]int id, [FromRoute]int questionId, [FromRoute]int count)
         {
             if (ModelState.IsValid)
             {
@@ -1183,10 +1209,13 @@ namespace RobiGroup.AskMeFootball.Controllers
                 var lang = _dbContext.Users.FirstOrDefault(u => u.Id == userId).Lang;
                 var match = _dbContext.Matches.Find(id);
 
+                var multiplyLimit = _dbContext.CardLimits.FirstOrDefault(cl => cl.CardId == match.CardId).Multiplier;
+
                 var multiplier = user.Multiplier > 0 ? true : false;
 
                 if (!multiplier)
                 {
+                    
                     switch (lang)
                     {
                         case "en":
@@ -1195,6 +1224,18 @@ namespace RobiGroup.AskMeFootball.Controllers
                             throw new Exception("У Вас нет удвоителя баллов");
                         case "kz":
                             throw new Exception("Баллды еселендиретын жетиспейди");
+                    }
+                }
+                if (count == multiplyLimit)
+                {
+                    switch (lang)
+                    {
+                        case "en":
+                            throw new Exception("Limit is over");
+                        case "ru":
+                            throw new Exception("Лимит исчерпан");
+                        case "kz":
+                            throw new Exception("Лимит бытты");
                     }
                 }
 
@@ -1449,6 +1490,26 @@ namespace RobiGroup.AskMeFootball.Controllers
                 string userId = User.GetUserId();
 
                 return Ok(await _matchManager.GetMatchResult(id, userId));
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        /// <summary>
+        /// Получить результат матча  
+        /// </summary> 
+        /// <param name="id">ID матча</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("competitive/{id}/result")]
+        [ProducesResponseType(typeof(MatchResultModel), 200)]
+        public async Task<IActionResult> CompetitiveMatchResult([FromRoute]int id)
+        {
+            if (ModelState.IsValid)
+            {
+                string userId = User.GetUserId();
+
+                return Ok(await _matchManager.CompetitiveMatchResult(id, userId));
             }
 
             return BadRequest(ModelState);

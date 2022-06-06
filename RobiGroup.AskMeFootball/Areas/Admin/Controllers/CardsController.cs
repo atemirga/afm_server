@@ -150,7 +150,7 @@ namespace RobiGroup.AskMeFootball.Areas.Admin.Controllers
             card.EntryPoint = model.EntryPoint;
             card.MaxBid = model.MaxBid;
             card.IsTwoH = Convert.ToBoolean(model.IsTwoH);
-            card.Prize = model.Prize;
+            card.Prize = model.Prize + " KZT";
             card.MatchQuestions = model.MatchQuestions;
             _dbContext.SaveChanges();
 

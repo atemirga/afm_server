@@ -237,7 +237,10 @@
         <!-- /.box-body -->
         <div class="box-footer">
             <button type="submit" class="btn btn-default">Отмена</button>
-            <button type="submit" class="btn btn-info pull-right">Сохранить</button>
+            <a class="btn btn-danger pull-left" href="javascript:void(0);" onclick="deleteCard(this, @Model.Id)">
+                <i class="glyphicon glyphicon-trash"></i> Удалить
+                <a/>
+                <button type="submit" class="btn btn-info pull-right">Сохранить</button>
         </div>
         <!-- /.box-footer -->
     </form>
@@ -471,6 +474,24 @@
             return false;
         }
 
+
+        function deletePrize(btn, id) {
+            console.log(id);
+
+            var confirm1 = confirm("Вы уверены что хотите удалить?");
+                    if (confirm1) {
+                        $.ajax({
+                            method: "POST",
+                            url: '@Url.Action("Delete", "Prizes", new { Area = "Admin" })',
+                            data: {
+                                id: id
+                            }
+                        })
+                        .done(function () {
+                            window.location = '@Url.Action("Index", "Prizes")'
+                        });
+                    }
+        }
 
     </script>
 }

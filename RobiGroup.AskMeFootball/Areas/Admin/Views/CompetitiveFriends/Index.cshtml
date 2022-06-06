@@ -7,7 +7,7 @@
 
 
 @{
-    ViewData["Title"] = "Пользователи";
+    ViewData["Title"] = "Друзья";
 }
 
 
@@ -23,7 +23,6 @@
             <th>Пуш</th>
             <th>Подсказки</th>
             <th>Удвоитель</th>
-            <th>Функции</th>
         </tr>
     </thead>
     <tbody>
@@ -56,10 +55,6 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Multipliers)
-            </td>
-            <td>
-                @Html.ActionLink("Друзья", "Index", "CompetitiveFriends", new { userId = item.Id, cardId = ViewBag.CardId }, null)
-                | @Html.ActionLink("Покупки", "Index", "Purchases", new { id = item.Id }, null)
             </td>
         </tr>
         }

@@ -11,5 +11,6 @@ namespace RobiGroup.AskMeFootball.Data
         public int CardId { get; set; }
         public int Lifes { get; set; }
         public int Hints { get; set; }
+        public int Multiplier { get; set; }
     }
 }

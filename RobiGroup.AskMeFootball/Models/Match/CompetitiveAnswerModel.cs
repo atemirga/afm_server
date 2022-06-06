@@ -14,5 +14,7 @@ namespace RobiGroup.AskMeFootball.Models.Match
         public int IncorrectAnswers { get; set; }
 
         public bool IsMultiplied { get; set; }
+
+        public int Coins { get; set; }
     }
 }
